@@ -85,18 +85,21 @@ const studyModes = [
     title: "Quick Quiz",
     description: "10 random questions from any domain",
     bg: "bg-yellow-500/10 border-yellow-500/20 hover:border-yellow-500/40",
+    href: "/quiz",
   },
   {
     icon: <Layers className="h-7 w-7 text-cyan-400" />,
     title: "Flashcard Drill",
     description: "Active recall on services and comparisons",
     bg: "bg-cyan-500/10 border-cyan-500/20 hover:border-cyan-500/40",
+    href: "/flashcards",
   },
   {
     icon: <Clock className="h-7 w-7 text-rose-400" />,
     title: "Exam Simulation",
     description: "65 questions, 130 minutes, full exam",
     bg: "bg-rose-500/10 border-rose-500/20 hover:border-rose-500/40",
+    href: "/quiz?mode=exam",
   },
 ];
 
@@ -156,6 +159,23 @@ export default function Home() {
           >
             View Progress
           </Button>
+        </div>
+
+        {/* Secondary nav */}
+        <div className="relative mt-5 flex items-center gap-5">
+          <Link
+            href="/flashcards"
+            className="text-sm text-white/50 hover:text-white transition-colors"
+          >
+            Flashcard Drill →
+          </Link>
+          <span className="text-white/20">·</span>
+          <Link
+            href="/services"
+            className="text-sm text-white/50 hover:text-white transition-colors"
+          >
+            Service Reference →
+          </Link>
         </div>
       </section>
 
@@ -253,24 +273,25 @@ export default function Home() {
 
         <div className="grid gap-5 sm:grid-cols-3">
           {studyModes.map((mode) => (
-            <Card
-              key={mode.title}
-              className={`border transition-colors duration-200 ${mode.bg}`}
-            >
-              <CardContent className="flex flex-col items-center gap-4 px-6 py-8 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/5">
-                  {mode.icon}
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white">
-                    {mode.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {mode.description}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <Link key={mode.title} href={mode.href}>
+              <Card
+                className={`border transition-colors duration-200 cursor-pointer ${mode.bg}`}
+              >
+                <CardContent className="flex flex-col items-center gap-4 px-6 py-8 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/5">
+                    {mode.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">
+                      {mode.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {mode.description}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </section>

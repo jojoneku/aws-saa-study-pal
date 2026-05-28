@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
@@ -483,7 +483,7 @@ function ResultsScreen({ questions, answers, onRetry }: ResultsProps) {
 
 // ─── Main session page ────────────────────────────────────────────────────────
 
-export default function QuizSessionPage() {
+function QuizSessionContent() {
   const searchParams = useSearchParams()
 
   const domainParam = searchParams.get("domain") ?? "all"
@@ -538,6 +538,7 @@ export default function QuizSessionPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [completed, setCompleted] = useState(false)
   const [timerKey] = useState(() => Date.now()) // stable key for timer
+  const [startTime] = useState(() => Date.now())
 
   const isPractice = modeParam === "practice"
   const isExam = modeParam === "exam"
@@ -615,6 +616,45 @@ export default function QuizSessionPage() {
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
   }, [completed, handleSelect, handleNext, isPractice, revealed, selectedAnswer])
+
+  // ── Save session when quiz completes ─────────────────────────────────────
+  useEffect(() => {
+    if (!completed) return
+    import("@/lib/storage").then(({ addSession }) => {
+      const total = questions.length
+      const correctAnswers = questions.filter((q) => {
+        const answer = answers[q.id]
+        return q.options.find((o) => o.id === answer)?.isCorrect === true
+      }).length
+      const scorePercent = total > 0 ? Math.round((correctAnswers / total) * 100) : 0
+
+      const domainBreakdown = ([1, 2, 3, 4] as const).map((d) => {
+        const qs = questions.filter((q) => q.domain === d)
+        const correct = qs.filter((q) => {
+          const answer = answers[q.id]
+          return q.options.find((o) => o.id === answer)?.isCorrect === true
+        }).length
+        return { domain: d, total: qs.length, correct }
+      })
+
+      const domain: "all" | 1 | 2 | 3 | 4 =
+        domainParam === "all"
+          ? "all"
+          : (parseInt(domainParam, 10) as 1 | 2 | 3 | 4)
+
+      addSession({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        completedAt: Date.now(),
+        mode: modeParam,
+        domain,
+        totalQuestions: total,
+        correctAnswers,
+        scorePercent,
+        domainBreakdown,
+        durationSeconds: Math.round((Date.now() - startTime) / 1000),
+      })
+    })
+  }, [completed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Guard: no questions ────────────────────────────────────────────────────
   if (questions.length === 0) {
@@ -897,5 +937,17 @@ export default function QuizSessionPage() {
         </p>
       </div>
     </main>
+  )
+}
+
+export default function QuizSessionPage() {
+  return (
+    <Suspense fallback={
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-muted-foreground text-sm">Loading quiz...</p>
+      </main>
+    }>
+      <QuizSessionContent />
+    </Suspense>
   )
 }

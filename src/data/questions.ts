@@ -1,4 +1,8 @@
 import { Question } from "../lib/types"
+import { domain1NewQuestions } from "./questions-d1-new"
+import { domain2NewQuestions } from "./questions-d2-new"
+import { domain3NewQuestions } from "./questions-d3-new"
+import { domain4NewQuestions } from "./questions-d4-new"
 
 // ─────────────────────────────────────────────────────────────
 // DOMAIN 1 — Design Secure Architectures (10 questions)
@@ -1546,7 +1550,14 @@ const domain4Questions: Question[] = [
 
 export const ALL_QUESTIONS: Question[] = [
   ...domain1Questions,
+  ...domain1NewQuestions,
   ...domain2Questions,
+  ...domain2NewQuestions,
   ...domain3Questions,
-  ...domain4Questions
+  ...domain3NewQuestions,
+  ...domain4Questions,
+  ...domain4NewQuestions,
 ]
+
+// Alias used by the quiz session page's dynamic require()
+export const questions = ALL_QUESTIONS
