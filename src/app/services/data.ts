@@ -1382,4 +1382,997 @@ export const services: ServiceEntry[] = [
     ],
     relatedServices: ["CloudTrail", "GuardDuty", "SecurityHub", "CloudWatch", "CloudFormation"],
   },
+
+  // ─── COMPUTE (NEW) ──────────────────────────────────────────────────────────
+
+  {
+    id: "app-runner",
+    name: "AWS App Runner",
+    shortName: "App Runner",
+    abbr: "AppRunner",
+    category: "compute",
+    domains: [2, 3, 4],
+    tagline: "Go from container image or source code to a live HTTPS URL in minutes, with zero infrastructure to manage.",
+    whatItDoes:
+      "AWS App Runner is a fully managed service that takes a container image (from ECR) or source code (from GitHub) and builds, deploys, and runs it as a scalable HTTPS web service. AWS handles load balancing, TLS certificates, auto scaling, and health checks. You never configure servers, clusters, or networking.",
+    whenToUse:
+      "Use when you want the fastest possible path from code to a running web service or API, with no interest in managing the underlying infrastructure. Ideal for web apps, REST APIs, and microservices where simplicity matters more than deep configuration control.",
+    keyFacts: [
+      "Supports container images from Amazon ECR and source code from GitHub (builds automatically on push)",
+      "Automatically scales out and in based on incoming request volume, including scaling to zero when idle",
+      "Provides a built-in HTTPS endpoint with a TLS certificate managed by AWS",
+      "No charge when scaled to zero; you pay only for compute and memory when requests are being served",
+      "VPC connector available to allow App Runner services to access private resources inside a VPC",
+    ],
+    examTraps: [
+      "Trap: App Runner and Elastic Beanstalk solve the same problem. Reality: Elastic Beanstalk provisions and exposes underlying EC2 instances, Auto Scaling groups, and load balancers that you can view and modify. App Runner abstracts all of that away entirely — no EC2 instances to see or manage.",
+    ],
+    relatedServices: ["ECS", "Fargate", "Elastic Beanstalk", "ECR", "Lambda"],
+  },
+
+  {
+    id: "batch",
+    name: "AWS Batch",
+    shortName: "AWS Batch",
+    abbr: "Batch",
+    category: "compute",
+    domains: [3, 4],
+    tagline: "Run large-scale batch computing jobs on EC2, Fargate, or Spot Instances without managing job schedulers.",
+    whatItDoes:
+      "AWS Batch is a fully managed batch computing service. You submit jobs (packaged as Docker containers) to a job queue. AWS Batch provisions the right amount of compute capacity — EC2, Fargate, or Spot Instances — runs your jobs, and cleans up when done. It handles job scheduling, dependency management (run job B after job A finishes), and compute provisioning automatically.",
+    whenToUse:
+      "Use for large-scale data processing, simulation, genomics, rendering, and any workload that runs as discrete jobs rather than a continuously running service. Use Spot Instances for task nodes to cut costs significantly on fault-tolerant batch workloads.",
+    keyFacts: [
+      "Jobs are Docker containers run on EC2, Fargate, or Spot Instances — no custom job scheduler to operate",
+      "Job queues and compute environments: you define how much compute to provision and from which sources (On-Demand, Spot, Fargate)",
+      "Job dependencies: you can specify that job B should only start after job A completes successfully",
+      "AWS Batch on Fargate removes the need to manage EC2 instances entirely for batch jobs",
+      "No additional charge for AWS Batch — you pay only for the underlying EC2, Fargate, or Spot resources consumed",
+    ],
+    examTraps: [
+      "Trap: Use Lambda for long-running batch data processing jobs. Reality: Lambda has a 15-minute maximum timeout. AWS Batch has no execution time limit and is purpose-built for long-running batch jobs that process large datasets.",
+    ],
+    relatedServices: ["Lambda", "ECS", "Fargate", "EC2", "S3", "Step Functions"],
+  },
+
+  {
+    id: "auto-scaling",
+    name: "Amazon EC2 Auto Scaling",
+    shortName: "EC2 Auto Scaling",
+    abbr: "AutoScaling",
+    category: "compute",
+    domains: [2, 3, 4],
+    tagline: "Automatically add or remove EC2 instances based on demand so you always have the right amount of capacity.",
+    whatItDoes:
+      "Amazon EC2 Auto Scaling maintains a group of EC2 instances (called an Auto Scaling Group, or ASG) and automatically adjusts the number of running instances in response to changing demand. You define a minimum, maximum, and desired capacity. Scaling policies specify when to scale out (add instances) and scale in (remove instances) based on CloudWatch metrics, schedules, or predictive models.",
+    whenToUse:
+      "Use any time you deploy EC2-based applications that experience variable traffic — web servers, application tiers, batch processing fleets. Always pair an Auto Scaling Group with a load balancer to distribute traffic across the healthy instances.",
+    keyFacts: [
+      "Scaling policies: Target Tracking (keep a metric at a target, e.g., CPU at 50%), Step Scaling (scale by fixed amounts at different thresholds), Simple Scaling (one action per alarm), and Scheduled Scaling (scale at a known time)",
+      "Predictive Scaling uses machine learning to forecast traffic and pre-provision capacity before demand spikes",
+      "Lifecycle hooks let you pause instance launch or termination to run custom scripts (install software, drain connections)",
+      "Warm pools: pre-initialized instances waiting in a stopped state so they can join the group faster than cold launches",
+      "Health checks: replaces unhealthy instances automatically; can use EC2 status checks or ELB health checks",
+    ],
+    examTraps: [
+      "Trap: Auto Scaling alone ensures high availability. Reality: Auto Scaling improves resilience, but for true high availability you must deploy instances across multiple Availability Zones AND use a load balancer to route traffic only to healthy instances.",
+    ],
+    relatedServices: ["EC2", "ALB", "NLB", "CloudWatch", "ELB", "Launch Template"],
+  },
+
+  // ─── STORAGE (NEW) ──────────────────────────────────────────────────────────
+
+  {
+    id: "datasync",
+    name: "AWS DataSync",
+    shortName: "AWS DataSync",
+    abbr: "DataSync",
+    category: "storage",
+    domains: [1, 2, 4],
+    tagline: "Automate scheduled data transfers between on-premises storage and AWS storage services at up to 10 Gbps.",
+    whatItDoes:
+      "AWS DataSync is an online data transfer service that automates moving data between on-premises file servers, object storage, and AWS storage services — including Amazon S3, Amazon EFS, Amazon FSx, and AWS Snowcone. You deploy a DataSync agent on-premises, create a task that defines source and destination, and schedule it to run on a recurring basis. DataSync handles encryption, data integrity verification, and bandwidth throttling.",
+    whenToUse:
+      "Use to migrate on-premises file data to AWS, replicate data to AWS for disaster recovery, archive cold data from on-premises NAS to S3, or synchronize on-premises and cloud storage on a schedule. Not the right choice when you need real-time replication — use Storage Gateway or database replication for that.",
+    keyFacts: [
+      "Can transfer data at up to 10 Gbps when used over AWS Direct Connect",
+      "Performs automatic data integrity checks (checksums) to verify files arrived intact",
+      "Supports NFS, SMB, HDFS, and object storage (S3-compatible) as sources",
+      "DataSync is scheduled/batch-oriented — it does NOT do real-time or continuous streaming replication",
+      "Agent-based for on-premises sources; agentless for transfers between AWS storage services",
+      "Supports bandwidth throttling to avoid saturating your network link during business hours",
+    ],
+    examTraps: [
+      "Trap: AWS DataSync and AWS Storage Gateway do the same thing. Reality: DataSync transfers data in bulk on a schedule (migration, sync, archival). Storage Gateway provides an always-on hybrid storage bridge so on-premises apps can access cloud storage using familiar protocols. They solve different problems.",
+    ],
+    relatedServices: ["S3", "EFS", "FSx", "Storage Gateway", "Direct Connect", "Snowball Edge"],
+  },
+
+  {
+    id: "transfer-family",
+    name: "AWS Transfer Family",
+    shortName: "Transfer Family",
+    abbr: "TransferFamily",
+    category: "storage",
+    domains: [1, 2],
+    tagline: "A managed SFTP, FTPS, FTP, and AS2 server that stores transferred files directly in Amazon S3 or Amazon EFS.",
+    whatItDoes:
+      "AWS Transfer Family is a fully managed file transfer service. It runs SFTP (SSH File Transfer Protocol), FTPS (FTP over TLS), FTP, and AS2 servers on your behalf. When partners or customers upload or download files using any of those protocols, the files are stored directly in or served from Amazon S3 or Amazon EFS. You manage users and their S3/EFS permissions through IAM.",
+    whenToUse:
+      "Use when business partners or customers need to transfer files to or from your AWS environment using standard file transfer protocols (SFTP, FTPS, FTP, AS2) — for example, EDI file exchanges, B2B data transfers, or migrating on-premises SFTP servers to AWS without changing client workflows.",
+    keyFacts: [
+      "Supports SFTP (SSH), FTPS (TLS), FTP (plaintext, use only in private VPCs), and AS2 (Applicability Statement 2, used for EDI) protocols",
+      "Files are stored directly in Amazon S3 or Amazon EFS — no separate storage layer to manage",
+      "Custom identity providers: integrate with existing Microsoft Active Directory, LDAP, or a custom Lambda function for user authentication",
+      "No file transfer servers to patch or manage — AWS handles all the infrastructure",
+      "Endpoint types: public (internet-facing) or VPC (accessible only from your VPC or over Direct Connect/VPN)",
+    ],
+    examTraps: [
+      "Trap: To allow partners to upload files via SFTP to S3, you need to run an EC2-based SFTP server. Reality: AWS Transfer Family provides a fully managed SFTP endpoint that writes directly to S3 — no EC2 instances required.",
+    ],
+    relatedServices: ["S3", "EFS", "IAM", "Route53", "Direct Connect"],
+  },
+
+  {
+    id: "fsx-ontap",
+    name: "Amazon FSx for NetApp ONTAP",
+    shortName: "FSx for NetApp ONTAP",
+    abbr: "FSx-ONTAP",
+    category: "storage",
+    domains: [2, 3],
+    tagline: "A fully managed NetApp ONTAP file system on AWS, supporting NFS, SMB, and iSCSI simultaneously.",
+    whatItDoes:
+      "Amazon FSx for NetApp ONTAP provides a managed file system based on NetApp's ONTAP storage operating system. It supports NFS (Linux), SMB (Windows), and iSCSI (block storage) protocols from a single file system. Enterprise features like data tiering, snapshots, clones, compression, deduplication, and SnapMirror replication are all available.",
+    whenToUse:
+      "Use when migrating on-premises NetApp ONTAP workloads to AWS and you want to retain the same storage OS and tooling. Also use when a single file system needs to serve both Linux (NFS) and Windows (SMB) clients simultaneously, or when you need enterprise storage features like SnapMirror cross-region replication.",
+    keyFacts: [
+      "Supports NFS, SMB, and iSCSI protocols simultaneously from one file system",
+      "Includes NetApp ONTAP enterprise features: snapshots, FlexClone (instant zero-copy clones), data deduplication, compression",
+      "Storage tiering automatically moves cold data to a lower-cost S3 storage tier",
+      "SnapMirror replication lets you replicate data to another FSx for ONTAP file system in a different region for DR",
+      "Deployed in Multi-AZ or Single-AZ configurations",
+    ],
+    examTraps: [
+      "Trap: FSx for Windows File Server and FSx for NetApp ONTAP are interchangeable for multi-protocol workloads. Reality: FSx for Windows supports SMB only. FSx for ONTAP supports NFS + SMB + iSCSI from one system — it's the choice when you need multi-protocol access or NetApp-specific features.",
+    ],
+    relatedServices: ["EFS", "FSx for Windows", "FSx-Lustre", "S3", "DataSync"],
+  },
+
+  {
+    id: "fsx-openzfs",
+    name: "Amazon FSx for OpenZFS",
+    shortName: "FSx for OpenZFS",
+    abbr: "FSx-OpenZFS",
+    category: "storage",
+    domains: [2, 3],
+    tagline: "A fully managed ZFS file system on AWS with sub-millisecond latency, snapshots, and instant clones.",
+    whatItDoes:
+      "Amazon FSx for OpenZFS provides a managed file system built on the open-source OpenZFS file system. It delivers sub-millisecond latency and up to 12.5 GB/s throughput. It includes ZFS native features such as point-in-time snapshots, instant zero-copy clones (useful for dev/test copies of production data), data compression, and NFS access.",
+    whenToUse:
+      "Use when migrating on-premises ZFS or Linux-based NFS workloads to AWS, or when you need fast NFS-accessible storage with instant cloning capabilities — for example, creating rapid developer copies of a large production dataset without duplicating the data.",
+    keyFacts: [
+      "Sub-millisecond read latency; up to 12.5 GB/s throughput",
+      "Instant zero-copy clones: create a writable clone of any snapshot in seconds, with no data duplication until writes occur",
+      "Supports NFS v3, v4, v4.1, and v4.2 protocols — Linux-only (no SMB support)",
+      "Data compression reduces storage consumption automatically",
+      "Up to 1 million IOPS on NVMe-backed configurations",
+    ],
+    examTraps: [
+      "Trap: FSx for OpenZFS and Amazon EFS are equivalent for Linux NFS storage. Reality: EFS is fully elastic and scales automatically to petabytes. FSx for OpenZFS offers much higher IOPS and throughput for latency-sensitive workloads but requires you to provision capacity up front.",
+    ],
+    relatedServices: ["EFS", "FSx for ONTAP", "FSx-Lustre", "EC2"],
+  },
+
+  {
+    id: "snow-family",
+    name: "AWS Snow Family",
+    shortName: "Snow Family",
+    abbr: "SnowFamily",
+    category: "storage",
+    domains: [1, 4],
+    tagline: "Physical devices AWS ships to you for moving large amounts of data to AWS when the network is too slow or unavailable.",
+    whatItDoes:
+      "AWS Snow Family is a collection of physical edge computing and offline data transfer devices. Snowcone (8 TB) is the smallest and can be shipped or used with DataSync. Snowball Edge (up to 80 TB storage, 40+ vCPUs) is mid-range and can run EC2 instances and Lambda locally. Snowmobile is a 100 PB shipping container on a truck for truly massive migrations.",
+    whenToUse:
+      "Use when transferring large data sets over the network would take too long (more than a week) or is impractical due to bandwidth cost or network limitations. Also use Snowball Edge at remote or disconnected sites that need local compute (military, oil rigs, factory floors) where internet is unreliable.",
+    keyFacts: [
+      "Snowcone: 8 TB HDD or 14 TB SSD, smallest device, can use AWS DataSync to send data back over the internet",
+      "Snowball Edge Storage Optimized: 80 TB usable, 40 vCPU, 80 GB RAM",
+      "Snowball Edge Compute Optimized: 28 TB NVMe SSD, 52 vCPU, 208 GB RAM — for edge compute needs",
+      "Snowmobile: 100 PB capacity, physically delivered as a shipping container on a truck",
+      "All devices use 256-bit encryption with keys managed by AWS KMS; encryption is automatic",
+      "Typical turnaround time: ship device → load data → ship back → AWS ingests → data in S3",
+    ],
+    examTraps: [
+      "Trap: Snowball Edge is only for data transfer — it cannot run compute workloads. Reality: Snowball Edge runs EC2 instances and Lambda functions locally at the edge, making it suitable for processing data at remote sites with no reliable internet connection.",
+    ],
+    relatedServices: ["S3", "KMS", "DataSync", "Storage Gateway"],
+  },
+
+  // ─── DATABASE (NEW) ─────────────────────────────────────────────────────────
+
+  {
+    id: "keyspaces",
+    name: "Amazon Keyspaces (for Apache Cassandra)",
+    shortName: "Amazon Keyspaces",
+    abbr: "Keyspaces",
+    category: "database",
+    domains: [2, 3],
+    tagline: "A serverless, managed database compatible with Apache Cassandra — no Cassandra clusters to operate.",
+    whatItDoes:
+      "Amazon Keyspaces is a fully managed, serverless database service compatible with the Apache Cassandra Query Language (CQL). You can run existing Cassandra workloads on AWS without operating or scaling Cassandra clusters. Keyspaces automatically scales table throughput and storage up and down based on application traffic.",
+    whenToUse:
+      "Use when you need a Cassandra-compatible database without the operational overhead of running Cassandra clusters yourself. Good for high-velocity, wide-column data storage such as IoT telemetry, time-series-like data, and user profile storage where you already use Cassandra CQL.",
+    keyFacts: [
+      "Fully compatible with Cassandra Query Language (CQL) API version 3.11",
+      "Serverless — no clusters to provision, patch, or rebalance; capacity scales automatically",
+      "Single-digit millisecond read/write latency at any scale",
+      "Data is replicated 3 times across 3 Availability Zones within a region automatically",
+      "Supports both on-demand and provisioned capacity modes, similar to DynamoDB",
+    ],
+    examTraps: [
+      "Trap: DynamoDB and Amazon Keyspaces are interchangeable — just pick either for NoSQL. Reality: Keyspaces is specifically for teams already using Apache Cassandra CQL. DynamoDB uses its own API. If the question mentions migrating Cassandra workloads, Keyspaces is the answer.",
+    ],
+    relatedServices: ["DynamoDB", "Aurora", "Timestream", "Glue"],
+  },
+
+  {
+    id: "timestream",
+    name: "Amazon Timestream",
+    shortName: "Amazon Timestream",
+    abbr: "Timestream",
+    category: "database",
+    domains: [3, 4],
+    tagline: "A serverless time-series database purpose-built for storing and analyzing metrics that change over time.",
+    whatItDoes:
+      "Amazon Timestream is a fully managed, serverless time-series database designed for storing trillions of time-stamped data points efficiently. It automatically tiers recent data into memory for fast queries and moves older data to a cost-optimized magnetic store. Timestream uses a SQL-like query language with built-in time-series functions for smoothing, interpolation, and approximation.",
+    whenToUse:
+      "Use for IoT sensor data, application performance metrics, DevOps telemetry, industrial monitoring, and any use case where data is inherently a series of values over time. Much cheaper and faster than storing time-series data in a relational database.",
+    keyFacts: [
+      "Automatically moves data from a fast in-memory store (recent data) to a cost-optimized magnetic store (older data) based on configurable retention policies",
+      "Serverless — scales automatically; no servers, shards, or clusters to manage",
+      "Built-in time-series analytics functions: time_series(), interpolate(), smooth(), and more",
+      "Integrates with Amazon Grafana, Amazon QuickSight, and Apache Kafka for visualization and ingestion",
+      "Can query data across both the in-memory and magnetic stores in a single query transparently",
+    ],
+    examTraps: [
+      "Trap: Store IoT sensor readings in DynamoDB because it has low latency. Reality: DynamoDB can store time-series data, but Timestream is purpose-built for it — it costs less per data point, compresses time-series data more efficiently, and provides native time-series query functions.",
+    ],
+    relatedServices: ["Keyspaces", "DynamoDB", "Kinesis Data Streams", "IoT Core", "QuickSight"],
+  },
+
+  {
+    id: "dms",
+    name: "AWS Database Migration Service (AWS DMS)",
+    shortName: "AWS DMS",
+    abbr: "DMS",
+    category: "database",
+    domains: [2, 3],
+    tagline: "Migrate databases to AWS with minimal downtime by replicating data continuously during the move.",
+    whatItDoes:
+      "AWS Database Migration Service migrates databases to AWS quickly and with minimal downtime. A replication instance (an EC2-based server managed by AWS) reads from the source database and writes to the target. For ongoing migrations, DMS uses Change Data Capture (CDC) to replicate ongoing transactions so the source database can stay live while you migrate.",
+    whenToUse:
+      "Use to migrate databases to AWS with minimal downtime — for example, moving an on-premises Oracle database to Amazon Aurora PostgreSQL. Use the AWS Schema Conversion Tool (SCT) alongside DMS for heterogeneous migrations (different database engines) to convert stored procedures and schema.",
+    keyFacts: [
+      "Supports homogeneous migrations (Oracle → Oracle, MySQL → RDS MySQL) and heterogeneous migrations (Oracle → Aurora PostgreSQL, SQL Server → MySQL)",
+      "Replication instance is an EC2-based server; you choose the instance size based on data volume and workload",
+      "Full load + CDC mode: migrates existing data then continuously replicates changes, keeping source and target in sync until cutover",
+      "AWS Schema Conversion Tool (SCT) converts database schema and stored procedures between different engine types — required for heterogeneous migrations",
+      "Supports migration to RDS, Aurora, Redshift, DynamoDB, S3, OpenSearch, and more",
+    ],
+    examTraps: [
+      "Trap: You need to take the source database offline before migrating with DMS. Reality: DMS supports live migration using Change Data Capture (CDC) — the source database stays online and continues serving traffic during the migration. Downtime only occurs at the final cutover moment.",
+    ],
+    relatedServices: ["RDS", "Aurora", "Redshift", "Schema Conversion Tool", "Direct Connect"],
+  },
+
+  {
+    id: "dax",
+    name: "Amazon DynamoDB Accelerator (Amazon DAX)",
+    shortName: "Amazon DAX",
+    abbr: "DAX",
+    category: "database",
+    domains: [1, 3],
+    tagline: "An in-memory cache that sits in front of DynamoDB and reduces read latency from milliseconds to microseconds.",
+    whatItDoes:
+      "Amazon DynamoDB Accelerator (DAX) is a fully managed, highly available in-memory cache for DynamoDB. It is API-compatible with DynamoDB — your application points to the DAX cluster endpoint instead of DynamoDB directly, with no code changes beyond the connection string. DAX handles cache population and invalidation automatically.",
+    whenToUse:
+      "Use when DynamoDB reads are a bottleneck and you need microsecond latency instead of single-digit milliseconds — for example, a leaderboard read by millions of users simultaneously, or a heavily read product catalog. Not useful for write-heavy workloads.",
+    keyFacts: [
+      "Delivers microsecond read latency for cached data (vs. single-digit millisecond for standard DynamoDB reads)",
+      "Minimum production cluster size: 3 nodes (for Multi-AZ high availability)",
+      "DAX does NOT cache strongly consistent reads — if your application requests a strongly consistent read, DAX bypasses the cache and goes directly to DynamoDB",
+      "API-compatible: swap the DynamoDB SDK endpoint for the DAX cluster endpoint with minimal code changes",
+      "DAX operates inside your VPC; it is not a public service",
+    ],
+    examTraps: [
+      "Trap: DAX caches all DynamoDB reads, including strongly consistent reads. Reality: Strongly consistent reads bypass the DAX cache entirely and go straight to DynamoDB. DAX only accelerates eventually consistent reads.",
+    ],
+    relatedServices: ["DynamoDB", "ElastiCache", "VPC", "Lambda"],
+  },
+
+  {
+    id: "elasticache-serverless",
+    name: "Amazon ElastiCache Serverless",
+    shortName: "ElastiCache Serverless",
+    abbr: "ElastiCache-SL",
+    category: "database",
+    domains: [3, 4],
+    tagline: "An auto-scaling cache that requires zero cluster configuration — just create it and connect.",
+    whatItDoes:
+      "Amazon ElastiCache Serverless is a serverless option for ElastiCache that automatically scales cache capacity up and down based on application demand. Unlike traditional ElastiCache, which requires you to choose cluster sizes and shard counts, Serverless handles all of that invisibly. It is compatible with both Redis and Memcached clients.",
+    whenToUse:
+      "Use when you want the performance benefits of an in-memory cache without the operational work of sizing, sharding, and managing a cache cluster. Good for applications with unpredictable or variable traffic patterns where you want to avoid over-provisioning.",
+    keyFacts: [
+      "No cluster configuration required — scales automatically as demand changes",
+      "Compatible with Redis OSS and Valkey (Redis fork) and Memcached protocols",
+      "Pricing is based on ElastiCache Processing Units (ECPUs) consumed and data stored — no charge for idle capacity",
+      "Supports Multi-AZ replication for high availability automatically",
+      "Single-digit millisecond latency for cached reads, same as traditional ElastiCache",
+    ],
+    examTraps: [
+      "Trap: ElastiCache Serverless has no minimum capacity or cost. Reality: There is a minimum data storage charge even for near-empty caches, so for very low and predictable workloads a provisioned cluster may be cheaper. Serverless shines for variable or unpredictable workloads.",
+    ],
+    relatedServices: ["ElastiCache", "DAX", "DynamoDB", "RDS", "Lambda"],
+  },
+
+  // ─── NETWORKING (NEW) ───────────────────────────────────────────────────────
+
+  {
+    id: "network-firewall",
+    name: "AWS Network Firewall",
+    shortName: "Network Firewall",
+    abbr: "NetworkFirewall",
+    category: "networking",
+    domains: [1, 2],
+    tagline: "A managed stateful firewall for your VPC that can inspect and filter traffic at Layer 3, Layer 4, and Layer 7.",
+    whatItDoes:
+      "AWS Network Firewall is a managed network firewall service that you deploy into your VPC subnets. It provides stateless packet filtering (allow/block by IP, port, protocol), stateful connection tracking, and application-layer (Layer 7) intrusion detection and prevention using Suricata-compatible IDS/IPS rules. Traffic must be routed through the firewall endpoints for inspection.",
+    whenToUse:
+      "Use when you need deeper network-level traffic inspection inside or between VPCs beyond what Security Groups and NACLs provide — for example, blocking known malicious IP addresses, detecting port scans, filtering outbound traffic to prevent data exfiltration, or enforcing domain-based filtering.",
+    keyFacts: [
+      "Supports stateless rules (IP/port/protocol, fast but no connection tracking) and stateful rules (connection-aware, supports application protocols)",
+      "Suricata-compatible IDS/IPS rules: you can import community rule sets or write your own Suricata rules for threat detection and prevention",
+      "Deployed per Availability Zone — one firewall endpoint per AZ for high availability",
+      "Logs can be sent to S3, CloudWatch Logs, or Kinesis Data Firehose",
+      "Managed threat intelligence rule groups available through AWS and third-party Marketplace vendors",
+    ],
+    examTraps: [
+      "Trap: AWS WAF and AWS Network Firewall do the same job — just pick either one. Reality: WAF operates at Layer 7 for HTTP/HTTPS traffic only, protecting web applications. Network Firewall operates at Layers 3, 4, and 7 for all protocols and can inspect non-HTTP traffic using Suricata IDS/IPS rules.",
+    ],
+    relatedServices: ["WAF", "Security Groups", "NACLs", "Transit Gateway", "Firewall Manager"],
+  },
+
+  {
+    id: "firewall-manager",
+    name: "AWS Firewall Manager",
+    shortName: "Firewall Manager",
+    abbr: "FirewallManager",
+    category: "networking",
+    domains: [1],
+    tagline: "Centrally apply and enforce WAF, Security Group, and Network Firewall policies across all accounts in your AWS Organization.",
+    whatItDoes:
+      "AWS Firewall Manager is a security management service for AWS Organizations. It lets you centrally create and enforce firewall rules — WAF Web ACLs, Security Group policies, Network Firewall policies, Shield Advanced protections, and Route 53 Resolver DNS Firewall rules — across all accounts and resources in your organization from a single administrator account.",
+    whenToUse:
+      "Use in multi-account AWS Organizations environments to ensure consistent security policies across all accounts — for example, mandating that all ALBs have a WAF Web ACL, or enforcing that all EC2 instances in every account use a specific Security Group baseline. Eliminates the need to configure policies account by account.",
+    keyFacts: [
+      "Requires AWS Organizations and an designated Firewall Manager administrator account",
+      "Automatically applies policies to new accounts and resources as they are added to the organization",
+      "Supports WAF rules, Security Group policies, Network Firewall policies, Shield Advanced, and Route 53 DNS Firewall",
+      "Provides a compliance dashboard showing which accounts/resources are non-compliant with each policy",
+      "No charge for Firewall Manager itself, but you pay for the underlying resources (WAF Web ACLs, etc.) it creates",
+    ],
+    examTraps: [
+      "Trap: AWS Config and Firewall Manager both enforce security policies. Reality: Config detects and reports non-compliance (detective). Firewall Manager actively deploys and enforces security policies across accounts (preventive). Config tells you what's wrong; Firewall Manager prevents it from being wrong.",
+    ],
+    relatedServices: ["WAF", "Network Firewall", "Shield", "Organizations", "Security Groups"],
+  },
+
+  {
+    id: "nat-gateway",
+    name: "NAT Gateway",
+    shortName: "NAT Gateway",
+    abbr: "NATGateway",
+    category: "networking",
+    domains: [1, 2, 3],
+    tagline: "Let EC2 instances in private subnets reach the internet (for software updates, API calls) without being reachable from the internet.",
+    whatItDoes:
+      "A NAT Gateway is a managed network address translation service. EC2 instances in private subnets send outbound internet traffic to the NAT Gateway (which lives in a public subnet), and the NAT Gateway forwards it to the internet using its own Elastic IP address. Return traffic comes back to the NAT Gateway and is forwarded to the originating instance. Inbound connections from the internet are not allowed.",
+    whenToUse:
+      "Use whenever private subnet instances need to make outbound internet connections — to download OS patches, call external APIs, reach AWS public endpoints (without VPC endpoints), or pull container images from the internet. Place a NAT Gateway in each Availability Zone's public subnet for high availability.",
+    keyFacts: [
+      "Deployed per Availability Zone in a public subnet — for high availability, deploy one per AZ",
+      "Managed by AWS — scales automatically up to 100 Gbps per NAT Gateway",
+      "Charged per hour the NAT Gateway exists plus per GB of data processed — not free",
+      "NAT Instances (EC2-based, older approach) require you to manage the instance; NAT Gateway is fully managed and preferred",
+      "For lowest cost, use VPC Gateway Endpoints for S3 and DynamoDB (free) instead of routing that traffic through NAT Gateway",
+    ],
+    examTraps: [
+      "Trap: NAT Gateway and Internet Gateway do the same thing — you only need one. Reality: Internet Gateway enables two-way communication between a VPC and the internet. NAT Gateway only enables outbound-initiated connections from private subnets. They serve different purposes and are often both present in an architecture.",
+    ],
+    relatedServices: ["Internet Gateway", "VPC", "Elastic IP", "Route Table", "VPC Endpoints"],
+  },
+
+  {
+    id: "internet-gateway",
+    name: "Internet Gateway",
+    shortName: "Internet Gateway",
+    abbr: "IGW",
+    category: "networking",
+    domains: [1, 2, 3],
+    tagline: "The free gateway that connects your VPC to the public internet, enabling two-way traffic for public subnets.",
+    whatItDoes:
+      "An Internet Gateway is a horizontally scaled, redundant, and highly available VPC component that allows two-way communication between instances in a VPC and the public internet. You attach one Internet Gateway to a VPC and add a route in a subnet's route table pointing 0.0.0.0/0 to the IGW — that subnet becomes a public subnet. Instances in public subnets need an Elastic IP or public IP to be reachable from the internet.",
+    whenToUse:
+      "Use in any VPC that needs resources (load balancers, bastion hosts, NAT Gateways) accessible from or able to initiate connections to the public internet. One Internet Gateway per VPC is the standard architecture — it is free and scales automatically.",
+    keyFacts: [
+      "Free — no hourly charge, no data processing fee",
+      "One Internet Gateway per VPC; it is attached to the VPC, not to individual subnets",
+      "Only makes a subnet 'public' when a route to the IGW (0.0.0.0/0 → igw-xxxx) is added to the subnet's route table",
+      "Performs NAT for instances with public IPv4 addresses (translates between their private and public IP)",
+      "Does NOT support IPv6 NAT — IPv6 addresses are globally routable, so no NAT is needed for IPv6",
+    ],
+    examTraps: [
+      "Trap: Attaching an Internet Gateway to a VPC automatically makes all subnets public. Reality: A subnet is public only when its route table has a route to the Internet Gateway. Attaching the IGW alone does nothing without the route table entry.",
+    ],
+    relatedServices: ["NAT Gateway", "VPC", "Route Table", "Elastic IP", "Security Groups"],
+  },
+
+  {
+    id: "vpg",
+    name: "Virtual Private Gateway",
+    shortName: "Virtual Private Gateway",
+    abbr: "VPG",
+    category: "networking",
+    domains: [1, 2],
+    tagline: "The AWS-side endpoint for a Site-to-Site VPN connection between your on-premises network and a VPC.",
+    whatItDoes:
+      "A Virtual Private Gateway (VGW) is the AWS endpoint of an AWS Site-to-Site VPN connection. You attach a VGW to your VPC and create a VPN connection between the VGW and a Customer Gateway (your on-premises VPN device). The VPN tunnel encrypts traffic between your data center and the VPC over the public internet.",
+    whenToUse:
+      "Use to establish an encrypted VPN connection between an on-premises network and a VPC. This is the fastest way to start a hybrid connection — provisioning takes minutes, unlike Direct Connect which takes weeks. Often used as a backup to Direct Connect for redundancy.",
+    keyFacts: [
+      "Each VPN connection has two IPSec tunnels for redundancy (one per Availability Zone on the AWS side)",
+      "Maximum throughput per VPN connection: approximately 1.25 Gbps (limited by the VPN endpoint, not the internet link)",
+      "VPN traffic goes over the public internet (encrypted) — unlike Direct Connect, which uses dedicated private fiber",
+      "Can be used with Direct Connect as an encrypted overlay for compliance requirements (Direct Connect + VPN)",
+      "For connecting multiple VPCs via VPN at scale, attach VPN connections to Transit Gateway instead of individual VGWs",
+    ],
+    examTraps: [
+      "Trap: Direct Connect and Site-to-Site VPN provide the same connectivity and performance. Reality: Direct Connect offers dedicated bandwidth, consistent latency, and private connectivity. VPN runs over the public internet and has variable latency. Direct Connect is preferred for production workloads; VPN for backup or quick setup.",
+    ],
+    relatedServices: ["Direct Connect", "Transit Gateway", "VPC", "Customer Gateway"],
+  },
+
+  {
+    id: "vpc-lattice",
+    name: "Amazon VPC Lattice",
+    shortName: "VPC Lattice",
+    abbr: "VPCLattice",
+    category: "networking",
+    domains: [1, 2, 3],
+    tagline: "Application-level networking that lets services in different VPCs and accounts communicate securely without complex VPC peering.",
+    whatItDoes:
+      "Amazon VPC Lattice is an application networking service that simplifies service-to-service communication across VPCs and AWS accounts. You define services (backed by EC2, Lambda, ECS, or Kubernetes pods) in a service network, configure access policies, and VPC Lattice handles load balancing, health checks, authentication, and authorization — regardless of where the services live.",
+    whenToUse:
+      "Use in microservices architectures spread across multiple VPCs or accounts where traditional VPC peering or Transit Gateway becomes complex to manage. VPC Lattice provides a consistent way to discover, connect to, and secure service-to-service communication without managing IP routing.",
+    keyFacts: [
+      "Connects services across VPCs and accounts without requiring VPC peering or IP address management",
+      "Supports HTTP/HTTPS and gRPC traffic; provides built-in load balancing and health checks",
+      "Auth policies control which services can call other services using IAM-based authorization",
+      "Services can be backed by EC2 Auto Scaling Groups, Lambda functions, ECS services, Kubernetes pods, or IP addresses",
+      "Integrates with AWS Resource Access Manager (RAM) for cross-account service sharing",
+    ],
+    examTraps: [
+      "Trap: Use Transit Gateway for service-to-service communication between VPCs. Reality: Transit Gateway solves network-level (IP routing) connectivity. VPC Lattice works at the application level (HTTP/gRPC), providing service discovery, authentication, and load balancing that Transit Gateway does not offer.",
+    ],
+    relatedServices: ["Transit Gateway", "API Gateway", "ALB", "ECS", "Lambda", "RAM"],
+  },
+
+  // ─── SECURITY (NEW) ─────────────────────────────────────────────────────────
+
+  {
+    id: "detective",
+    name: "Amazon Detective",
+    shortName: "Amazon Detective",
+    abbr: "Detective",
+    category: "security",
+    domains: [1],
+    tagline: "Investigate and visualize the root cause of security findings using ML-powered graph analysis of your AWS logs.",
+    whatItDoes:
+      "Amazon Detective automatically collects log data from AWS CloudTrail, Amazon VPC Flow Logs, Amazon GuardDuty findings, and AWS Organizations, then uses machine learning and graph analysis to build an interactive behavior graph. Security teams use Detective to investigate security incidents — tracing the chain of events, understanding the scope of a compromise, and identifying the root cause.",
+    whenToUse:
+      "Use when you receive a GuardDuty finding and need to investigate further — who triggered the finding, what IP addresses were involved, which resources were accessed, and what happened before and after the finding. Detective replaces hours of manual log correlation with interactive graph visualizations.",
+    keyFacts: [
+      "Uses ML and graph analysis on CloudTrail events, VPC Flow Logs, and GuardDuty findings to build a behavior graph",
+      "READ-ONLY investigation tool — Amazon Detective cannot block threats, quarantine resources, or take any remediation action",
+      "Automatically retains up to 1 year of aggregated log data for investigation",
+      "Multi-account support: a designated administrator account can investigate findings across all member accounts",
+      "Works alongside GuardDuty (detection) — GuardDuty surfaces threats; Detective helps you understand them",
+    ],
+    examTraps: [
+      "Trap: Amazon Detective can block threats detected by GuardDuty. Reality: Detective is an investigation-only, read-only service. It helps you understand what happened — it cannot block traffic, quarantine instances, or prevent future attacks. Use WAF, Security Groups, or Lambda-based automated remediation for blocking.",
+    ],
+    relatedServices: ["GuardDuty", "CloudTrail", "SecurityHub", "Macie", "Inspector"],
+  },
+
+  {
+    id: "iam-access-analyzer",
+    name: "AWS IAM Access Analyzer",
+    shortName: "IAM Access Analyzer",
+    abbr: "AccessAnalyzer",
+    category: "security",
+    domains: [1],
+    tagline: "Find out which of your AWS resources are accessible from outside your account or organization, and validate IAM policies before deploying.",
+    whatItDoes:
+      "AWS IAM Access Analyzer continuously analyzes resource-based policies (on S3 buckets, KMS keys, IAM roles, Lambda functions, SQS queues, Secrets Manager secrets, and more) to identify resources shared with external principals — principals outside your zone of trust. It also validates IAM policies for syntax errors, best-practice violations, and unused access.",
+    whenToUse:
+      "Use to audit whether any AWS resources are unintentionally exposed to external accounts or the public, and to validate IAM policies before deploying them. Especially important in multi-account organizations to detect accidental cross-account sharing.",
+    keyFacts: [
+      "Zone of trust can be set to a single AWS account or an entire AWS Organization",
+      "Generates findings for any resource accessible by principals outside the zone of trust",
+      "Policy validation checks IAM and resource-based policies for syntax errors, security warnings, and best-practice suggestions",
+      "Unused access analyzer (added 2024): identifies IAM users and roles with permissions that have never been used, helping enforce least privilege",
+      "Access preview: simulate what access a proposed policy change would grant before applying it",
+    ],
+    examTraps: [
+      "Trap: IAM Access Analyzer prevents external access to your resources. Reality: Access Analyzer is a detective control — it identifies and reports unintended external access but does not block it. You must act on the findings manually or through automated remediation.",
+    ],
+    relatedServices: ["IAM", "S3", "KMS", "Lambda", "SecretsManager", "Organizations"],
+  },
+
+  {
+    id: "acm-private-ca",
+    name: "AWS Private Certificate Authority",
+    shortName: "AWS Private CA",
+    abbr: "ACM-PCA",
+    category: "security",
+    domains: [1],
+    tagline: "Run your own private certificate authority on AWS to issue TLS certificates for internal services without buying from a public CA.",
+    whatItDoes:
+      "AWS Private Certificate Authority (formerly ACM Private CA) is a managed private CA service. You create a root or subordinate certificate authority, and it issues private X.509 TLS certificates for internal use — microservices, IoT devices, VPN clients, or any internal application that needs mutual TLS (mTLS) or encryption. The certificates are trusted only by systems that trust your private CA, not by public browsers.",
+    whenToUse:
+      "Use when you need to issue certificates for internal services, devices, or users that don't need to be publicly trusted. Common for securing service-to-service communication with mTLS in microservices, issuing certificates to IoT devices, and encrypting internal corporate applications.",
+    keyFacts: [
+      "Issues private certificates — not trusted by public browsers, only by systems configured to trust your CA",
+      "Works with AWS Certificate Manager (ACM) for managed certificate deployment to ALB, CloudFront, API Gateway",
+      "Charges per CA per month ($400/month for a root CA) plus per certificate issued",
+      "Supports ECDSA and RSA key algorithms; certificate validity period configurable",
+      "Integrates with AWS IoT Core, Amazon EKS (for in-cluster TLS), and Amazon API Gateway",
+    ],
+    examTraps: [
+      "Trap: Use AWS Certificate Manager (ACM) public certificates for internal microservice mTLS. Reality: ACM public certificates are issued by a public CA and are designed for external-facing HTTPS. For internal mTLS between microservices, you need AWS Private CA to issue certificates trusted only within your environment.",
+    ],
+    relatedServices: ["ACM", "ALB", "API Gateway", "IoT Core", "EKS"],
+  },
+
+  {
+    id: "audit-manager",
+    name: "AWS Audit Manager",
+    shortName: "Audit Manager",
+    abbr: "AuditManager",
+    category: "security",
+    domains: [1],
+    tagline: "Automate evidence collection for compliance audits (PCI-DSS, HIPAA, SOC 2) by continuously gathering data from your AWS environment.",
+    whatItDoes:
+      "AWS Audit Manager continuously collects evidence from your AWS environment to help you prepare for compliance audits. It maps your AWS resource configurations and activity to compliance frameworks (PCI-DSS, HIPAA, SOC 2, GDPR, FedRAMP, and more) and produces audit-ready reports. Instead of manually gathering screenshots and logs before an audit, Audit Manager does it continuously.",
+    whenToUse:
+      "Use when you need to demonstrate compliance with regulatory frameworks and want to reduce the manual effort of gathering evidence before an audit. Especially valuable for organizations subject to regular audits where evidence collection is a recurring burden.",
+    keyFacts: [
+      "Pre-built frameworks for PCI-DSS, HIPAA, SOC 2, ISO 27001, GDPR, FedRAMP, NIST, and more",
+      "Collects evidence automatically from AWS Config, CloudTrail, Security Hub, and AWS API calls",
+      "Custom frameworks: create your own control library and evidence sources for internal policies",
+      "Evidence repository: stores all collected evidence for audit review, with delegation to control owners",
+      "Works alongside AWS Config (which tracks configuration changes) and Security Hub (which aggregates findings)",
+    ],
+    examTraps: [
+      "Trap: AWS Config and Audit Manager serve the same purpose for compliance. Reality: Config records resource configuration changes and checks compliance rules in real time. Audit Manager focuses on generating audit-ready evidence reports mapped to compliance frameworks. They complement each other.",
+    ],
+    relatedServices: ["Config", "CloudTrail", "SecurityHub", "Trusted Advisor"],
+  },
+
+  {
+    id: "directory-service",
+    name: "AWS Directory Service",
+    shortName: "Directory Service",
+    abbr: "DirectoryService",
+    category: "security",
+    domains: [1, 2],
+    tagline: "Run Microsoft Active Directory on AWS (or connect to your existing AD) so AWS services and Windows workloads can use AD authentication.",
+    whatItDoes:
+      "AWS Directory Service provides managed Microsoft Active Directory options on AWS. AWS Managed Microsoft AD is a fully functional Microsoft AD (hosted on Windows Server) managed by AWS, suitable for production workloads. AD Connector is a proxy that redirects authentication requests to your existing on-premises AD without caching any data. Simple AD is a low-cost, Samba-based AD-compatible directory for basic use cases.",
+    whenToUse:
+      "Use AWS Managed Microsoft AD when you need a full Active Directory in AWS for domain-joining EC2 instances, FSx for Windows, Amazon WorkSpaces, and AWS SSO. Use AD Connector when you want to keep your existing on-premises AD as the identity source and just proxy AWS authentication to it.",
+    keyFacts: [
+      "AWS Managed Microsoft AD: real Microsoft AD on Windows Server, Multi-AZ, supports trusts with on-premises AD",
+      "AD Connector: proxy only — redirects authentication to on-premises AD, no directory data stored in AWS, requires Direct Connect or VPN",
+      "Simple AD: Samba-based, supports basic LDAP and Kerberos, limited functionality, lower cost — not for complex AD workloads",
+      "Works with Amazon WorkSpaces, Amazon WorkDocs, Amazon RDS for SQL Server, FSx for Windows, and IAM Identity Center",
+      "Trust relationships between AWS Managed Microsoft AD and on-premises AD allow single sign-on across hybrid environments",
+    ],
+    examTraps: [
+      "Trap: AD Connector stores a copy of your Active Directory in AWS. Reality: AD Connector is a pure proxy — it stores no directory data in AWS. All authentication requests are forwarded to your on-premises AD. If the on-premises AD or the network link is unavailable, authentication fails.",
+    ],
+    relatedServices: ["FSx for Windows", "WorkSpaces", "IAM", "Direct Connect", "VPN"],
+  },
+
+  {
+    id: "verified-access",
+    name: "AWS Verified Access",
+    shortName: "Verified Access",
+    abbr: "VerifiedAccess",
+    category: "security",
+    domains: [1],
+    tagline: "Give employees secure access to internal applications without a VPN, using identity and device trust signals.",
+    whatItDoes:
+      "AWS Verified Access implements a zero-trust network access model for internal corporate applications. Instead of requiring employees to connect to a VPN before accessing internal web apps, Verified Access evaluates trust signals in real time — identity (from an identity provider like Okta, Azure AD, or IAM Identity Center) and device posture (from AWS Verified Access or third-party device management tools) — and grants or denies access to each individual request.",
+    whenToUse:
+      "Use to replace or reduce VPN usage for internal web application access. Provides more granular, per-request authorization than a VPN (which grants broad network access once connected) and makes it easier for employees to access applications from any device or location.",
+    keyFacts: [
+      "Zero-trust model: every request is evaluated individually against identity and device trust policies",
+      "Integrates with any OIDC-compatible identity provider (Okta, Azure AD, Google Workspace, IAM Identity Center)",
+      "Device trust: can integrate with AWS Verified Access device trust providers or third-party tools like Jamf, Carbon Black",
+      "No VPN client required — employees access apps through a browser using their identity provider login",
+      "Access logs are sent to S3, CloudWatch Logs, or Kinesis Data Firehose for auditing",
+    ],
+    examTraps: [
+      "Trap: Verified Access replaces Direct Connect or Site-to-Site VPN for all hybrid connectivity needs. Reality: Verified Access replaces VPN only for user-to-application access to internal web apps. It does not replace network-level hybrid connectivity between data centers and VPCs (that is the role of Direct Connect and Site-to-Site VPN).",
+    ],
+    relatedServices: ["IAM Identity Center", "WAF", "ALB", "CloudTrail", "Organizations"],
+  },
+
+  {
+    id: "cognito",
+    name: "Amazon Cognito",
+    shortName: "Amazon Cognito",
+    abbr: "Cognito",
+    category: "security",
+    domains: [1, 2],
+    tagline: "Add user sign-up, sign-in, and access control to your web and mobile apps in minutes.",
+    whatItDoes:
+      "Amazon Cognito provides two services: User Pools and Identity Pools. User Pools are managed user directories — they handle user registration, authentication (username/password, MFA, OAuth 2.0/OIDC federated login via Google, Facebook, SAML), and return JWT tokens. Identity Pools (Federated Identities) exchange those tokens (or tokens from other identity providers) for temporary AWS credentials, allowing users to directly access AWS services like S3 or DynamoDB.",
+    whenToUse:
+      "Use Cognito User Pools when you need to add authentication (sign-up/sign-in) to a web or mobile application. Use Cognito Identity Pools when authenticated users need to call AWS services directly from the client (for example, a mobile app uploading to S3). Combine both for full auth + AWS resource access.",
+    keyFacts: [
+      "User Pools: user directory with sign-up, sign-in, MFA, social federation (Google, Facebook), SAML federation",
+      "Identity Pools: exchange User Pool JWT tokens or social identity tokens for temporary IAM credentials",
+      "Integrates natively with API Gateway and ALB for JWT token validation",
+      "User Pool triggers: Lambda functions can customize authentication flows (pre-sign-up, post-confirmation, pre-token generation)",
+      "Supports OAuth 2.0, OpenID Connect (OIDC), and SAML 2.0 standards",
+    ],
+    examTraps: [
+      "Trap: Cognito User Pools and Identity Pools are the same thing. Reality: User Pools handle authentication (who are you?) and return JWTs. Identity Pools handle authorization to AWS resources (what AWS services can you access?) by issuing temporary IAM credentials. They are complementary but distinct.",
+    ],
+    relatedServices: ["IAM", "API Gateway", "ALB", "Lambda", "S3"],
+  },
+
+  // ─── INTEGRATION (NEW) ──────────────────────────────────────────────────────
+
+  {
+    id: "amazon-mq",
+    name: "Amazon MQ",
+    shortName: "Amazon MQ",
+    abbr: "AmazonMQ",
+    category: "integration",
+    domains: [2, 3],
+    tagline: "A managed message broker for Apache ActiveMQ and RabbitMQ — lift and shift on-premises messaging to AWS without rewriting applications.",
+    whatItDoes:
+      "Amazon MQ is a managed message broker service that supports Apache ActiveMQ and RabbitMQ. It lets you migrate existing applications that use standard messaging protocols (AMQP, MQTT, STOMP, OpenWire, WebSocket) to AWS without changing the messaging code. AWS manages broker provisioning, patching, and high availability.",
+    whenToUse:
+      "Use when you're migrating on-premises applications that already use ActiveMQ or RabbitMQ and want to move to AWS without rewriting the messaging layer. For new applications, prefer Amazon SQS (simpler, fully serverless, scales automatically) or Amazon SNS over Amazon MQ.",
+    keyFacts: [
+      "Supports Apache ActiveMQ and RabbitMQ broker engines",
+      "Supports open standard messaging protocols: AMQP, MQTT, STOMP, OpenWire, WebSocket",
+      "Deployed on managed EC2 instances (not truly serverless like SQS) — you choose an instance type",
+      "High availability: Active/Standby broker pair in two Availability Zones with automatic failover",
+      "Storage backed by Amazon EFS (for ActiveMQ) to ensure message durability across failover",
+    ],
+    examTraps: [
+      "Trap: Amazon MQ and Amazon SQS are equivalent — use Amazon MQ for all messaging needs. Reality: SQS is serverless, scales to unlimited throughput, and is the preferred choice for new AWS-native applications. Amazon MQ is specifically for migrating existing applications that already depend on ActiveMQ or RabbitMQ protocols.",
+    ],
+    relatedServices: ["SQS", "SNS", "EventBridge", "EC2", "EFS"],
+  },
+
+  {
+    id: "appsync",
+    name: "AWS AppSync",
+    shortName: "AWS AppSync",
+    abbr: "AppSync",
+    category: "integration",
+    domains: [1, 3],
+    tagline: "A managed GraphQL API service that connects your apps to data from multiple sources with real-time subscriptions.",
+    whatItDoes:
+      "AWS AppSync is a fully managed GraphQL API service. You define a GraphQL schema, and AppSync resolves queries and mutations against data sources — DynamoDB, Aurora Serverless, Lambda, OpenSearch, HTTP APIs, and more. AppSync also supports real-time data with GraphQL subscriptions (using WebSockets), so clients receive updates when data changes.",
+    whenToUse:
+      "Use when you want to build a GraphQL API that aggregates data from multiple backends, when your mobile or web app needs real-time updates (subscriptions), or when different clients need different subsets of the same data (a GraphQL strength over REST APIs).",
+    keyFacts: [
+      "Supports GraphQL queries (read), mutations (write), and subscriptions (real-time WebSocket push)",
+      "Data sources: DynamoDB, Aurora Serverless, Lambda, OpenSearch, HTTP endpoints",
+      "Resolvers use Apache VTL (Velocity Template Language) or JavaScript to map GraphQL operations to data source calls",
+      "AWS WAF can be attached to AppSync to protect against malicious GraphQL queries",
+      "Offline data sync: AppSync includes conflict resolution for mobile apps that need to work offline and sync later",
+    ],
+    examTraps: [
+      "Trap: API Gateway and AppSync are interchangeable for all API needs. Reality: API Gateway is for REST and WebSocket APIs. AppSync is specifically for GraphQL APIs with real-time subscriptions and multi-source data aggregation. The exam will hint at GraphQL when AppSync is the answer.",
+    ],
+    relatedServices: ["API Gateway", "DynamoDB", "Lambda", "Cognito", "WAF"],
+  },
+
+  {
+    id: "eventbridge-scheduler",
+    name: "Amazon EventBridge Scheduler",
+    shortName: "EventBridge Scheduler",
+    abbr: "EBScheduler",
+    category: "integration",
+    domains: [2, 3, 4],
+    tagline: "Schedule one-time or recurring invocations of Lambda, SQS, Step Functions, and other AWS targets without writing scheduler code.",
+    whatItDoes:
+      "Amazon EventBridge Scheduler is a standalone scheduling service. You create schedules using cron or rate expressions for recurring jobs, or a one-time timestamp for a future task. The scheduler invokes a target — Lambda, SQS, SNS, Step Functions, ECS, Kinesis, Firehose, and many other AWS services — at the specified time, handling retries and delivering at-least-once or exactly-once execution.",
+    whenToUse:
+      "Use for scheduled tasks that need to run at a specific time or on a regular interval — nightly data exports, batch job triggers, scheduled notifications, resource cleanup, and any 'run this at 2 AM every day' requirement. Replaces the need for EC2-based cron jobs or custom scheduler applications.",
+    keyFacts: [
+      "Supports cron expressions (schedule with year, month, day, hour, minute precision) and rate expressions (e.g., every 5 minutes)",
+      "One-time schedules: invoke a target exactly once at a specified future date and time",
+      "Flexible time window: allow the scheduler to invoke the target within a configurable window (e.g., within 15 minutes of the scheduled time) to smooth out traffic",
+      "Supports over 270 AWS service targets natively",
+      "Different from EventBridge rules (which trigger on event patterns from the event bus) — Scheduler is time-based only",
+    ],
+    examTraps: [
+      "Trap: EventBridge Scheduler and EventBridge scheduled rules do exactly the same thing. Reality: EventBridge scheduled rules (on the default event bus) are limited and designed for simpler use cases. EventBridge Scheduler is a dedicated service with millions of schedules, flexible time windows, and one-time schedules — preferred for large-scale scheduling needs.",
+    ],
+    relatedServices: ["Lambda", "Step Functions", "SQS", "ECS", "EventBridge"],
+  },
+
+  {
+    id: "step-functions",
+    name: "AWS Step Functions",
+    shortName: "Step Functions",
+    abbr: "StepFunctions",
+    category: "integration",
+    domains: [1, 2, 3],
+    tagline: "Visually orchestrate multi-step workflows across Lambda, ECS, Glue, and other services with built-in error handling and retry logic.",
+    whatItDoes:
+      "AWS Step Functions is a serverless workflow orchestration service. You define a state machine in Amazon States Language (ASL) — a JSON-based language — where each state is a task (calling Lambda, ECS, Glue, DynamoDB, etc.), a choice point, a parallel branch, a wait, or an error handler. Step Functions handles sequencing, retries, error handling, and long-running orchestrations automatically.",
+    whenToUse:
+      "Use when you need to coordinate multiple AWS services into a reliable workflow — order processing pipelines, ML model training pipelines, data ETL orchestration, microservice choreography, and human approval workflows. Replace ad hoc Lambda chains with explicit, visible state machines.",
+    keyFacts: [
+      "Standard Workflows: exactly-once execution semantics, up to 1 year duration, async and sync execution; ideal for long-running, auditable business processes",
+      "Express Workflows: at-least-once execution semantics, up to 5 minutes duration, higher throughput and lower cost; ideal for high-volume, short-duration event processing",
+      "Built-in error handling: Catch and Retry blocks at the state level to handle failures without custom code",
+      "Integrations: optimized integrations with Lambda, ECS, DynamoDB, SNS, SQS, Glue, SageMaker, and 200+ other AWS services",
+      "Visual Workflow Studio in the AWS Console for designing and debugging state machines graphically",
+    ],
+    examTraps: [
+      "Trap: Express Workflows provide exactly-once execution like Standard Workflows. Reality: Express Workflows use at-least-once execution — a step may execute more than once on retries. Only Standard Workflows guarantee exactly-once execution. This matters for non-idempotent operations like financial transactions.",
+    ],
+    relatedServices: ["Lambda", "ECS", "Glue", "SageMaker", "EventBridge", "SQS"],
+  },
+
+  {
+    id: "appflow",
+    name: "Amazon AppFlow",
+    shortName: "Amazon AppFlow",
+    abbr: "AppFlow",
+    category: "integration",
+    domains: [3, 4],
+    tagline: "Transfer data between SaaS applications (Salesforce, ServiceNow, Slack) and AWS services without writing integration code.",
+    whatItDoes:
+      "Amazon AppFlow is a fully managed data integration service. It moves data between SaaS applications (Salesforce, ServiceNow, Zendesk, Slack, Google Analytics, Marketo, and more) and AWS services (S3, Redshift, EventBridge) using pre-built connectors. You configure flows in the console to trigger on a schedule, an event, or on demand, and optionally apply data transformations (filtering, masking, mapping) in transit.",
+    whenToUse:
+      "Use when you need to sync or import data from SaaS tools into your AWS data lake or analytics pipeline — pulling Salesforce leads into Redshift for analysis, archiving ServiceNow tickets to S3, or sending Slack messages to EventBridge for routing. No custom integration code required.",
+    keyFacts: [
+      "Pre-built connectors for 50+ SaaS applications including Salesforce, ServiceNow, SAP, Google Analytics, Zendesk, Slack, and more",
+      "Data is transferred and encrypted in transit using AWS PrivateLink when available (data does not traverse the public internet)",
+      "Built-in data transformations: field mapping, filtering, masking PII fields, value concatenation",
+      "Triggers: schedule-based, event-based (on data change in SaaS), or on-demand",
+      "Destinations: Amazon S3, Amazon Redshift, Amazon EventBridge, Salesforce (bidirectional)",
+    ],
+    examTraps: [
+      "Trap: Use AWS Glue to ingest data from Salesforce into Redshift. Reality: Glue ETL requires you to write code and manage connectors. AppFlow provides a no-code, pre-built Salesforce connector with built-in transformations and is the simpler choice for SaaS-to-AWS data movement.",
+    ],
+    relatedServices: ["S3", "Redshift", "EventBridge", "Glue", "DataSync"],
+  },
+
+  // ─── ANALYTICS (NEW) ────────────────────────────────────────────────────────
+
+  {
+    id: "quicksight",
+    name: "Amazon QuickSight",
+    shortName: "Amazon QuickSight",
+    abbr: "QuickSight",
+    category: "analytics",
+    domains: [3, 4],
+    tagline: "A serverless business intelligence tool for creating interactive dashboards and visualizations from your AWS data.",
+    whatItDoes:
+      "Amazon QuickSight is a fully managed cloud business intelligence (BI) service. You connect it to data sources — S3, Athena, Redshift, RDS, Aurora, Timestream, and more — and build interactive dashboards, charts, and reports. QuickSight uses SPICE (Super-fast Parallel In-memory Calculation Engine) to cache and query data at high speed. Dashboards can be embedded in applications or shared with users.",
+    whenToUse:
+      "Use to give business users self-service access to data visualizations and reports without running a separate BI server. Good for executive dashboards, operational reporting, ad hoc data exploration, and embedding analytics in customer-facing applications.",
+    keyFacts: [
+      "SPICE: QuickSight's in-memory calculation engine that caches imported data for fast query responses — queries SPICE instead of hitting the source database every time",
+      "Per-user pricing: approximately $18/user/month for Reader access, $24/user/month for Author access (can create dashboards)",
+      "Embedded analytics: dashboards can be embedded in web applications using the QuickSight Embedding API",
+      "Machine learning insights: automatically detects anomalies and trends in your data (ML-powered narratives and forecasting)",
+      "Connects to Athena, Redshift, RDS, Aurora, S3, Timestream, Salesforce, and third-party databases via JDBC",
+    ],
+    examTraps: [
+      "Trap: Use Redshift as a BI visualization tool. Reality: Redshift is a data warehouse for running analytical SQL queries. QuickSight is the visualization and BI layer that sits on top of Redshift (or other sources) to display charts and dashboards to end users.",
+    ],
+    relatedServices: ["Athena", "Redshift", "S3", "Glue", "Timestream", "RDS"],
+  },
+
+  {
+    id: "kinesis-video",
+    name: "Amazon Kinesis Video Streams",
+    shortName: "Kinesis Video Streams",
+    abbr: "KVS",
+    category: "analytics",
+    domains: [3],
+    tagline: "Securely ingest, store, and process video, audio, and other time-encoded media streams from cameras and devices.",
+    whatItDoes:
+      "Amazon Kinesis Video Streams makes it easy to securely stream video, audio, radar, and other time-encoded data from millions of connected devices to AWS for storage, playback, and real-time or batch processing. Producer SDKs handle the capture and ingestion; consumer applications (using Amazon Rekognition Video, custom ML models, or WebRTC) process the streams.",
+    whenToUse:
+      "Use for video surveillance systems, smart home camera streams, industrial IoT visual inspection, video analytics pipelines, and any application that needs to ingest and process continuous time-encoded media at scale.",
+    keyFacts: [
+      "Ingests video, audio, RADAR, LIDAR, and depth data streams",
+      "Supports HTTP Live Streaming (HLS) and Dynamic Adaptive Streaming over HTTP (DASH) for playback",
+      "WebRTC support for two-way, real-time media streaming (interactive video chat, video conferencing use cases)",
+      "Integrated with Amazon Rekognition Video for real-time face detection, object identification, and content moderation on live streams",
+      "Data is durably stored with configurable retention periods (hours to years)",
+    ],
+    examTraps: [
+      "Trap: Amazon Kinesis Data Streams and Kinesis Video Streams are the same service for different data types. Reality: Kinesis Data Streams handles general-purpose records (logs, events, metrics). Kinesis Video Streams is purpose-built for time-encoded media with video-specific features like HLS playback, WebRTC, and Rekognition integration.",
+    ],
+    relatedServices: ["Rekognition", "Kinesis Data Streams", "S3", "Lambda"],
+  },
+
+  {
+    id: "lake-formation",
+    name: "AWS Lake Formation",
+    shortName: "Lake Formation",
+    abbr: "LakeFormation",
+    category: "analytics",
+    domains: [1, 3],
+    tagline: "Build, secure, and manage a data lake on Amazon S3 with fine-grained column- and row-level access controls.",
+    whatItDoes:
+      "AWS Lake Formation simplifies building a secure data lake on Amazon S3. It builds on top of the AWS Glue Data Catalog and adds centralized fine-grained access control — down to individual columns and rows — for data in S3. You grant permissions to tables and columns in Lake Formation, and those permissions are enforced when Athena, Redshift Spectrum, or EMR queries the data.",
+    whenToUse:
+      "Use when you need centralized, fine-grained access control over your S3 data lake — for example, letting analysts query a table but only see non-PII columns, or restricting row-level access based on department. Also use to streamline the ingestion and cataloging of new data sources into the lake.",
+    keyFacts: [
+      "Fine-grained access control: grant or deny access to specific databases, tables, columns, and rows in the Glue Data Catalog",
+      "Built on top of AWS Glue Data Catalog — Lake Formation adds permission management; Glue provides the metadata",
+      "Cross-account data sharing: grant other AWS accounts or Organizations access to specific tables in your data lake",
+      "Integrates with Athena, Redshift Spectrum, EMR, and AWS Glue for query enforcement",
+      "Data filters: row-level and cell-level security using filter expressions",
+    ],
+    examTraps: [
+      "Trap: Use S3 bucket policies and IAM to control who can query specific columns of data in your data lake. Reality: S3 bucket policies control access to entire objects (files), not columns within files. Lake Formation provides the column- and row-level security that S3 bucket policies cannot offer.",
+    ],
+    relatedServices: ["S3", "Glue", "Athena", "Redshift Spectrum", "EMR", "IAM"],
+  },
+
+  {
+    id: "emr",
+    name: "Amazon EMR",
+    shortName: "Amazon EMR",
+    abbr: "EMR",
+    category: "analytics",
+    domains: [3, 4],
+    tagline: "A managed big data platform for running Hadoop, Spark, Hive, Flink, and other frameworks at scale on EC2 or Fargate.",
+    whatItDoes:
+      "Amazon EMR (Elastic MapReduce) is a managed big data platform that provisions and configures clusters of EC2 instances running open-source frameworks — Apache Hadoop, Apache Spark, Apache Hive, Apache HBase, Presto, Flink, and more. EMR handles cluster setup, framework configuration, and scaling so you can focus on writing data processing jobs.",
+    whenToUse:
+      "Use for large-scale batch data processing, ETL pipelines, machine learning feature engineering, log analysis, genomics, financial risk modeling, and any use case that requires running Spark or Hadoop at scale. Use Spot Instances for task nodes to cut cluster costs significantly.",
+    keyFacts: [
+      "Three deployment modes: EC2 (traditional, most control), EKS (run Spark jobs on existing Kubernetes clusters), and Serverless (no cluster provisioning — EMR allocates resources automatically)",
+      "Supports Hadoop, Spark, Hive, HBase, Presto, Flink, Pig, and many other big data frameworks",
+      "Use Spot Instances for task nodes (stateless, can be interrupted without data loss) to reduce cost by up to 80%",
+      "EMRFS: EMR File System extends Hadoop to use S3 as a durable storage layer instead of HDFS",
+      "EMR Serverless: auto-provisions and scales workers; you pay per vCPU-second and GB-second consumed",
+    ],
+    examTraps: [
+      "Trap: Use Glue ETL for all large-scale Spark processing workloads. Reality: Glue ETL is simpler and serverless but less flexible. EMR gives full control over Spark/Hadoop configuration, supports a wider range of frameworks, and is preferred for complex, long-running big data jobs or when you need to tune Spark settings.",
+    ],
+    relatedServices: ["S3", "Glue", "Athena", "Redshift", "Lake Formation", "Kinesis Data Streams"],
+  },
+
+  // ─── MANAGEMENT (NEW) ───────────────────────────────────────────────────────
+
+  {
+    id: "control-tower",
+    name: "AWS Control Tower",
+    shortName: "Control Tower",
+    abbr: "ControlTower",
+    category: "management",
+    domains: [1, 2],
+    tagline: "Set up and govern a secure, multi-account AWS environment based on best practices, with a few clicks.",
+    whatItDoes:
+      "AWS Control Tower automates the setup of a multi-account AWS environment (called a landing zone) following AWS best practices. It uses AWS Organizations, AWS SSO (IAM Identity Center), AWS Config, and CloudTrail under the hood to create a pre-configured governance structure: separate accounts for logging and security, guardrails (preventive and detective controls), and a self-service account vending machine for creating new accounts.",
+    whenToUse:
+      "Use when setting up a new multi-account AWS environment and want guardrails and governance built in from the start. Control Tower is the prescriptive, fast-path solution for organizations adopting AWS at scale who want to follow the AWS Well-Architected Framework multi-account best practices.",
+    keyFacts: [
+      "Creates a landing zone: a baseline multi-account structure with a management account, log archive account, and audit account",
+      "Guardrails are governance rules that are either preventive (using SCPs — cannot be bypassed) or detective (using Config Rules — detect violations)",
+      "Account Factory: a self-service portal (backed by Service Catalog) for creating new AWS accounts that automatically conform to your baseline",
+      "Account Factory for Terraform (AFT): provision accounts and apply Terraform customizations via GitOps",
+      "Integrates with AWS Organizations, Config, CloudTrail, and IAM Identity Center (SSO)",
+    ],
+    examTraps: [
+      "Trap: AWS Organizations alone provides the same governance as Control Tower. Reality: Organizations manages account hierarchy and Service Control Policies. Control Tower adds opinionated best-practice guardrails, automated logging baselines, an account vending machine, and a unified dashboard — it orchestrates Organizations rather than replacing it.",
+    ],
+    relatedServices: ["Organizations", "Config", "CloudTrail", "IAM Identity Center", "Service Catalog"],
+  },
+
+  {
+    id: "service-catalog",
+    name: "AWS Service Catalog",
+    shortName: "Service Catalog",
+    abbr: "ServiceCatalog",
+    category: "management",
+    domains: [1, 4],
+    tagline: "Create and manage a catalog of approved AWS products (CloudFormation templates) that teams can self-service deploy.",
+    whatItDoes:
+      "AWS Service Catalog lets administrators create and share portfolios of approved AWS products — CloudFormation templates packaged as service catalog products — that users can deploy themselves without needing IAM permissions to create the underlying resources. The catalog enforces organizational standards, tagging policies, and constraints (e.g., allowed regions, instance types) while giving users self-service agility.",
+    whenToUse:
+      "Use when you want to empower development teams to provision approved resources (a standard EC2 + VPC setup, a pre-approved RDS configuration) without granting them broad IAM permissions to create anything. Also use for Control Tower Account Factory to provision new accounts following standards.",
+    keyFacts: [
+      "Products are CloudFormation templates packaged with metadata, descriptions, and constraints",
+      "Portfolios group products and are shared with specific IAM users, groups, or roles",
+      "Launch constraints: delegate a specific IAM role to launch the CloudFormation stack, so the end user doesn't need CloudFormation permissions directly",
+      "TagOptions: enforce required tags on all resources created through the catalog",
+      "Integrates with AWS Organizations for sharing portfolios across accounts",
+    ],
+    examTraps: [
+      "Trap: Service Catalog and CloudFormation are the same — just use CloudFormation for self-service deployments. Reality: CloudFormation requires the user to have IAM permissions to create the underlying resources. Service Catalog wraps CloudFormation with governance, constraints, and a launch role so end users can deploy without broad IAM permissions.",
+    ],
+    relatedServices: ["CloudFormation", "Organizations", "IAM", "Control Tower", "Config"],
+  },
+
+  {
+    id: "xray",
+    name: "AWS X-Ray",
+    shortName: "AWS X-Ray",
+    abbr: "XRay",
+    category: "management",
+    domains: [3],
+    tagline: "Trace requests as they flow through your distributed application to find bottlenecks, errors, and slow services.",
+    whatItDoes:
+      "AWS X-Ray provides distributed tracing for applications. You instrument your application code (using X-Ray SDKs or auto-instrumentation for Lambda, API Gateway, and ECS) so each request generates trace data. X-Ray aggregates these traces into a service map — a visual graph of how services call each other — and shows latency, error rates, and throttling for each segment.",
+    whenToUse:
+      "Use when debugging performance issues or errors in distributed applications (microservices, serverless, containers) where a single request passes through multiple services and you need to see the full execution path and identify which service is slow or throwing errors.",
+    keyFacts: [
+      "Service map: auto-generated visual graph showing all service dependencies and their health (latency, error rates, throttle rates)",
+      "Traces consist of segments (one per service/component) and subsegments (within a service call, e.g., SQL query, external HTTP call)",
+      "Sampling: by default, X-Ray records the first request each second and 5% of additional requests — reduces cost while maintaining visibility",
+      "Integrates with Lambda, API Gateway, ALB, ECS, EC2, Elastic Beanstalk, and App Mesh out of the box",
+      "X-Ray Analytics: query and filter traces using filter expressions to find specific error patterns",
+    ],
+    examTraps: [
+      "Trap: Use CloudWatch Logs to debug latency issues in a microservice architecture. Reality: CloudWatch Logs shows individual log lines per service but doesn't correlate a single end-to-end request across services. X-Ray provides end-to-end distributed tracing so you can see the full request journey and pinpoint exactly which service or call is slow.",
+    ],
+    relatedServices: ["CloudWatch", "Lambda", "API Gateway", "ECS", "Elastic Beanstalk"],
+  },
+
+  {
+    id: "ecr",
+    name: "Amazon Elastic Container Registry (Amazon ECR)",
+    shortName: "Amazon ECR",
+    abbr: "ECR",
+    category: "management",
+    domains: [1, 2, 3],
+    tagline: "A fully managed Docker and OCI container image registry on AWS, integrated with ECS, EKS, and Lambda.",
+    whatItDoes:
+      "Amazon ECR is a managed container image registry. You push Docker or OCI images to ECR repositories, and AWS stores them durably, replicates them, and serves them to ECS tasks, EKS pods, Lambda functions, or any Docker client. ECR integrates with AWS IAM for access control and with Amazon Inspector for automatic vulnerability scanning of images.",
+    whenToUse:
+      "Use whenever you deploy containers on AWS — ECR is the natural registry for ECS and EKS workloads. Use ECR instead of Docker Hub to avoid external network hops, keep images inside the AWS network, and leverage IAM-based authentication.",
+    keyFacts: [
+      "Fully integrated with ECS, EKS, Lambda container images, and Fargate — image pulls stay on the AWS network",
+      "ECR Public Gallery: publicly accessible registry for sharing images (similar to Docker Hub) — open to anyone",
+      "Image scanning: integrates with Amazon Inspector to automatically scan images for CVEs (software vulnerabilities) on push or on schedule",
+      "Lifecycle policies: automatically delete old images (e.g., keep only the last 10 images tagged as 'release') to reduce storage costs",
+      "Cross-region and cross-account replication: replicate images to other regions and accounts for DR or multi-region deployments",
+    ],
+    examTraps: [
+      "Trap: You must use Docker Hub to store container images before deploying to ECS. Reality: ECR is a fully managed, AWS-native container registry. Using ECR avoids internet egress costs, keeps image pulls on the AWS network for lower latency, and uses IAM for authentication instead of Docker Hub credentials.",
+    ],
+    relatedServices: ["ECS", "EKS", "Lambda", "Fargate", "Inspector", "IAM"],
+  },
 ]
