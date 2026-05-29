@@ -40,6 +40,18 @@ const domains = [
     },
   },
   {
+    value: "cross" as const,
+    label: "Cross-Domain",
+    sublabel: "Multi-Domain Scenarios",
+    description: "Scenarios spanning 2–4 domains at once · hardest",
+    icon: <Target className="h-5 w-5 text-pink-400" />,
+    color: {
+      card: "border-pink-500/20 hover:border-pink-500/50",
+      badge: "bg-pink-500/20 text-pink-300 border-pink-500/30",
+      selected: "border-pink-400/60 bg-pink-500/10 ring-1 ring-pink-400/30",
+    },
+  },
+  {
     value: 1 as const,
     label: "Domain 1",
     sublabel: "Design Secure Architectures",
@@ -161,12 +173,15 @@ function QuizSetupContent() {
 
   // Pre-select domain if navigated here from the landing page with ?domain=X
   const initialDomain = searchParams.get("domain")
-  const parsedDomain = initialDomain
-    ? (parseInt(initialDomain, 10) as 1 | 2 | 3 | 4)
-    : "all"
+  const parsedDomain: "all" | "cross" | 1 | 2 | 3 | 4 =
+    initialDomain === "cross"
+      ? "cross"
+      : initialDomain
+      ? (parseInt(initialDomain, 10) as 1 | 2 | 3 | 4)
+      : "all"
 
   const [selectedDomain, setSelectedDomain] = useState<
-    "all" | 1 | 2 | 3 | 4
+    "all" | "cross" | 1 | 2 | 3 | 4
   >(parsedDomain)
   const [selectedMode, setSelectedMode] = useState<
     "practice" | "exam" | "weak-area"

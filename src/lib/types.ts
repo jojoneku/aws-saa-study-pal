@@ -12,16 +12,18 @@ export interface QuestionOption {
 
 export interface Question {
   id: string
-  domain: Domain
-  taskStatement: string  // e.g. "1.1", "2.2", "3.3"
-  services: string[]     // AWS services tested e.g. ["rds", "aurora"]
+  domain: Domain          // primary domain (for filtering/scoring)
+  domains?: Domain[]      // all domains this question touches (cross-domain only)
+  crossDomain?: boolean   // true when scenario spans multiple exam domains
+  taskStatement: string   // e.g. "1.1", "2.2", "3.3"
+  services: string[]      // AWS services tested e.g. ["rds", "aurora"]
   constraintType: ConstraintType
   difficulty: Difficulty
   type: QuestionType
-  stem: string           // the scenario question text
+  stem: string            // the scenario question text
   options: QuestionOption[]
-  explanation: string    // overall explanation shown after answering
-  keywords: string[]     // exam keywords in the question e.g. ["most cost-effective", "multi-AZ"]
+  explanation: string     // overall explanation shown after answering
+  keywords: string[]      // exam keywords in the question e.g. ["most cost-effective", "multi-AZ"]
 }
 
 export interface QuizSession {

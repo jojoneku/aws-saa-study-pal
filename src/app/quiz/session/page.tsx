@@ -268,7 +268,25 @@ const DOMAIN_CONFIG = {
   },
 } as const
 
-function DomainBadge({ domain }: { domain: Domain }) {
+function DomainBadge({ domain, crossDomain, domains }: { domain: Domain; crossDomain?: boolean; domains?: Domain[] }) {
+  if (crossDomain && domains && domains.length > 1) {
+    return (
+      <div className="flex items-center gap-1 flex-wrap">
+        <Badge className="flex items-center gap-1 border text-xs bg-pink-500/20 text-pink-300 border-pink-500/30">
+          <Target className="h-3.5 w-3.5" />
+          Cross-Domain
+        </Badge>
+        {domains.map((d) => {
+          const cfg = DOMAIN_CONFIG[d]
+          return (
+            <Badge key={d} className={cn("border text-[10px] px-1.5 py-0", cfg.badge)}>
+              D{d}
+            </Badge>
+          )
+        })}
+      </div>
+    )
+  }
   const cfg = DOMAIN_CONFIG[domain]
   return (
     <Badge className={cn("flex items-center gap-1 border text-xs", cfg.badge)}>
@@ -515,6 +533,8 @@ function QuizSessionContent() {
   const domainFiltered =
     domainParam === "all"
       ? allQuestions
+      : domainParam === "cross"
+      ? allQuestions.filter((q) => q.crossDomain === true)
       : allQuestions.filter((q) => q.domain === parseInt(domainParam, 10))
 
   // Filter by difficulty
@@ -780,7 +800,11 @@ function QuizSessionContent() {
           <CardHeader className="pb-0">
             {/* Meta row */}
             <div className="flex flex-wrap items-center gap-2">
-              <DomainBadge domain={currentQuestion.domain} />
+              <DomainBadge
+                domain={currentQuestion.domain}
+                crossDomain={currentQuestion.crossDomain}
+                domains={currentQuestion.domains}
+              />
               <DifficultyDots level={currentQuestion.difficulty} />
               <span className="text-xs text-muted-foreground">
                 Task {currentQuestion.taskStatement}

@@ -3,6 +3,7 @@ import { domain1NewQuestions } from "./questions-d1-new"
 import { domain2NewQuestions } from "./questions-d2-new"
 import { domain3NewQuestions } from "./questions-d3-new"
 import { domain4NewQuestions } from "./questions-d4-new"
+import { crossDomainQuestions } from "./questions-cross"
 
 // ─────────────────────────────────────────────────────────────
 // DOMAIN 1 — Design Secure Architectures (10 questions)
@@ -1557,6 +1558,7 @@ export const ALL_QUESTIONS: Question[] = [
   ...domain3NewQuestions,
   ...domain4Questions,
   ...domain4NewQuestions,
+  ...crossDomainQuestions,
 ]
 
 // Alias used by the quiz session page's dynamic require()
