@@ -544,14 +544,14 @@ function QuizSessionContent() {
     return true
   })
 
-  // Shuffle + limit
+  // Shuffle + limit — lazy initializer keeps Math.random() out of render
   const questionCount = modeParam === "exam" ? 65 : 10
-  const shuffled = [...(diffFiltered.length > 0 ? diffFiltered : MOCK_QUESTIONS)]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, questionCount)
+  const basePool = diffFiltered.length > 0 ? diffFiltered : MOCK_QUESTIONS
 
   // ── State ─────────────────────────────────────────────────────────────────
-  const [questions] = useState<Question[]>(shuffled)
+  const [questions] = useState<Question[]>(() =>
+    [...basePool].sort(() => Math.random() - 0.5).slice(0, questionCount)
+  )
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
   const [revealed, setRevealed] = useState(false)
@@ -580,7 +580,7 @@ function QuizSessionContent() {
         setSelectedAnswer(optionId)
       }
     },
-    [revealed, isPractice, currentQuestion?.id]
+    [revealed, isPractice, currentQuestion]
   )
 
   const handleNext = useCallback(() => {
@@ -598,7 +598,7 @@ function QuizSessionContent() {
       setSelectedAnswer(null)
       setRevealed(false)
     }
-  }, [isPractice, selectedAnswer, currentIndex, total, currentQuestion?.id])
+  }, [isPractice, selectedAnswer, currentIndex, total, currentQuestion])
 
   const handleTimerExpire = useCallback(() => {
     // Commit any pending answer and show results
@@ -720,7 +720,7 @@ function QuizSessionContent() {
           </div>
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-extrabold text-white">Quiz Complete</h1>
-            <p className="mt-2 text-muted-foreground">Here's how you did</p>
+            <p className="mt-2 text-muted-foreground">Here&apos;s how you did</p>
           </div>
           <ResultsScreen
             questions={questions}

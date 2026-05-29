@@ -15,7 +15,6 @@ import { FlashCard } from "@/components/FlashCard"
 import {
   ALL_FLASHCARDS,
   CATEGORY_LABELS,
-  DOMAIN_NAMES,
   CATEGORIES,
   type Flashcard,
 } from "@/data/flashcards"
