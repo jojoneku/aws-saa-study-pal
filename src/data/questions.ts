@@ -4,6 +4,11 @@ import { domain2NewQuestions } from "./questions-d2-new"
 import { domain3NewQuestions } from "./questions-d3-new"
 import { domain4NewQuestions } from "./questions-d4-new"
 import { crossDomainQuestions } from "./questions-cross"
+import { domain1NewQuestions2 } from "./questions-d1-new2"
+import { domain2NewQuestions2 } from "./questions-d2-new2"
+import { domain3NewQuestions2 } from "./questions-d3-new2"
+import { domain4NewQuestions2 } from "./questions-d4-new2"
+import { crossDomainQuestions2 } from "./questions-cross2"
 
 // ─────────────────────────────────────────────────────────────
 // DOMAIN 1 — Design Secure Architectures (10 questions)
@@ -1552,13 +1557,18 @@ const domain4Questions: Question[] = [
 export const ALL_QUESTIONS: Question[] = [
   ...domain1Questions,
   ...domain1NewQuestions,
+  ...domain1NewQuestions2,
   ...domain2Questions,
   ...domain2NewQuestions,
+  ...domain2NewQuestions2,
   ...domain3Questions,
   ...domain3NewQuestions,
+  ...domain3NewQuestions2,
   ...domain4Questions,
   ...domain4NewQuestions,
+  ...domain4NewQuestions2,
   ...crossDomainQuestions,
+  ...crossDomainQuestions2,
 ]
 
 // Alias used by the quiz session page's dynamic require()
