@@ -15,7 +15,63 @@ export interface SavedSession {
 }
 
 const STORAGE_KEY = "aws-study-pal-sessions"
+const FLASHCARD_KEY = "aws-study-pal-flashcards"
+const PREFS_KEY = "aws-study-pal-quiz-prefs"
 const MAX_SESSIONS = 50
+
+// ─── Quiz preferences ─────────────────────────────────────────────────────────
+
+export interface QuizPreferences {
+  domain: "all" | "cross" | 1 | 2 | 3 | 4
+  mode: "practice" | "exam" | "weak-area"
+  difficulty: "mixed" | "medium" | "hard"
+}
+
+export function saveQuizPreferences(prefs: QuizPreferences): void {
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify(prefs))
+  } catch { /* SSR or private browsing */ }
+}
+
+export function loadQuizPreferences(): QuizPreferences | null {
+  try {
+    const raw = localStorage.getItem(PREFS_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as QuizPreferences
+  } catch {
+    return null
+  }
+}
+
+// ─── Flashcard progress ───────────────────────────────────────────────────────
+
+export interface FlashcardProgress {
+  knownIds: string[]    // card IDs marked "Got It"
+  studyIds: string[]    // card IDs marked "Study More"
+  lastUpdated: number
+}
+
+export function saveFlashcardProgress(progress: FlashcardProgress): void {
+  try {
+    localStorage.setItem(FLASHCARD_KEY, JSON.stringify(progress))
+  } catch { /* SSR or private browsing */ }
+}
+
+export function loadFlashcardProgress(): FlashcardProgress {
+  try {
+    const raw = localStorage.getItem(FLASHCARD_KEY)
+    if (!raw) return { knownIds: [], studyIds: [], lastUpdated: 0 }
+    return JSON.parse(raw) as FlashcardProgress
+  } catch {
+    return { knownIds: [], studyIds: [], lastUpdated: 0 }
+  }
+}
+
+export function clearFlashcardProgress(): void {
+  try {
+    localStorage.removeItem(FLASHCARD_KEY)
+  } catch { /* SSR or private browsing */ }
+}
 
 export function saveSessions(sessions: SavedSession[]): void {
   try {

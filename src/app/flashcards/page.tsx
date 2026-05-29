@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo, useEffect } from "react"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -97,6 +97,17 @@ function SetupPhase({ onStart }: SetupProps) {
     new Set([1, 2, 3])
   )
   const [shuffleCards, setShuffleCards] = useState(true)
+  const [knownCount, setKnownCount] = useState(0)
+  const [studyCount, setStudyCount] = useState(0)
+
+  // Load persisted progress counts for display
+  useEffect(() => {
+    import("@/lib/storage").then(({ loadFlashcardProgress }) => {
+      const p = loadFlashcardProgress()
+      setKnownCount(p.knownIds.length)
+      setStudyCount(p.studyIds.length)
+    })
+  }, [])
 
   function toggleCategory(cat: Flashcard["category"]) {
     setSelectedCategories((prev) => {
@@ -308,6 +319,31 @@ function SetupPhase({ onStart }: SetupProps) {
           </label>
         </section>
 
+        {/* ── Saved progress banner ── */}
+        {(knownCount > 0 || studyCount > 0) && (
+          <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+            <div className="text-sm text-white/70">
+              Saved progress:{" "}
+              <span className="text-emerald-400 font-medium">{knownCount} known</span>
+              {studyCount > 0 && (
+                <>, <span className="text-rose-400 font-medium">{studyCount} to review</span></>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                import("@/lib/storage").then(({ clearFlashcardProgress }) => {
+                  clearFlashcardProgress()
+                  setKnownCount(0)
+                  setStudyCount(0)
+                })
+              }}
+              className="text-xs text-white/30 hover:text-white/60 transition-colors"
+            >
+              Reset
+            </button>
+          </div>
+        )}
+
         {/* ── Start button ── */}
         <div className="pt-2">
           <button
@@ -421,6 +457,17 @@ function DrillingPhase({ deck, onComplete, onSetup }: DrillingProps) {
   const [knownIds, setKnownIds] = useState<Set<string>>(new Set())
   const [studyMoreIds, setStudyMoreIds] = useState<Set<string>>(new Set())
 
+  // Load persisted progress on mount
+  useEffect(() => {
+    import("@/lib/storage").then(({ loadFlashcardProgress }) => {
+      const saved = loadFlashcardProgress()
+      if (saved.knownIds.length > 0 || saved.studyIds.length > 0) {
+        setKnownIds(new Set(saved.knownIds))
+        setStudyMoreIds(new Set(saved.studyIds))
+      }
+    })
+  }, [])
+
   const card = deck[currentIndex]
 
   const goTo = useCallback(
@@ -444,6 +491,10 @@ function DrillingPhase({ deck, onComplete, onSetup }: DrillingProps) {
     newStudyMore.delete(card.id)
     setKnownIds(newKnown)
     setStudyMoreIds(newStudyMore)
+    // Persist
+    import("@/lib/storage").then(({ saveFlashcardProgress }) => {
+      saveFlashcardProgress({ knownIds: [...newKnown], studyIds: [...newStudyMore], lastUpdated: Date.now() })
+    })
     if (currentIndex < deck.length - 1) {
       goTo(currentIndex + 1)
     } else {
@@ -457,6 +508,10 @@ function DrillingPhase({ deck, onComplete, onSetup }: DrillingProps) {
     newKnown.delete(card.id)
     setStudyMoreIds(newStudyMore)
     setKnownIds(newKnown)
+    // Persist
+    import("@/lib/storage").then(({ saveFlashcardProgress }) => {
+      saveFlashcardProgress({ knownIds: [...newKnown], studyIds: [...newStudyMore], lastUpdated: Date.now() })
+    })
     if (currentIndex < deck.length - 1) {
       goTo(currentIndex + 1)
     } else {

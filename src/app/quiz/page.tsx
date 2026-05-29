@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, Suspense } from "react"
+import { useState, Suspense, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
@@ -190,7 +190,23 @@ function QuizSetupContent() {
     "mixed" | "medium" | "hard"
   >("mixed")
 
+  // Load last-used preferences from localStorage (only if no ?domain= in URL)
+  useEffect(() => {
+    if (initialDomain) return // URL param takes priority
+    import("@/lib/storage").then(({ loadQuizPreferences }) => {
+      const prefs = loadQuizPreferences()
+      if (!prefs) return
+      setSelectedDomain(prefs.domain)
+      setSelectedMode(prefs.mode)
+      setSelectedDifficulty(prefs.difficulty)
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   function handleStart() {
+    // Save preferences before navigating
+    import("@/lib/storage").then(({ saveQuizPreferences }) => {
+      saveQuizPreferences({ domain: selectedDomain, mode: selectedMode, difficulty: selectedDifficulty })
+    })
     const params = new URLSearchParams({
       domain: String(selectedDomain),
       mode: selectedMode,
