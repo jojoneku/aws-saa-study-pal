@@ -337,31 +337,6 @@ export const services: ServiceEntry[] = [
   },
 
   {
-    id: "snowball-edge",
-    name: "AWS Snowball Edge",
-    shortName: "Snowball Edge",
-    abbr: "SnowballEdge",
-    category: "storage",
-    domains: [1, 4],
-    tagline: "A physical device AWS ships to your location so you can transfer petabytes of data without using the internet.",
-    whatItDoes:
-      "AWS Snowball Edge is a ruggedized physical device with storage and compute that AWS ships to you. You load your data onto it, ship it back to AWS, and AWS imports the data into S3. It solves the problem of transferring massive datasets where network transfer would take weeks or months.",
-    whenToUse:
-      "Use when you need to migrate large amounts of data (tens of terabytes to petabytes) to AWS and the network bandwidth would make it impractical — typically when migration would take more than a week over your available connection. Also used for edge computing in locations with limited or no internet.",
-    keyFacts: [
-      "Snowball Edge Storage Optimized: 80 TB usable storage, 40 vCPU compute",
-      "Snowball Edge Compute Optimized: 28 TB NVMe SSD, 52 vCPU, 208 GB RAM — for local compute needs",
-      "Data transfer to AWS: Snowball is cheaper than internet transfer for datasets above ~10 TB given typical bandwidth costs",
-      "AWS Snowmobile is a 100 PB capacity truck for truly massive migrations (above ~10 PB)",
-      "Uses 256-bit encryption automatically; encryption keys managed by AWS KMS",
-    ],
-    examTraps: [
-      "Trap: Snowball Edge is only for data transfer. Reality: Snowball Edge also runs EC2 instances and Lambda functions locally at the edge — useful for remote sites with poor connectivity that still need compute.",
-    ],
-    relatedServices: ["S3", "KMS", "DataSync"],
-  },
-
-  {
     id: "backup",
     name: "AWS Backup",
     shortName: "AWS Backup",
@@ -2374,5 +2349,852 @@ export const services: ServiceEntry[] = [
       "Trap: You must use Docker Hub to store container images before deploying to ECS. Reality: ECR is a fully managed, AWS-native container registry. Using ECR avoids internet egress costs, keeps image pulls on the AWS network for lower latency, and uses IAM for authentication instead of Docker Hub credentials.",
     ],
     relatedServices: ["ECS", "EKS", "Lambda", "Fargate", "Inspector", "IAM"],
+  },
+
+  // ─── INTEGRATION (ADDITIONAL) ───────────────────────────────────────────────
+
+  {
+    id: "msk",
+    name: "Amazon Managed Streaming for Apache Kafka (Amazon MSK)",
+    shortName: "Amazon MSK",
+    abbr: "MSK",
+    category: "integration",
+    domains: [2, 3],
+    tagline: "Fully managed Apache Kafka service for real-time event streaming.",
+    whatItDoes:
+      "Runs Apache Kafka clusters without managing brokers, ZooKeeper, or infrastructure. It is a drop-in replacement for self-managed Kafka that supports Kafka-compatible producers and consumers with zero code changes. You keep all your existing Kafka tooling — Kafka Streams, Kafka Connect, and ksqlDB — and AWS handles the underlying infrastructure.",
+    whenToUse:
+      "Use when migrating existing Kafka workloads to AWS, when you need strict message ordering plus replay and multiple consumers with independent offsets, or when you need the broader Kafka ecosystem tools that SQS does not support.",
+    keyFacts: [
+      "MSK Express brokers (2024): 3x throughput and 20x faster scaling compared to Standard brokers",
+      "MSK Serverless: auto-scales capacity with no broker management; pay per usage",
+      "MSK KRaft mode (Kafka 4.0+): eliminates ZooKeeper dependency; supports up to 60 brokers",
+      "Retention is configurable; unlike SQS, messages can be replayed by multiple consumer groups independently",
+      "MSK Connect provides managed Kafka Connect connectors for integrating with external systems",
+    ],
+    examTraps: [
+      "Trap: MSK and SQS are interchangeable. Reality: SQS has no replay capability and no consumer group offsets. MSK is for Kafka lift-and-shift migrations or when you specifically need replay, ordering, and multiple independent consumers.",
+      "Trap: MSK KRaft mode works with any Kafka version. Reality: KRaft requires Kafka 4.0+ and cannot be migrated in-place from ZooKeeper-based clusters.",
+    ],
+    relatedServices: ["SQS", "SNS", "KDS", "Firehose"],
+  },
+
+  // ─── MANAGEMENT (ADDITIONAL) ────────────────────────────────────────────────
+
+  {
+    id: "ssm",
+    name: "AWS Systems Manager (AWS SSM)",
+    shortName: "AWS Systems Manager",
+    abbr: "SSM",
+    category: "management",
+    domains: [1, 2, 3, 4],
+    tagline: "Unified operations hub for managing, patching, and accessing AWS and on-premises resources.",
+    whatItDoes:
+      "Provides a suite of tools for automating operational tasks. Parameter Store stores configuration values and secrets. Session Manager gives browser-based SSH access without opening port 22. Patch Manager automates OS patching across a fleet. Run Command executes scripts remotely across many instances at once. Automation runs runbook-based workflows. All features work on EC2 and on-premises servers with the SSM Agent installed.",
+    whenToUse:
+      "Use Parameter Store for storing config values and non-secret strings (free tier). Use Session Manager to SSH into EC2 instances without a bastion host or open inbound ports. Use Patch Manager for automated patching compliance across a fleet of instances.",
+    keyFacts: [
+      "Parameter Store Standard tier: free — up to 10,000 parameters with a 4 KB maximum size each",
+      "Parameter Store Advanced tier: paid — up to 100,000 parameters, 8 KB maximum, supports TTL and notification policies",
+      "Session Manager requires no open inbound ports — it uses HTTPS (port 443) outbound from the instance to SSM endpoints",
+      "Session activity is fully logged to CloudTrail and optionally to S3 and CloudWatch Logs",
+      "SSM Agent is pre-installed on Amazon Linux 2, Amazon Linux 2023, Ubuntu 16.04+, and Windows Server 2008+",
+    ],
+    examTraps: [
+      "Trap: SSM Parameter Store and Secrets Manager are the same service. Reality: Parameter Store is for config and non-secret values and is free at the standard tier. Secrets Manager adds automatic rotation, cross-account access, and fine-grained Lambda-based rotation integration — at a cost.",
+      "Trap: Session Manager requires port 22 to be open on the EC2 instance. Reality: Session Manager uses HTTPS outbound from the instance to SSM endpoints — no inbound ports need to be open at all.",
+    ],
+    relatedServices: ["SecretsManager", "CloudTrail", "IAM", "EC2"],
+  },
+
+  {
+    id: "organizations",
+    name: "AWS Organizations",
+    shortName: "AWS Organizations",
+    abbr: "Organizations",
+    category: "management",
+    domains: [1, 4],
+    tagline: "Centrally manage and govern multiple AWS accounts as a single organization.",
+    whatItDoes:
+      "Groups AWS accounts into a hierarchical structure of Organizational Units (OUs). Enables consolidated billing (one payment method for all accounts), Service Control Policies (SCPs) for account-level permission guardrails, and centralized management of services like CloudTrail, Config, GuardDuty, and Security Hub across all accounts.",
+    whenToUse:
+      "Use when you have multiple AWS accounts and need centralized billing, security guardrails via SCPs, or centralized compliance. Required for using delegated administrator features across AWS security services.",
+    keyFacts: [
+      "Two feature sets: Consolidated Billing only (simpler) vs All Features (required for SCPs and service integrations)",
+      "SCPs cap permissions for all IAM principals in member accounts — including root users — but do NOT apply to the management account",
+      "The management account has full unrestricted access; SCPs attached to the root OU never apply to it",
+      "Reserved Instances and Savings Plans purchased in the management account can be shared across all member accounts via Consolidated Billing",
+      "Maximum 5 levels of OU nesting under the root",
+    ],
+    examTraps: [
+      "Trap: SCPs grant permissions to accounts. Reality: SCPs only restrict — they never grant permissions. An Allow in an SCP means the action is not blocked by the SCP, but the principal still needs an IAM policy that explicitly grants the permission.",
+      "Trap: The management account is protected by SCPs attached to the root OU. Reality: SCPs do not apply to the management account — it always has unrestricted access regardless of any SCPs.",
+    ],
+    relatedServices: ["ControlTower", "IAM", "Budgets", "CloudTrail"],
+  },
+
+  {
+    id: "identity-center",
+    name: "AWS IAM Identity Center",
+    shortName: "IAM Identity Center",
+    abbr: "IdentityCenter",
+    category: "security",
+    domains: [1],
+    tagline: "Single sign-on for all your AWS accounts and business applications from one place.",
+    whatItDoes:
+      "Formerly called AWS Single Sign-On (SSO). Provides a central portal where users log in once and access multiple AWS accounts and SaaS applications (Salesforce, Office 365, etc.) without separate credentials for each. Integrates with Active Directory, Okta, Azure AD, and other identity providers via SAML 2.0 and SCIM for automatic user provisioning.",
+    whenToUse:
+      "Use when you have multiple AWS accounts in an Organization and want users to log in once to access all of them. Use when replacing per-account IAM users with federated access from a corporate identity provider.",
+    keyFacts: [
+      "Deployed in one home region; the access portal is globally accessible but the service itself is regional",
+      "Permission Sets define what a user can do in a specific account — similar to IAM roles",
+      "Supports attribute-based access control (ABAC) using user attributes from the identity provider",
+      "SCIM protocol enables automatic user provisioning and deprovisioning from the identity provider",
+      "Free to use — no additional charge beyond the underlying resources",
+    ],
+    examTraps: [
+      "Trap: IAM Identity Center and IAM federation do the same thing. Reality: IAM federation creates individual role assumptions per account. Identity Center provides a unified portal across ALL accounts in the organization with centralized permission management.",
+      "Trap: IAM Identity Center is deployed across multiple regions simultaneously. Reality: It is deployed in a single home region — this is a known limitation and a potential exam scenario.",
+    ],
+    relatedServices: ["Organizations", "IAM", "DirectoryService", "Cognito"],
+  },
+
+  {
+    id: "ram",
+    name: "AWS Resource Access Manager (AWS RAM)",
+    shortName: "AWS RAM",
+    abbr: "RAM",
+    category: "security",
+    domains: [1, 2],
+    tagline: "Share AWS resources securely across accounts and within your Organization without extra cost.",
+    whatItDoes:
+      "Allows you to share specific AWS resources — such as VPC subnets, Transit Gateways, Route 53 Resolver rules, License Manager configurations, and more — with other AWS accounts or across your entire Organization. The sharing account retains ownership; the receiving account can use the resource but cannot modify or delete it.",
+    whenToUse:
+      "Use when you want multiple accounts to share a central VPC subnet (shared VPC pattern), share a Transit Gateway across accounts, or share Route 53 Resolver rules for centralized DNS. Eliminates the need to duplicate resources across accounts.",
+    keyFacts: [
+      "Shared VPC subnets: the owner account creates the subnet; participant accounts launch resources into it but cannot modify the subnet itself",
+      "Resources that can be shared via RAM include: VPC subnets, Transit Gateways, Route 53 Resolver rules, License Manager configs, Aurora clusters, and CodeBuild projects",
+      "Resources that cannot be shared via RAM include: Security Groups, Internet Gateways, and Route Tables — these must remain in the owner account",
+      "No charge for using RAM — you pay only for the shared resources themselves",
+      "Within an Organization sharing is automatic; outside the org the recipient must accept a share invitation",
+    ],
+    examTraps: [
+      "Trap: RAM can share any AWS resource. Reality: Only specific resource types support RAM sharing. Security Groups, Internet Gateways, and Route Tables cannot be shared via RAM.",
+      "Trap: Accounts receiving a shared subnet can modify or delete it. Reality: Only the owner account can modify or delete shared resources — participants can only use them.",
+    ],
+    relatedServices: ["VPC", "TransitGateway", "Organizations", "IAM"],
+  },
+
+  {
+    id: "budgets",
+    name: "AWS Budgets",
+    shortName: "AWS Budgets",
+    abbr: "Budgets",
+    category: "management",
+    domains: [4],
+    tagline: "Set spending limits and get alerted — or automatically act — when costs exceed your thresholds.",
+    whatItDoes:
+      "Lets you define budgets for cost, usage, Reserved Instance and Savings Plans coverage, and utilization. Sends alerts via SNS or email when actual or forecasted spend exceeds a threshold. Budget Actions can automatically apply an IAM policy, attach an SCP, or stop EC2 and RDS instances when a budget threshold is breached — no Lambda required.",
+    whenToUse:
+      "Use when you need proactive cost alerts, want to automatically restrict spending when a limit is reached, or need to track Reserved Instance coverage and utilization rates.",
+    keyFacts: [
+      "Budget types: Cost, Usage, RI Coverage, RI Utilization, Savings Plans Coverage, and Savings Plans Utilization",
+      "Budget Actions: apply an IAM policy, attach an SCP, or stop EC2 and RDS instances automatically when a threshold is breached",
+      "First 2 budgets per account are free; $0.02 per day per additional budget after that",
+      "Can alert on actual spend OR forecasted spend before the budget is actually exceeded",
+      "Forecasted alerts trigger before the threshold is reached, giving you time to act proactively",
+    ],
+    examTraps: [
+      "Trap: AWS Budgets and AWS Cost Explorer do the same thing. Reality: Cost Explorer is for analyzing and visualizing past spend. Budgets is for setting forward-looking limits and triggering automated alerts and actions.",
+      "Trap: Budget Actions require a Lambda function to remediate spending. Reality: Budget Actions can directly apply IAM policies, attach SCPs, or stop instances without any custom Lambda code.",
+    ],
+    relatedServices: ["CostExplorer", "SNS", "Organizations", "IAM"],
+  },
+
+  {
+    id: "compute-optimizer",
+    name: "AWS Compute Optimizer",
+    shortName: "Compute Optimizer",
+    abbr: "ComputeOptimizer",
+    category: "management",
+    domains: [4],
+    tagline: "Get ML-powered right-sizing recommendations to cut EC2, Lambda, and EBS costs.",
+    whatItDoes:
+      "Analyzes your actual resource utilization using machine learning and recommends optimal resource configurations. This includes EC2 instance type changes, EBS volume type and size adjustments, Lambda memory settings, and ECS on Fargate task sizes. It identifies over-provisioned resources wasting money and under-provisioned resources causing performance problems.",
+    whenToUse:
+      "Use when you want data-driven right-sizing recommendations without manually analyzing CloudWatch metrics. Especially useful before Reserved Instance purchases to ensure you are reserving the correct instance types.",
+    keyFacts: [
+      "Requires at least 14 days of utilization data before generating recommendations",
+      "Must enable Cost Explorer at the organization level to receive org-wide recommendations",
+      "Supports EC2 instances, EC2 Auto Scaling groups, EBS volumes, Lambda functions, and ECS services on Fargate",
+      "Provides three recommendation risk levels: over-provisioned, under-provisioned, and optimized",
+      "Free to use; enhanced recommendations using third-party metrics require the paid Compute Optimizer tier",
+    ],
+    examTraps: [
+      "Trap: Compute Optimizer and Trusted Advisor both provide the same right-sizing recommendations. Reality: Trusted Advisor checks basic underutilization thresholds (for example, CPU below 10%). Compute Optimizer uses ML with 14 or more days of multi-metric data for nuanced analysis.",
+    ],
+    relatedServices: ["EC2", "Lambda", "EBS", "CostExplorer", "TrustedAdvisor"],
+  },
+
+  {
+    id: "well-architected",
+    name: "AWS Well-Architected Tool",
+    shortName: "Well-Architected Tool",
+    abbr: "WellArchitected",
+    category: "management",
+    domains: [1, 2, 3, 4],
+    tagline: "Free self-service tool to review your architecture against AWS best practices across 6 pillars.",
+    whatItDoes:
+      "Walks you through a questionnaire about your workload against the 6 Well-Architected pillars: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, and Sustainability. It identifies High Risk Items and Medium Risk Items with specific improvement recommendations and links to AWS documentation.",
+    whenToUse:
+      "Use before a major launch, after a significant architecture change, or as a periodic architectural health check. Use to generate a structured improvement plan for a workload that guides the team toward best practices.",
+    keyFacts: [
+      "Completely free to use",
+      "6 pillars: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, and Sustainability",
+      "Well-Architected Lenses extend the framework to specific domains: SAP, Serverless, SaaS, IoT, Machine Learning, and more",
+      "Generates a report of High Risk Items and Medium Risk Items with milestone tracking over time",
+      "AWS Well-Architected Partner Program allows AWS partners to conduct formal reviews on your behalf",
+    ],
+    examTraps: [
+      "Trap: The Well-Architected Tool automatically fixes issues it finds. Reality: It is purely advisory — it identifies risks and provides recommendations but takes no automated actions whatsoever.",
+    ],
+    relatedServices: ["TrustedAdvisor", "Config", "SecurityHub"],
+  },
+
+  // ─── COMPUTE (ADDITIONAL) ───────────────────────────────────────────────────
+
+  {
+    id: "lightsail",
+    name: "Amazon Lightsail",
+    shortName: "Amazon Lightsail",
+    abbr: "Lightsail",
+    category: "compute",
+    domains: [3, 4],
+    tagline: "The simplest way to launch a virtual server, database, or app on AWS at a predictable flat monthly price.",
+    whatItDoes:
+      "Provides pre-configured virtual private servers (instances), managed databases, object storage, load balancers, and CDN distributions at fixed monthly prices. Designed for developers who want simplicity over flexibility. Uses the same underlying infrastructure as EC2 but abstracts away the complexity of VPCs, security groups, and instance type selection.",
+    whenToUse:
+      "Use for simple websites, blogs, dev and test environments, or small apps where predictable pricing matters more than fine-grained control. When you need EC2-like compute without the operational complexity.",
+    keyFacts: [
+      "Fixed monthly pricing — for example, $3.50 per month for 512 MB RAM, 1 vCPU, and 20 GB SSD",
+      "Each plan includes a set monthly data transfer allowance",
+      "Can peer with a VPC for connectivity to other AWS services",
+      "Not appropriate for complex, enterprise, or high-scale workloads",
+      "Managed databases, object storage, and load balancers available as add-ons within Lightsail",
+    ],
+    examTraps: [
+      "Trap: Lightsail and EC2 are interchangeable. Reality: Lightsail is a simplified abstraction with fixed pricing and limited configuration options. EC2 provides full control, full VPC integration, all instance types, and fine-grained networking — Lightsail intentionally hides all of that.",
+    ],
+    relatedServices: ["EC2", "RDS", "S3"],
+  },
+
+  {
+    id: "outposts",
+    name: "AWS Outposts",
+    shortName: "AWS Outposts",
+    abbr: "Outposts",
+    category: "compute",
+    domains: [2, 3],
+    tagline: "Run AWS infrastructure, services, and APIs on-premises for truly consistent hybrid deployments.",
+    whatItDoes:
+      "A fully managed rack of AWS hardware delivered to your data center or on-premises location. It runs the same AWS APIs (EC2, EBS, ECS, EKS, RDS, EMR, and more) locally so data never leaves your facility. AWS manages and monitors the hardware remotely. Designed for workloads requiring low latency to on-premises systems or that must stay on-premises for data residency reasons.",
+    whenToUse:
+      "Use when applications require single-digit millisecond latency to on-premises systems, data residency regulations prevent cloud migration, or you need consistent AWS APIs on-premises as a gradual migration path.",
+    keyFacts: [
+      "Requires a reliable network connection back to an AWS parent region for management plane operations",
+      "If the link to the parent region goes down, management is disrupted but existing workloads continue running locally",
+      "Supports a subset of AWS services including EC2, EBS, S3 (Outposts variant), RDS, ECS, EKS, and EMR",
+      "Two form factors: 42U full rack and smaller 1U or 2U Outposts servers for compact footprints",
+      "You own the floor space and provide power and networking; AWS owns and manages the hardware",
+    ],
+    examTraps: [
+      "Trap: Outposts works independently of AWS regions. Reality: Outposts requires connectivity to its parent AWS region for management and service control plane operations — it is an extension of the region, not a standalone deployment.",
+    ],
+    relatedServices: ["EC2", "ECS", "EKS", "DirectConnect"],
+  },
+
+  {
+    id: "workspaces",
+    name: "Amazon WorkSpaces",
+    shortName: "Amazon WorkSpaces",
+    abbr: "WorkSpaces",
+    category: "compute",
+    domains: [2, 3],
+    tagline: "Fully managed virtual desktops (VDI) in the cloud, accessible from any device.",
+    whatItDoes:
+      "Provides persistent virtual Windows or Linux desktops hosted in AWS. Each WorkSpace is a cloud PC with configurable CPU, RAM, and storage. Users access their desktop from any device via the WorkSpaces client or a web browser. The desktop persists between sessions — applications and files are saved just like a physical PC.",
+    whenToUse:
+      "Use for remote workers who need a full desktop experience, regulated industries where data must not leave the AWS environment, or to replace physical PCs with centrally managed cloud desktops.",
+    keyFacts: [
+      "Persistent desktop — user data and installed applications survive between sessions (unlike AppStream 2.0)",
+      "Billing options: monthly (always on) or hourly with AutoStop (shuts down when idle; user data persists)",
+      "Integrates with Microsoft Active Directory for user authentication and policy management",
+      "Supports both Windows and Linux desktop environments",
+      "WorkSpaces Personal provides dedicated per-user desktops",
+    ],
+    examTraps: [
+      "Trap: WorkSpaces and AppStream 2.0 are the same service. Reality: WorkSpaces provides a full persistent desktop (VDI). AppStream 2.0 streams specific applications to a browser — there is no persistent desktop and users cannot install software themselves.",
+    ],
+    relatedServices: ["AppStream", "DirectoryService", "VPC"],
+  },
+
+  {
+    id: "appstream",
+    name: "Amazon AppStream 2.0",
+    shortName: "Amazon AppStream 2.0",
+    abbr: "AppStream",
+    category: "compute",
+    domains: [2, 3],
+    tagline: "Stream desktop applications to any browser — no persistent desktop, no client install required.",
+    whatItDoes:
+      "Delivers specific Windows applications to users via a web browser. The application runs on AWS infrastructure and only the display is streamed to the user's browser. Unlike WorkSpaces, there is no persistent desktop — users get access to specific pre-approved applications only. Each session is isolated and ephemeral.",
+    whenToUse:
+      "Use when you need to deliver specific desktop applications (such as engineering CAD software or legacy Windows apps) to users without giving them a full virtual desktop. Ideal for contractor access, BYOD scenarios, or expensive software you want to license centrally rather than per device.",
+    keyFacts: [
+      "Applications run on AWS; only screen pixels are streamed to the user so no data is stored on the user's device",
+      "Sessions are stateless by default — no persistent storage (optional home folders can be attached via S3)",
+      "Priced per streaming hour per user",
+      "Supports GPU instances for graphics-intensive and CAD applications",
+      "Users cannot install software — all applications are pre-configured by administrators",
+    ],
+    examTraps: [
+      "Trap: AppStream 2.0 provides a full virtual desktop like WorkSpaces. Reality: AppStream streams specific applications only — there is no Windows desktop, no Start menu, and no ability to install software.",
+    ],
+    relatedServices: ["WorkSpaces", "S3", "VPC", "DirectoryService"],
+  },
+
+  // ─── NETWORKING (ADDITIONAL) ────────────────────────────────────────────────
+
+  {
+    id: "privatelink",
+    name: "AWS PrivateLink",
+    shortName: "AWS PrivateLink",
+    abbr: "PrivateLink",
+    category: "networking",
+    domains: [1, 2],
+    tagline: "Expose your service privately to other VPCs or accounts without traffic traversing the public internet.",
+    whatItDoes:
+      "Lets you create a private endpoint for a service you host (or an AWS service) so consumers can access it via their VPC without going over the internet, VPC peering, or VPN. The consumer side uses an Elastic Network Interface (ENI) with a private IP in their VPC. PrivateLink supports overlapping CIDR blocks between provider and consumer VPCs.",
+    whenToUse:
+      "Use when you want to expose a service (hosted behind a Network Load Balancer) to other accounts or VPCs privately. Use Interface VPC Endpoints — which are powered by PrivateLink — to access AWS services like SSM, Secrets Manager, and EC2 APIs via private IPs instead of the internet.",
+    keyFacts: [
+      "Requires a Network Load Balancer on the provider side and an Interface VPC Endpoint on the consumer side",
+      "Supports overlapping CIDRs between provider and consumer — unlike VPC Peering which blocks overlapping CIDR ranges",
+      "Traffic stays on the AWS network and never traverses the public internet",
+      "Interface VPC Endpoints cost money: hourly per AZ plus per-GB; Gateway Endpoints for S3 and DynamoDB are free",
+      "Most AWS services (SSM, Secrets Manager, EC2 API, etc.) offer Interface VPC Endpoints powered by PrivateLink",
+    ],
+    examTraps: [
+      "Trap: PrivateLink and VPC Peering solve the same problem. Reality: VPC Peering gives full bi-directional access between two VPCs (no transitive routing, no overlapping CIDRs). PrivateLink exposes one specific service privately, supports CIDR overlap, and is one-directional.",
+    ],
+    relatedServices: ["NLB", "VPC", "TransitGateway"],
+  },
+
+  {
+    id: "client-vpn",
+    name: "AWS Client VPN",
+    shortName: "AWS Client VPN",
+    abbr: "ClientVPN",
+    category: "networking",
+    domains: [1, 2],
+    tagline: "Let remote users securely connect to your AWS VPC and on-premises networks from anywhere.",
+    whatItDoes:
+      "A managed client-based VPN service that allows remote users (employees, developers) to securely connect to AWS VPCs and on-premises networks using OpenVPN clients. Users install the AWS-provided OpenVPN client or any compatible OpenVPN client and authenticate using Active Directory, SAML, or mutual certificate authentication.",
+    whenToUse:
+      "Use when remote workers need secure access to resources in a VPC without exposing those resources to the public internet. An alternative to maintaining a self-managed VPN server on EC2.",
+    keyFacts: [
+      "OpenVPN-based; any OpenVPN-compatible client works without additional software",
+      "Authentication options: Active Directory, SAML 2.0 federated identity, or mutual certificate authentication",
+      "Billed per endpoint association-hour plus per connection-hour",
+      "Split tunneling: route only VPC-bound traffic through the VPN to reduce bandwidth costs for general internet browsing",
+      "Client VPN endpoint is associated with a VPC subnet per Availability Zone",
+    ],
+    examTraps: [
+      "Trap: Client VPN and Site-to-Site VPN are the same thing. Reality: Client VPN is for individual remote users connecting a laptop to the cloud. Site-to-Site VPN connects entire networks — an on-premises office or data center — to the cloud.",
+    ],
+    relatedServices: ["VPC", "DirectConnect", "DirectoryService"],
+  },
+
+  {
+    id: "site-to-site-vpn",
+    name: "AWS Site-to-Site VPN",
+    shortName: "AWS Site-to-Site VPN",
+    abbr: "SiteToSiteVPN",
+    category: "networking",
+    domains: [1, 2],
+    tagline: "Encrypted tunnel connecting your on-premises network to your AWS VPC over the public internet.",
+    whatItDoes:
+      "Creates an IPsec VPN tunnel between your on-premises network (a router or firewall acting as the Customer Gateway) and an AWS Virtual Private Gateway or Transit Gateway. All traffic between your data center and AWS is encrypted. AWS provides two redundant tunnels per VPN connection for high availability.",
+    whenToUse:
+      "Use as a cost-effective encrypted connection to AWS when Direct Connect is too expensive or not yet provisioned. Often deployed as a backup to Direct Connect for redundancy.",
+    keyFacts: [
+      "Two IPsec tunnels per VPN connection for redundancy — both connect to different AWS endpoints",
+      "Maximum bandwidth approximately 1.25 Gbps per tunnel; runs over the public internet so bandwidth is not dedicated",
+      "Supports BGP dynamic routing and static routing",
+      "Accelerated Site-to-Site VPN uses AWS Global Accelerator to improve performance over the public internet",
+      "Cost approximately $0.05 per hour per VPN connection plus data transfer charges",
+    ],
+    examTraps: [
+      "Trap: Site-to-Site VPN provides the same reliability as Direct Connect. Reality: Site-to-Site VPN runs over the public internet with variable latency and shared bandwidth. Direct Connect is a dedicated private circuit with consistent performance and lower latency.",
+    ],
+    relatedServices: ["DirectConnect", "TransitGateway", "VPC", "VPG", "ClientVPN"],
+  },
+
+  // ─── DATABASE (ADDITIONAL) ──────────────────────────────────────────────────
+
+  {
+    id: "rds-proxy",
+    name: "Amazon RDS Proxy",
+    shortName: "Amazon RDS Proxy",
+    abbr: "RDSProxy",
+    category: "database",
+    domains: [2, 3],
+    tagline: "Connection pooler that sits between your application and RDS or Aurora to reduce connection overhead.",
+    whatItDoes:
+      "Maintains a pool of established database connections and shares them across application connections. Instead of each Lambda function or application instance opening a direct database connection, they connect to RDS Proxy which multiplexes them into a smaller pool of actual database connections. During a database failover, RDS Proxy holds open connections and routes them to the new primary, reducing application-visible downtime.",
+    whenToUse:
+      "Use when Lambda functions, containers, or microservices create too many short-lived database connections that overwhelm the database (connection exhaustion). Especially critical for Lambda combined with RDS or Aurora.",
+    keyFacts: [
+      "Reduces database connections by up to 66% in Lambda workloads",
+      "Failover time reduced by up to 66% compared to direct database connections because the Proxy absorbs the failover",
+      "Supports IAM authentication to the database — applications authenticate to the Proxy with IAM tokens instead of database passwords",
+      "Supports Secrets Manager for credential rotation without requiring application changes",
+      "Attaching RDS Proxy prevents Aurora Serverless v2 from scaling to zero ACUs (the cluster cannot pause)",
+    ],
+    examTraps: [
+      "Trap: RDS Proxy improves query performance. Reality: RDS Proxy does not cache queries or improve query execution speed — it reduces connection overhead and failover time only.",
+      "Trap: RDS Proxy can be used with Aurora Serverless v2 scale-to-zero. Reality: Attaching a proxy prevents Aurora Serverless v2 from pausing — the cluster cannot scale to zero ACUs while a proxy is attached.",
+    ],
+    relatedServices: ["RDS", "Aurora", "Lambda", "SecretsManager", "IAM"],
+  },
+
+  // ─── MIGRATION ──────────────────────────────────────────────────────────────
+
+  {
+    id: "mgn",
+    name: "AWS Application Migration Service (AWS MGN)",
+    shortName: "AWS MGN",
+    abbr: "MGN",
+    category: "management",
+    domains: [2],
+    tagline: "Automated lift-and-shift migration of physical, virtual, or cloud servers to AWS.",
+    whatItDoes:
+      "Installs a lightweight agent on source servers that continuously replicates block-level data to AWS. When you are ready to cut over, it launches fully functional replicated servers in AWS. Minimizes downtime by keeping replication current up to the moment of cutover. Replaces the older AWS Server Migration Service (SMS), which is now deprecated.",
+    whenToUse:
+      "Use for rehosting (lift-and-shift) migrations of existing servers — physical servers, VMware, Hyper-V, or other cloud VMs — to AWS with minimal downtime and without modifying the applications.",
+    keyFacts: [
+      "Agent-based continuous block-level replication (not snapshot-based), so the cutover window is typically minutes",
+      "Free for the first 90 days per migrated server; charged per replicated server after that",
+      "Replaces AWS Server Migration Service (SMS), which has been deprecated",
+      "Different from AWS DMS: MGN migrates entire servers (OS plus applications plus data); DMS migrates database data only",
+      "Migration Hub integration provides a central tracking dashboard for all migrations",
+    ],
+    examTraps: [
+      "Trap: AWS MGN and AWS DMS do the same thing. Reality: MGN migrates entire servers via block-level replication (OS, applications, and all data). DMS migrates database data only and supports schema conversion between different database engines.",
+    ],
+    relatedServices: ["DMS", "EC2", "EBS"],
+  },
+
+  {
+    id: "migration-hub",
+    name: "AWS Migration Hub",
+    shortName: "Migration Hub",
+    abbr: "MigrationHub",
+    category: "management",
+    domains: [2],
+    tagline: "Central dashboard to track the progress of all your application migrations across AWS tools.",
+    whatItDoes:
+      "Provides a single place to monitor migrations happening across multiple AWS migration tools — MGN, DMS, and DataSync. Lets you group servers into applications and track migration status for each. Does not perform migrations itself; it is a tracking and orchestration layer that aggregates status from the individual tools.",
+    whenToUse:
+      "Use when migrating a large number of servers or databases and need a unified view of progress across multiple migration tools and teams.",
+    keyFacts: [
+      "Free service — no charge for using Migration Hub itself",
+      "Integrates with MGN, DMS, DataSync, and partner migration tools",
+      "Application Discovery Service integrates with Migration Hub to map server dependencies before migration begins",
+      "Tracks per-server migration status: not started, in-progress, completed, or failed",
+      "Available only in specific AWS regions, not all regions globally",
+    ],
+    examTraps: [
+      "Trap: Migration Hub migrates your servers for you. Reality: Migration Hub only tracks and displays migration progress — you still use the individual tools (MGN, DMS, etc.) to perform the actual migration work.",
+    ],
+    relatedServices: ["MGN", "DMS", "DataSync", "EC2"],
+  },
+
+  // ─── AI / ML ────────────────────────────────────────────────────────────────
+
+  {
+    id: "sagemaker",
+    name: "Amazon SageMaker",
+    shortName: "Amazon SageMaker",
+    abbr: "SageMaker",
+    category: "analytics",
+    domains: [3],
+    tagline: "Fully managed platform to build, train, and deploy machine learning models at scale.",
+    whatItDoes:
+      "Provides tools for every step of the ML workflow: data labeling (Ground Truth), notebook-based exploration (Studio), model training with managed infrastructure (Training Jobs), hyperparameter optimization (Automatic Model Tuning), and model hosting (Endpoints). Removes the need to manage the underlying ML infrastructure at any stage.",
+    whenToUse:
+      "Use when building custom ML models that require training on your own data. Use SageMaker Endpoints to host trained models as scalable, managed inference APIs.",
+    keyFacts: [
+      "SageMaker Studio: an integrated IDE covering all ML development steps in one web interface",
+      "Training Jobs: managed compute for model training that scales to many GPUs and terminates when done",
+      "Real-time Inference Endpoints: persistent, auto-scaling model hosting with pay-per-second billing",
+      "Batch Transform: run inference on large datasets offline without a persistent endpoint",
+      "SageMaker Feature Store: a centralized repository for storing and sharing ML features across teams",
+    ],
+    examTraps: [
+      "Trap: SageMaker is only for training models. Reality: SageMaker covers the full ML lifecycle — data preparation, labeling, training, tuning, hosting, and monitoring.",
+    ],
+    relatedServices: ["S3", "EC2", "IAM", "CloudWatch", "Bedrock"],
+  },
+
+  {
+    id: "bedrock",
+    name: "Amazon Bedrock",
+    shortName: "Amazon Bedrock",
+    abbr: "Bedrock",
+    category: "analytics",
+    domains: [3],
+    tagline: "Access foundation models from leading AI companies via a single API — no ML expertise needed.",
+    whatItDoes:
+      "Provides access to large language models and foundation models from providers including Anthropic (Claude), Meta (Llama), Stability AI, Cohere, and Amazon (Titan) via a unified API. No need to train models from scratch or manage ML infrastructure. Supports fine-tuning with your own data and Retrieval Augmented Generation (RAG) via Bedrock Knowledge Bases.",
+    whenToUse:
+      "Use when building generative AI applications — chatbots, summarization, code generation, image generation — without managing ML infrastructure. Use Bedrock Knowledge Bases when you need to ground model responses in your own private documents.",
+    keyFacts: [
+      "Serverless — no infrastructure to manage; pricing is per token or per request",
+      "Knowledge Bases: connects foundation models to your data in S3 using vector search (RAG pattern) for grounded responses",
+      "Agents: orchestrates multi-step tasks using foundation models combined with your APIs and tools",
+      "Fine-tuning: customize a foundation model with your own labeled data for domain-specific accuracy",
+      "All data stays within your AWS account — foundation model providers cannot access your data",
+    ],
+    examTraps: [
+      "Trap: Bedrock and SageMaker are the same service. Reality: Bedrock provides access to pre-built foundation models via API with no training required. SageMaker is for building and training custom ML models from scratch.",
+    ],
+    relatedServices: ["SageMaker", "S3", "Lambda", "OpenSearch", "IAM"],
+  },
+
+  {
+    id: "rekognition",
+    name: "Amazon Rekognition",
+    shortName: "Amazon Rekognition",
+    abbr: "Rekognition",
+    category: "analytics",
+    domains: [1, 3],
+    tagline: "Add image and video analysis to your apps — detect objects, faces, text, and unsafe content.",
+    whatItDoes:
+      "Pre-trained ML service for analyzing images and videos. Can detect objects and scenes, identify and compare faces, recognize celebrities, detect text in images, identify unsafe content for content moderation, and analyze video streams in real time.",
+    whenToUse:
+      "Use for identity verification (face comparison against a collection), content moderation at scale, searching for specific faces in video archives, or extracting text from natural-scene images — all without building custom ML models.",
+    keyFacts: [
+      "No ML expertise required — API-based with pay-per-image or pay-per-minute video pricing",
+      "Face comparison: compares a face against a collection of stored faces for 1-to-N search",
+      "Custom Labels: train Rekognition to detect your own custom objects using minimal labeled images",
+      "Streaming video analysis: real-time analysis of live video via Kinesis Video Streams",
+      "Stores face feature vectors (mathematical representations) in Rekognition Collections, not the actual images",
+    ],
+    examTraps: [
+      "Trap: Rekognition stores the actual photos of faces you index. Reality: Rekognition stores only face feature vectors — the original images are not retained inside Rekognition.",
+    ],
+    relatedServices: ["KVS", "S3", "Lambda", "Textract"],
+  },
+
+  {
+    id: "textract",
+    name: "Amazon Textract",
+    shortName: "Amazon Textract",
+    abbr: "Textract",
+    category: "analytics",
+    domains: [3],
+    tagline: "Extract text and structured data (forms, tables) from scanned documents automatically.",
+    whatItDoes:
+      "Goes beyond basic OCR to understand the structure of documents. Can extract printed text, handwriting, form key-value pairs (such as \"Name: John Smith\"), and table data from PDFs and images. Works with scanned documents, photos of documents, and multi-page PDFs.",
+    whenToUse:
+      "Use for automating document processing pipelines — extracting data from tax forms, medical records, contracts, or invoices. Replaces manual data entry by automatically pulling structured data from any document.",
+    keyFacts: [
+      "Detects text, form fields as key-value pairs, tables, and handwritten signatures",
+      "Asynchronous API for large multi-page PDFs; synchronous for single-page images",
+      "Queries feature: ask specific natural-language questions about a document such as 'What is the patient name?'",
+      "Integrates with Amazon Augmented AI (A2I) for human review of low-confidence extractions",
+      "Pay per page analyzed",
+    ],
+    examTraps: [
+      "Trap: Textract and Rekognition both extract text from images and do the same job. Reality: Rekognition detects text in natural-scene images (signs, labels). Textract is specifically for structured documents (forms, tables, PDFs) with much higher accuracy for document layouts.",
+    ],
+    relatedServices: ["S3", "Lambda", "Comprehend"],
+  },
+
+  {
+    id: "comprehend",
+    name: "Amazon Comprehend",
+    shortName: "Amazon Comprehend",
+    abbr: "Comprehend",
+    category: "analytics",
+    domains: [3],
+    tagline: "Discover insights from text using natural language processing — no ML training needed.",
+    whatItDoes:
+      "NLP service that analyzes text to find entities (names, places, dates), detect sentiment (positive, negative, neutral, or mixed), extract key phrases, identify the language, and classify text into custom categories. Comprehend Medical is a specialized version for analyzing clinical and healthcare text.",
+    whenToUse:
+      "Use for analyzing customer reviews for sentiment, classifying support tickets automatically, extracting named entities from documents, or building content recommendation engines based on text analysis.",
+    keyFacts: [
+      "Sentiment analysis returns positive, negative, neutral, or mixed for each document",
+      "Entity recognition identifies types including PERSON, LOCATION, ORGANIZATION, DATE, and QUANTITY",
+      "Custom classification: train custom text classifiers with your own labeled data without writing ML code",
+      "Comprehend Medical: extracts medical conditions, medications, anatomy, and dosages from clinical notes",
+      "Pay per character analyzed with a minimum of 3 units per API request",
+    ],
+    examTraps: [
+      "Trap: Comprehend and Textract both analyze documents and are interchangeable. Reality: Textract extracts text from document images (OCR plus structure). Comprehend analyzes the meaning and content of text that has already been extracted.",
+    ],
+    relatedServices: ["Textract", "S3", "Lambda", "Translate"],
+  },
+
+  {
+    id: "translate",
+    name: "Amazon Translate",
+    shortName: "Amazon Translate",
+    abbr: "Translate",
+    category: "analytics",
+    domains: [3],
+    tagline: "Neural machine translation service to translate text between 75+ languages.",
+    whatItDoes:
+      "Translates text using neural machine translation models. Supports real-time translation via API and batch translation of stored documents in S3. Can be customized with terminology files to preserve domain-specific terms such as product names and technical jargon during translation.",
+    whenToUse:
+      "Use for localizing application content, translating user-generated content at scale, building multilingual customer support, or analyzing text that was written in a foreign language.",
+    keyFacts: [
+      "Supports 75+ languages",
+      "Custom terminology: upload a CSV file with source-to-target term mappings to override automatic translation for specific terms",
+      "Batch translation: translate files stored in S3 and write results back to S3",
+      "Real-time translation: synchronous API for immediate translation in applications",
+      "Pay per character translated",
+    ],
+    examTraps: [
+      "Trap: Amazon Translate and Amazon Transcribe do similar things. Reality: Translate converts text between languages. Transcribe converts speech (audio) to text. They are completely different functions.",
+    ],
+    relatedServices: ["Comprehend", "Transcribe", "S3", "Lambda"],
+  },
+
+  {
+    id: "transcribe",
+    name: "Amazon Transcribe",
+    shortName: "Amazon Transcribe",
+    abbr: "Transcribe",
+    category: "analytics",
+    domains: [3],
+    tagline: "Automatically convert speech to text from audio and video files.",
+    whatItDoes:
+      "Speech-to-text service that transcribes audio and video files into text. Supports real-time streaming transcription and batch transcription of stored files. Features include speaker diarization (identifying and labeling different speakers), custom vocabulary for domain-specific terms, and automatic punctuation insertion.",
+    whenToUse:
+      "Use for generating subtitles and captions for video content, transcribing call center recordings for analysis, building voice interfaces, or converting meeting recordings into searchable text.",
+    keyFacts: [
+      "Supports 100+ languages and dialects",
+      "Speaker diarization: identifies and labels different speakers in a multi-speaker conversation",
+      "Custom vocabulary: improves accuracy for technical terms, product names, and industry acronyms",
+      "Transcribe Medical: specialized model tuned for clinical vocabulary and is HIPAA-eligible",
+      "Real-time streaming transcription returns partial results as audio comes in, enabling live captions",
+    ],
+    examTraps: [
+      "Trap: Transcribe and Translate are the same type of service. Reality: Transcribe converts audio to text (speech recognition). Translate converts text from one language to another (machine translation). They are opposites in terms of input and output.",
+    ],
+    relatedServices: ["Translate", "Comprehend", "S3", "KVS"],
+  },
+
+  {
+    id: "polly",
+    name: "Amazon Polly",
+    shortName: "Amazon Polly",
+    abbr: "Polly",
+    category: "analytics",
+    domains: [3],
+    tagline: "Convert text to lifelike speech in 60+ voices across 30+ languages.",
+    whatItDoes:
+      "Text-to-speech service that generates natural-sounding speech from text. Supports standard voices and Neural Text-to-Speech voices that sound more natural and expressive. Can be used to add voice output to applications, create audio versions of written content, or provide accessibility features for users with visual impairments.",
+    whenToUse:
+      "Use for adding voice output to applications, creating audio versions of text content, building voice assistants, or accessibility features.",
+    keyFacts: [
+      "Standard voices use concatenative synthesis; Neural voices use deep learning for more natural-sounding output",
+      "SSML (Speech Synthesis Markup Language) support for controlling pronunciation, speech rate, pitch, and pauses",
+      "Speech Marks: returns metadata (word timing, sentence boundaries) for syncing animations to speech",
+      "Output formats: MP3, OGG, and PCM",
+      "Pay per character synthesized",
+    ],
+    examTraps: [
+      "Trap: Polly and Transcribe do similar things. Reality: Polly converts text to speech (text in, audio out). Transcribe converts speech to text (audio in, text out). They are exact opposites.",
+    ],
+    relatedServices: ["Transcribe", "Lex", "Lambda", "S3"],
+  },
+
+  {
+    id: "lex",
+    name: "Amazon Lex",
+    shortName: "Amazon Lex",
+    abbr: "Lex",
+    category: "integration",
+    domains: [2, 3],
+    tagline: "Build conversational chatbots and voice interfaces using the same technology as Alexa.",
+    whatItDoes:
+      "Provides automatic speech recognition (ASR) and natural language understanding (NLU) to build conversational chatbots. You define intents (what the user wants to do), slots (the required information to fulfill the intent), and fulfillment (a Lambda function that executes the action). Bots can be deployed to web, mobile, Slack, Microsoft Teams, Facebook Messenger, and Amazon Connect.",
+    whenToUse:
+      "Use for building customer service chatbots, interactive voice response (IVR) systems, FAQ bots, or any conversational interface where users express intent in natural language rather than clicking buttons.",
+    keyFacts: [
+      "Built on the same technology as Amazon Alexa",
+      "Intents define actions a user can perform — for example, BookFlight or CheckBalance",
+      "Slots are the parameters needed to fulfill an intent — for example, departure city or travel date",
+      "Lambda integration fulfills the intent after all required slots are collected from the user",
+      "Multi-turn conversations: Lex maintains context across multiple utterances within a session",
+    ],
+    examTraps: [
+      "Trap: Lex is just a chatbot template service that matches keywords. Reality: Lex handles the full NLU pipeline — it understands many variations in how users phrase a request and maps them to intents, not just exact keyword matching.",
+    ],
+    relatedServices: ["Lambda", "Polly", "Transcribe", "Connect"],
+  },
+
+  {
+    id: "ses",
+    name: "Amazon Simple Email Service (Amazon SES)",
+    shortName: "Amazon SES",
+    abbr: "SES",
+    category: "integration",
+    domains: [2, 4],
+    tagline: "High-volume, low-cost email sending and receiving service for applications.",
+    whatItDoes:
+      "Cloud-based email service for sending transactional emails (order confirmations, password resets), marketing emails, and receiving inbound email. Handles the infrastructure of email delivery including spam filtering, bounce handling, and deliverability monitoring. Supports both SMTP interface and REST API so it integrates with any application.",
+    whenToUse:
+      "Use for application-generated emails (notifications, alerts, reports), bulk marketing campaigns, or receiving and processing inbound emails. Much cheaper than traditional email service providers at scale.",
+    keyFacts: [
+      "Cost: $0.10 per 1,000 emails sent; first 62,000 emails per month are free when sent from EC2",
+      "Supports both SMTP and SES API; can replace any SMTP-based email sending in your application",
+      "Sandbox mode is on by default — you must request production access to send to unverified addresses",
+      "Dedicated IP addresses available for improved deliverability reputation if needed",
+      "Email receiving: triggers Lambda, SNS, or stores received email to S3 for processing",
+    ],
+    examTraps: [
+      "Trap: SES and SNS both send messages to users and are interchangeable. Reality: SNS sends push notifications to topics (SMS, HTTP, email subscriptions, Lambda). SES is specifically for sending formatted emails at scale for application use cases.",
+    ],
+    relatedServices: ["SNS", "Lambda", "S3"],
+  },
+
+  {
+    id: "connect",
+    name: "Amazon Connect",
+    shortName: "Amazon Connect",
+    abbr: "Connect",
+    category: "integration",
+    domains: [2],
+    tagline: "Cloud-based contact center — set up a call center in minutes, pay only for what you use.",
+    whatItDoes:
+      "Provides a fully managed contact center platform for handling inbound and outbound voice calls and chat. Uses Contact Flows — a drag-and-drop IVR builder — to define customer journeys. Integrates with Amazon Lex for AI-powered conversational IVR, Lambda for custom business logic, and databases or CRM systems for customer data lookup.",
+    whenToUse:
+      "Use when replacing an on-premises PBX or contact center system with a scalable cloud-based alternative. Especially well-suited for variable call volumes where per-minute pricing is more economical than fixed-capacity hardware.",
+    keyFacts: [
+      "Pay-per-minute for voice and pay-per-message for chat — no per-agent licensing fees",
+      "Contact Flows: visual drag-and-drop IVR configuration without writing code",
+      "Native integration with Amazon Lex for conversational IVR without custom development",
+      "Amazon Connect Wisdom: provides agents with real-time recommendations pulled from your knowledge base",
+      "Works globally and handles international phone numbers and local telephony regulations",
+    ],
+    examTraps: [
+      "Trap: Amazon Connect is just a VoIP phone service. Reality: Connect is a full contact center platform with IVR, agent desktops, AI integrations (Lex, Transcribe, Comprehend), real-time analytics, and CRM integrations.",
+    ],
+    relatedServices: ["Lex", "Lambda", "DynamoDB", "Kinesis", "S3"],
+  },
+
+  {
+    id: "codepipeline",
+    name: "AWS CodePipeline",
+    shortName: "AWS CodePipeline",
+    abbr: "CodePipeline",
+    category: "management",
+    domains: [2, 3],
+    tagline: "Fully managed CI/CD pipeline that automates your build, test, and deploy stages.",
+    whatItDoes:
+      "Orchestrates the end-to-end software release process. Connects source control (CodeCommit, GitHub, S3), build services (CodeBuild), test stages, and deployment services (CodeDeploy, ECS, Lambda, CloudFormation, Elastic Beanstalk) into an automated pipeline. Each code change triggers the full pipeline automatically.",
+    whenToUse:
+      "Use to automate the software release process from code commit to production deployment. Ensures every change goes through the same validated, repeatable release process.",
+    keyFacts: [
+      "Free tier: 1 active pipeline per month free; $1 per month per active pipeline after that",
+      "Stages in a pipeline: Source, Build, Test, Deploy — and custom Lambda stages for any other actions",
+      "Parallel actions: multiple actions within the same stage run concurrently",
+      "Manual approval stage: requires human sign-off before the pipeline continues to the next stage",
+      "Integrates with GitHub, GitLab, and Bitbucket via AWS CodeStar Connections",
+    ],
+    examTraps: [
+      "Trap: CodePipeline performs the actual build and deployment. Reality: CodePipeline is the orchestrator — it triggers CodeBuild for builds and CodeDeploy for deployments. It does not execute them itself.",
+    ],
+    relatedServices: ["CodeBuild", "CodeDeploy", "CloudFormation", "ECS"],
+  },
+
+  {
+    id: "codebuild",
+    name: "AWS CodeBuild",
+    shortName: "AWS CodeBuild",
+    abbr: "CodeBuild",
+    category: "management",
+    domains: [2, 3],
+    tagline: "Fully managed build service that compiles code, runs tests, and produces deployment artifacts.",
+    whatItDoes:
+      "Executes build jobs in managed containers without requiring you to maintain build servers. You provide a buildspec.yml file defining the build commands (install dependencies, run tests, compile, and package). CodeBuild scales automatically so multiple builds run concurrently. Produces build artifacts stored in S3.",
+    whenToUse:
+      "Use to replace self-managed Jenkins or build servers. Integrates with CodePipeline as the build stage in a CI/CD pipeline.",
+    keyFacts: [
+      "Pay per build minute based on compute type (General1.small, General1.medium, General1.large, etc.)",
+      "No idle time charges — you pay only when a build is actively running",
+      "buildspec.yml defines phases: install, pre_build, build, post_build — plus artifact output locations",
+      "Docker support: can build and push Docker images to ECR as part of the build process",
+      "VPC support: can run builds inside a VPC to access private resources like databases during testing",
+    ],
+    examTraps: [
+      "Trap: CodeBuild and CodeDeploy are the same. Reality: CodeBuild compiles code and runs tests. CodeDeploy deploys already-built artifacts to EC2, Lambda, or ECS. They are separate stages in the pipeline.",
+    ],
+    relatedServices: ["CodePipeline", "CodeDeploy", "ECR", "S3", "IAM"],
+  },
+
+  {
+    id: "codedeploy",
+    name: "AWS CodeDeploy",
+    shortName: "AWS CodeDeploy",
+    abbr: "CodeDeploy",
+    category: "management",
+    domains: [2, 3],
+    tagline: "Automate application deployments to EC2, Lambda, ECS, or on-premises servers.",
+    whatItDoes:
+      "Automates the deployment of application code to target compute resources. Supports rolling deployments (update a few instances at a time), blue/green deployments (shift traffic to a new environment), and canary deployments (shift a small percentage of traffic first). Uses an appspec.yml file to define which files to deploy and which lifecycle hook scripts to run.",
+    whenToUse:
+      "Use to automate deployments and reduce downtime. Blue/green deployments are especially useful for zero-downtime releases and instant rollback when problems are detected.",
+    keyFacts: [
+      "Deployment types: In-place (rolling update of existing instances) and Blue/Green (new environment created before traffic shifts)",
+      "Deployment configurations: AllAtOnce, HalfAtATime, OneAtATime, or a custom percentage",
+      "appspec.yml defines files to deploy and lifecycle hook scripts: BeforeInstall, AfterInstall, ApplicationStart, and ValidateService",
+      "Automatic rollback: reverts to the last successful deployment if health checks fail after a deployment",
+      "Free for EC2, on-premises, Lambda, and ECS deployments — no additional charge",
+    ],
+    examTraps: [
+      "Trap: Blue/green deployment permanently doubles your cost. Reality: After traffic shifts fully to the new (green) environment, the old (blue) environment is terminated according to a configurable termination policy.",
+    ],
+    relatedServices: ["CodePipeline", "CodeBuild", "EC2", "Lambda", "ECS"],
+  },
+
+  {
+    id: "flink",
+    name: "Amazon Managed Service for Apache Flink",
+    shortName: "Managed Service for Apache Flink",
+    abbr: "Flink",
+    category: "analytics",
+    domains: [3],
+    tagline: "Run stateful Apache Flink applications for real-time stream processing without managing infrastructure.",
+    whatItDoes:
+      "Runs Apache Flink applications on managed infrastructure. Flink enables stateful, exactly-once stream processing with event-time semantics, windowed aggregations, complex event processing, and real-time ML inference. Reads from Kinesis Data Streams, MSK, or S3 and writes results to S3, DynamoDB, OpenSearch, RDS, and other destinations.",
+    whenToUse:
+      "Use for complex real-time analytics that require stateful processing, event-time windowing, or exactly-once semantics — scenarios too complex for simple Lambda triggers on Kinesis or the basic delivery pipeline of Firehose.",
+    keyFacts: [
+      "Stateful processing: maintains state across events — for example, running totals or session window aggregations",
+      "Exactly-once semantics: guarantees no duplicate processing even on failure and restart",
+      "Application checkpointing: state is periodically saved to S3 so the application can recover from failure",
+      "Formerly called Kinesis Data Analytics for Apache Flink — renamed in 2024; use the new name on the exam",
+      "Supports Java, Scala, Python, and SQL APIs for writing Flink applications",
+    ],
+    examTraps: [
+      "Trap: This service is still called Kinesis Data Analytics for Apache Flink. Reality: It was renamed to Amazon Managed Service for Apache Flink in 2024. Newer exam questions will use the new name.",
+      "Trap: Flink and Firehose both do real-time stream processing. Reality: Firehose is a simple near-real-time delivery service with a 60-second minimum buffer. Flink is for complex stateful stream processing with sub-second latency.",
+    ],
+    relatedServices: ["KDS", "MSK", "Firehose", "S3", "OpenSearch"],
   },
 ]
