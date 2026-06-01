@@ -17,6 +17,27 @@ export interface SavedSession {
 const STORAGE_KEY = "aws-study-pal-sessions"
 const FLASHCARD_KEY = "aws-study-pal-flashcards"
 const PREFS_KEY = "aws-study-pal-quiz-prefs"
+const SERVICES_KEY = "aws-study-pal-services"
+
+// ─── Service study progress ───────────────────────────────────────────────────
+
+export function loadStudiedServices(): Set<string> {
+  try {
+    const raw = localStorage.getItem(SERVICES_KEY)
+    if (!raw) return new Set()
+    return new Set(JSON.parse(raw) as string[])
+  } catch { return new Set() }
+}
+
+export function saveStudiedServices(ids: Set<string>): void {
+  try {
+    localStorage.setItem(SERVICES_KEY, JSON.stringify([...ids]))
+  } catch { /* SSR */ }
+}
+
+export function clearStudiedServices(): void {
+  try { localStorage.removeItem(SERVICES_KEY) } catch { /* SSR */ }
+}
 const MAX_SESSIONS = 50
 
 // ─── Quiz preferences ─────────────────────────────────────────────────────────
