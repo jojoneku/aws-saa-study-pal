@@ -14,13 +14,13 @@ export const domain4NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "S3 Standard-IA is correct because it is cheaper than S3 Standard and has no monitoring fee.",
+        text: "S3 Standard-IA is correct because it is cheaper than S3 Standard and has no monitoring fee at all.",
         isCorrect: false,
         explanation: "Wrong — S3 Standard-IA charges a $0.01/GB retrieval fee on every GET. For objects accessed frequently, retrieval fees can exceed the storage savings. Standard-IA also has a 30-day minimum storage duration, meaning newly uploaded objects deleted or transitioned before 30 days are still billed for the full 30 days."
       },
       {
         id: "B",
-        text: "S3 Intelligent-Tiering is correct because it automatically moves objects between access tiers with no retrieval fees, and the monitoring fee is negligible for objects ≥128 KB.",
+        text: "S3 Intelligent-Tiering is correct — it auto-tiers objects with no retrieval fees and a negligible monitoring fee.",
         isCorrect: true,
         explanation: "Correct — S3 Intelligent-Tiering monitors access patterns and automatically moves objects to Frequent, Infrequent (30-day), Archive Instant (90-day opt-in), or Archive (90-day+ opt-in) tiers. There is NO retrieval fee for objects pulled from any tier. The only extra cost is a monitoring/automation fee of $0.0025 per 1,000 objects per month. Objects smaller than 128 KB are always stored in the Frequent tier and are NOT charged the monitoring fee. For 2 million varied-size objects with unpredictable access, Intelligent-Tiering is optimal."
       },
@@ -32,7 +32,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "Neither — both charge retrieval fees, so S3 One Zone-IA offers the lowest total cost.",
+        text: "Neither — both charge retrieval fees, so S3 One Zone-IA offers the lowest total cost here.",
         isCorrect: false,
         explanation: "Wrong — S3 One Zone-IA stores data in a single AZ. If that AZ fails, data is permanently lost. For 2 million objects with unknown criticality, single-AZ storage is inappropriate. Additionally, One Zone-IA still charges a retrieval fee, and S3 Intelligent-Tiering charges NO retrieval fees."
       }
@@ -54,19 +54,19 @@ export const domain4NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "gp3 volumes support higher IOPS than gp2, so fewer volumes are needed.",
+        text: "gp3 volumes support higher baseline IOPS than gp2, so fewer volumes are needed.",
         isCorrect: false,
         explanation: "Wrong — Both gp2 and gp3 support up to 16,000 IOPS maximum per volume. The benefit of gp3 is not that it supports more IOPS, but that the base performance (3,000 IOPS and 125 MB/s) is included at a lower price per GB."
       },
       {
         id: "B",
-        text: "gp3 is priced at $0.08/GB-month versus gp2's $0.10/GB-month, and gp3 includes 3,000 IOPS and 125 MB/s throughput in the base price at no extra charge.",
+        text: "gp3 costs $0.08/GB-month versus gp2's $0.10, and includes 3,000 IOPS and 125 MB/s in the base price.",
         isCorrect: true,
         explanation: "Correct — gp3 is 20% cheaper per GB ($0.08 vs $0.10/GB-mo) and includes 3,000 IOPS and 125 MB/s baseline for free. Since these workloads only require 3,000 IOPS and 125 MB/s, no additional IOPS or throughput provisioning is needed. The migration saves approximately $5,000/month (500 × 500 GiB × $0.02 savings). The migration is live with zero downtime."
       },
       {
         id: "C",
-        text: "gp3 volumes are automatically deduped by AWS, reducing billed capacity.",
+        text: "gp3 volumes are automatically deduplicated by AWS, reducing the billed capacity.",
         isCorrect: false,
         explanation: "Wrong — EBS does not perform transparent deduplication at the volume level. Storage billing is based on provisioned capacity, not actual used capacity. Deduplication is an OS-level or application-level feature."
       },
@@ -140,7 +140,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Enable EFS Intelligent-Tiering with lifecycle management to automatically transition files not accessed in 30 days to the EFS Infrequent Access (IA) tier.",
+        text: "Enable EFS lifecycle management to transition files not accessed in 30 days to the EFS Infrequent Access tier.",
         isCorrect: true,
         explanation: "Correct — EFS Intelligent-Tiering with lifecycle management (30-day threshold) automatically moves files to the IA tier at $0.016/GB-month versus EFS Standard at $0.30/GB-month — a 95% storage cost reduction for those files. When a file in IA is accessed, it is transparently served at the same POSIX path (no application changes). For 80% of files (40 TB), monthly cost drops from ~$12,000 to ~$640 — saving ~$11,360/month."
       },
@@ -152,7 +152,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "Switch from EFS Standard to EFS One Zone to reduce per-GB pricing.",
+        text: "Switch from EFS Standard to EFS One Zone to reduce the per-GB storage price.",
         isCorrect: false,
         explanation: "Wrong — EFS One Zone stores data in a single AZ ($0.16/GB-month), which is cheaper than EFS Standard ($0.30/GB-month) but still 10× more expensive than EFS IA ($0.016/GB-month). One Zone also reduces durability (single-AZ vs multi-AZ) and may require architecture changes. EFS lifecycle to IA is the more impactful optimization."
       }
@@ -294,13 +294,13 @@ export const domain4NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Purchase 3-year Standard Reserved Instances sized for peak capacity.",
+        text: "Purchase 3-year Standard Reserved Instances sized for the peak capacity requirement.",
         isCorrect: false,
         explanation: "Wrong — Reserved Instances sized for peak capacity would be idle 80% of the time during normal traffic. Paying for 5× capacity 24/7 via RIs would cost far more than On-Demand for average traffic levels. RIs optimize cost for steady-state utilization, not variable burst capacity."
       },
       {
         id: "B",
-        text: "Configure the Auto Scaling group to use a mix of On-Demand for baseline capacity and Amazon EC2 Spot Instances for the variable burst capacity, diversified across multiple instance types and Availability Zones.",
+        text: "Use a mixed-instances Auto Scaling group with On-Demand baseline and EC2 Spot for burst capacity.",
         isCorrect: true,
         explanation: "Correct — Spot Instances provide up to 90% off On-Demand for the variable burst capacity. Diversifying across multiple instance types (m5.xlarge, m4.xlarge, m5a.xlarge, etc.) and AZs reduces interruption probability. The stateless application design (sessions in ElastiCache) means Spot interruptions only affect individual requests, which are retried by the load balancer. The mixed On-Demand/Spot fleet maintains availability while capturing 70%+ savings on the variable portion."
       },
@@ -346,7 +346,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "C",
-        text: "AWS Compute Optimizer.",
+        text: "AWS Compute Optimizer resource recommendations.",
         isCorrect: true,
         explanation: "Correct — AWS Compute Optimizer is FREE and uses machine learning to analyze 14 days of utilization metrics to provide right-sizing recommendations for EC2 instances, Auto Scaling groups, EBS volumes, Lambda functions, ECS Fargate tasks, and RDS instances. It works across all accounts in an AWS Organization and identifies over-provisioned and under-provisioned resources. No additional cost or support tier is required."
       },
@@ -500,7 +500,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Switch the table to DynamoDB Standard-IA table class.",
+        text: "Switch the table to the DynamoDB Standard-Infrequent Access table class.",
         isCorrect: true,
         explanation: "Correct — DynamoDB Standard-IA table class reduces storage cost by approximately 60% (from $0.25/GB-month to $0.10/GB-month) at the cost of approximately 25% higher per-request pricing. For this table: storage savings = $125 × 60% = $75/month; request cost increase = $2 × 25% = $0.50/month. Net savings = ~$74.50/month. When storage dominates (>50% of total bill), Standard-IA always wins. Table class can be changed up to 2 times per 30-day period."
       },
@@ -694,13 +694,13 @@ export const domain4NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "CloudFront reduces EC2 data transfer costs because S3-to-CloudFront transfers are free.",
+        text: "CloudFront reduces EC2 data transfer costs because S3-to-CloudFront transfers are free of charge.",
         isCorrect: false,
         explanation: "Wrong — The free S3-to-CloudFront data transfer applies to S3 as the origin, not EC2/ALB as the origin. EC2-to-CloudFront origin fetches are charged at standard EC2 data transfer rates. The primary cost benefit here is the cache hit rate reducing origin requests."
       },
       {
         id: "B",
-        text: "With a 24-hour TTL and static product catalog data, CloudFront can serve >99% of requests from its edge cache, dramatically reducing the number of origin requests reaching EC2 — thereby reducing EC2 compute and data transfer costs.",
+        text: "With a 24-hour TTL on static catalog data, CloudFront serves most requests from the edge cache.",
         isCorrect: true,
         explanation: "Correct — With a 24-hour TTL on data that changes once daily, CloudFront cache hit rates can reach 95-99%+. For 50 million requests/day, 99% cache hits means only ~500K requests/day reach EC2 (down from 50M). This reduces EC2 load by ~99%, enabling right-sizing the EC2 fleet (potentially reducing from $8,000/month to <$500/month for origin requests) and reducing EC2 data transfer proportionally."
       },
@@ -740,7 +740,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Direct Connect saves approximately $391/month at 8 TB/month because per-GB transfer savings ($0.07/GB) more than offset the higher fixed port cost.",
+        text: "Direct Connect saves about $391/month at 8 TB because the $0.07/GB transfer savings offsets the higher port cost.",
         isCorrect: true,
         explanation: "Correct — VPN total: $36.50 + (8,192 × $0.09) = $773.78/month. DX total: $219 + (8,192 × $0.02) = $382.84/month. Savings = $390.94/month. The break-even point is approximately 2.6 TB/month: ($219 - $36.50) / ($0.09 - $0.02) = $182.50 / $0.07 ≈ 2,607 GB ≈ 2.55 TB. At 8 TB (3× the break-even), Direct Connect is substantially cheaper."
       },
@@ -780,7 +780,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "S3 Glacier Deep Archive has a 180-day minimum storage duration. Objects deleted or transitioned before 180 days are billed for the full 180 days. Daily logs deleted or re-transitioned before 180 days incur the 180-day minimum billing period.",
+        text: "S3 Glacier Deep Archive has a 180-day minimum storage duration, so daily logs deleted earlier are still billed for 180 days.",
         isCorrect: true,
         explanation: "Correct — S3 Glacier Deep Archive has a 180-day minimum storage duration. If objects are deleted, overwritten, or transitioned to another class before 180 days, AWS charges the remaining days of the 180-day minimum. For 365 daily log files, each file starts a 180-day clock. An object added on Day 1 must remain in Deep Archive until Day 181 to avoid the minimum charge. If the team deletes or transitions logs before 180 days, each deletion triggers a charge for the remaining minimum duration days."
       },
@@ -820,7 +820,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Dedicated Hosts provide per-host visibility into physical sockets and cores, enabling per-socket/per-core BYOL licensing. Dedicated Instances only guarantee hardware isolation but do not expose socket or core count for licensing.",
+        text: "Dedicated Hosts expose physical socket and core counts for per-socket BYOL licensing; Dedicated Instances only isolate hardware.",
         isCorrect: true,
         explanation: "Correct — Dedicated Hosts allow you to see: number of physical sockets, physical cores per socket, and instance count per host. This information is required for Windows Server, SQL Server, Oracle, and SUSE/RHEL BYOL licenses sold on a per-socket or per-core basis. Dedicated Instances provide dedicated hardware to prevent sharing with other AWS accounts, but AWS does not expose the physical topology — insufficient for per-socket/core BYOL compliance."
       },
@@ -860,7 +860,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Cause: AWS began charging $0.005/hour for all in-use public IPv4 addresses effective February 1, 2024. 200 EIPs × $0.005/hr × 720 hr/month ≈ $720/month. Remediation: Remove unnecessary public IPs and route outbound traffic through NAT Gateway, or migrate to IPv6.",
+        text: "Cause: AWS now charges $0.005/hour per in-use public IPv4 address — 200 EIPs ≈ $720/month. Remediation: use a NAT Gateway or IPv6.",
         isCorrect: true,
         explanation: "Correct — Effective February 1, 2024, AWS charges $0.005/hour for every public IPv4 address — attached or unattached, on EC2, RDS, ELB, NAT Gateway, or any other service. 200 EIPs × $0.005 × 720 hours = $720/month. If some instances also have auto-assigned public IPs, the total exceeds $720. The cost-effective remediations are: remove public IPs for instances that don't need them (use NAT Gateway for outbound), use IPv6 with an Egress-Only Internet Gateway (free), or release unattached EIPs."
       },
@@ -900,7 +900,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "With Consolidated Billing and RI sharing enabled, the ten RIs purchased in the management account will discount all matching m5.large usage across all member accounts. Unused RI hours in the management account automatically flow to Member Account A's five instances.",
+        text: "With consolidated billing and RI sharing, the ten RIs discount matching m5.large usage in all member accounts, including Account A.",
         isCorrect: true,
         explanation: "Correct — AWS Organizations Consolidated Billing aggregates RI usage across all accounts. With RI sharing enabled (default), unused RI capacity from any account can be applied to matching usage in other accounts within the organization. The management account's ten RIs: five are used by Member Account A (at the RI discounted rate), and the remaining five are wasted (no matching usage in B or C). RI sharing can be disabled per account to prevent unwanted sharing."
       },
@@ -940,7 +940,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Switch to Aurora I/O-Optimized — I/O charges represent 40% of the total bill (exceeding the 25% threshold), and the net effect is cost savings.",
+        text: "Switch to Aurora I/O-Optimized — I/O is 40% of the bill, above the 25% break-even threshold, so it nets savings.",
         isCorrect: true,
         explanation: "Correct — Total Standard bill: $2,400 + $300 + $1,800 = $4,500. I/O percentage: $1,800 / $4,500 = 40% > 25% threshold. I/O-Optimized calculation: Instance $2,400 × 1.30 = $3,120; Storage $300 × 2.25 = $675; I/O $0. Total: $3,795. Savings = $4,500 - $3,795 = $705/month (15.7% reduction). The 25% threshold is the break-even rule: when I/O exceeds 25% of total Aurora bill, switching to I/O-Optimized saves money."
       },
@@ -980,7 +980,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "The S3 Intelligent-Tiering monitoring fee of $0.0025 per 1,000 objects per month on 500 million objects equals $1,250/month, which may exceed the storage cost savings from tiering 2 KB objects that never move to cheaper tiers.",
+        text: "The Intelligent-Tiering monitoring fee on 500 million objects is about $1,250/month, likely exceeding the tiering savings.",
         isCorrect: true,
         explanation: "Correct — S3 Intelligent-Tiering charges $0.0025 per 1,000 objects per month as a monitoring/automation fee. For 500 million objects: 500,000,000 / 1,000 × $0.0025 = $1,250/month. However, objects under 128 KB are NEVER moved to cheaper tiers — they remain in the Frequent Access tier and are NOT eligible for the monitoring fee. If most objects are 2 KB (below 128 KB threshold), the monitoring fee is NOT charged on them, making Intelligent-Tiering comparable to Standard but with no tiering benefit. The real concern is that 2 KB objects get no cost benefit from auto-tiering regardless of access frequency."
       },
@@ -1020,7 +1020,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Yes — at 800 GB/month the Interface Endpoint saves money. Interface Endpoint total: $21.90 (hourly) + $8.00 (per-GB) = $29.90/month vs NAT processing of $36/month.",
+        text: "Yes — at 800 GB/month the Interface Endpoint totals about $29.90 versus $36 in NAT processing charges.",
         isCorrect: true,
         explanation: "Correct — Interface Endpoint 3-AZ cost: $0.01 × 3 AZs × 720 hrs = $21.60/month hourly + $0.01 × 800 GB = $8.00/month per-GB = $29.60/month total. NAT Gateway processing: $0.045 × 800 GB = $36/month. Savings: $36 - $29.60 = $6.40/month. At 800 GB, the Interface Endpoint is cheaper. Note: break-even ≈ 626 GB/month ($21.60 / ($0.045 - $0.01) = $21.60 / $0.035 ≈ 617 GB). Additional benefit: traffic stays private (never traverses internet), improving security posture."
       },
@@ -1054,19 +1054,19 @@ export const domain4NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Use AWS DataSync over the existing 10 Mbps connection to transfer data online.",
+        text: "Use AWS DataSync over the existing 10 Mbps connection to transfer the data online.",
         isCorrect: false,
         explanation: "Wrong — At 10 Mbps, the theoretical maximum throughput for 200 TB is 200 TB / (10 Mbps / 8 bits × 3,600 sec/hr × 24 hr/day) ≈ 185 days. This is neither fast nor cost-effective for a one-time large migration. AWS DataSync is appropriate for ongoing delta sync, not initial bulk migration with severe bandwidth constraints."
       },
       {
         id: "B",
-        text: "Order an AWS Snowball Edge Storage Optimized device to physically transfer the 200 TB, then configure an S3 Lifecycle policy to transition objects to S3 Glacier Deep Archive.",
+        text: "Order an AWS Snowball Edge device, then lifecycle the objects into S3 Glacier Deep Archive.",
         isCorrect: true,
         explanation: "Correct — The AWS Snowball Edge Storage Optimized device holds up to 210 TB of usable capacity. For 200 TB with a 10 Mbps connection, physical transfer via Snowball Edge is dramatically faster (load to device locally at disk speed, ship to AWS, 2-5 business days turnaround) and avoids months of internet transfer. After import to S3, a Lifecycle policy immediately transitions objects to Glacier Deep Archive for minimum storage cost. Snowball Edge is the appropriate current device — Snowmobile was retired April 2024 and Snowcone was discontinued November 2024."
       },
       {
         id: "C",
-        text: "Use AWS Snowmobile to transport 200 TB in a single truck shipment.",
+        text: "Use AWS Snowmobile to transport the 200 TB in a single truck shipment.",
         isCorrect: false,
         explanation: "Wrong — AWS Snowmobile was retired in April 2024. It is no longer available. For current exam questions, Snowmobile is never the correct answer. The Snowball Edge Storage Optimized (210 TB usable) can accommodate 200 TB with one or two devices."
       },
@@ -1094,13 +1094,13 @@ export const domain4NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "S3 Standard-IA — provides multi-AZ durability for infrequently accessed data.",
+        text: "S3 Standard-IA — provides multi-AZ durability for infrequently accessed thumbnail data.",
         isCorrect: false,
         explanation: "Wrong — S3 Standard-IA is appropriate for data that cannot be recreated (requiring multi-AZ durability). Since thumbnails can be regenerated from source videos at any time, paying the premium for multi-AZ durability in Standard-IA is unnecessary. S3 One Zone-IA is 20% cheaper and appropriate for re-creatable data."
       },
       {
         id: "B",
-        text: "Amazon S3 One Zone-IA — thumbnails are re-creatable, so single-AZ durability is acceptable at 20% lower cost than Standard-IA.",
+        text: "Amazon S3 One Zone-IA — thumbnails are re-creatable, so single-AZ durability is fine at lower cost.",
         isCorrect: true,
         explanation: "Correct — S3 One Zone-IA stores data in a single Availability Zone (~$0.01/GB-month vs Standard-IA's ~$0.0125/GB-month, approximately 20% cheaper). The critical qualifier for One Zone-IA is that the data must be re-creatable or reproducible from another source. Thumbnails generated from source videos meet this requirement perfectly. If the single AZ hosting One Zone-IA is destroyed, thumbnails are lost — but can be regenerated from the source videos in S3 Standard."
       },
@@ -1134,13 +1134,13 @@ export const domain4NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Purchase 3-year Regional Standard Reserved Instances for 100 m5.2xlarge in us-east-1.",
+        text: "Purchase 3-year Regional Standard Reserved Instances for the 100 m5.2xlarge instances in us-east-1.",
         isCorrect: false,
         explanation: "Wrong — Regional Standard RIs provide billing discounts but do NOT guarantee capacity in a specific AZ. In a capacity-constrained scenario during a real disaster (when other companies are also attempting to launch instances), Regional RIs provide no capacity assurance. Additionally, you pay for On-Demand-equivalent capacity continuously even when the instances are not running."
       },
       {
         id: "B",
-        text: "On-Demand Capacity Reservations (ODCR) in a specific AZ combined with Regional Standard Reserved Instances or Compute Savings Plans for the billing discount.",
+        text: "On-Demand Capacity Reservations in a specific AZ, plus Regional RIs or Savings Plans for the discount.",
         isCorrect: true,
         explanation: "Correct — On-Demand Capacity Reservations guarantee capacity in a specific AZ regardless of broader regional demand spikes. ODCRs charge On-Demand rates when unused. Combining with Regional Standard RIs or Compute Savings Plans applies the billing discount to the ODCR capacity (matching On-Demand usage). When instances are not launched, the ODCR capacity charge (at On-Demand rates) is offset by the RI/SP discount, effectively paying the discounted rate for reserved capacity. This provides both guaranteed capacity and a billing discount."
       },
@@ -1180,7 +1180,7 @@ export const domain4NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Configure two CloudFront cache behaviors: a default behavior (matching /config/*) with a 6-hour TTL for the shared configuration, and a second behavior (matching /user/*) with a TTL of 0 and all request headers forwarded to the origin for personalized responses.",
+        text: "Configure two cache behaviors: /config/* with a 6-hour TTL, and /user/* with a TTL of 0 and headers forwarded to the origin.",
         isCorrect: true,
         explanation: "Correct — CloudFront supports multiple cache behaviors ordered by path pattern. The default behavior for /config/* with 6-hour TTL caches the 95% of shared configuration requests at edge locations closest to Asia-Pacific users, dramatically reducing origin requests and latency. The /user/* behavior with TTL=0 bypasses caching and forwards personalized requests directly to the EC2 origin. This simultaneously reduces origin load (fewer requests to EC2) and reduces Asia-Pacific latency for the cacheable majority."
       },

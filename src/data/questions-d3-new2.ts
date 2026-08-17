@@ -14,13 +14,13 @@ export const domain3NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Engineer A is correct — DataSync and Storage Gateway are both designed for ongoing hybrid access. DataSync is preferred because it is 10× faster than Storage Gateway.",
+        text: "Engineer A is correct — both are designed for ongoing hybrid access, and DataSync is preferred because it is faster.",
         isCorrect: false,
         explanation: "Wrong — DataSync is a scheduled data migration and synchronization service: it copies data from a source to a destination on a schedule. Once the transfer completes, DataSync's job is done until the next scheduled run. It does NOT present an NFS/SMB mount point to on-premises clients and is NOT designed for ongoing hybrid file access where on-premises remains the primary access point."
       },
       {
         id: "B",
-        text: "Engineer B is correct — AWS DataSync is designed for scheduled bulk data migration and sync (one-time or periodic batch transfers); AWS Storage Gateway S3 File Gateway is designed for ongoing hybrid access, presenting an NFS/SMB mount on-premises with S3 as the persistent backend.",
+        text: "Engineer B is correct — DataSync handles scheduled bulk migration, while S3 File Gateway presents an ongoing NFS/SMB mount backed by S3.",
         isCorrect: true,
         explanation: "Correct — DataSync transfers data between storage systems on a schedule (agent-based, 10× faster than rsync, ~$0.0125/GB). It is ideal for one-time migrations and periodic batch syncs but does NOT provide a persistent mount point for ongoing access. Storage Gateway S3 File Gateway presents a live NFS/SMB interface backed by S3 with a local cache — applications continue to use the same mount point indefinitely. For 'on-premises NFS server must remain primary while data is also in AWS,' Storage Gateway is the correct choice."
       },
@@ -66,7 +66,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "C",
-        text: "Use AWS Transfer Family with an SFTP server endpoint backed by Amazon S3, authenticating users via a custom identity provider using AWS Secrets Manager.",
+        text: "Use AWS Transfer Family with an SFTP endpoint backed by Amazon S3 and a custom identity provider.",
         isCorrect: true,
         explanation: "Correct — AWS Transfer Family provides a fully managed SFTP/FTPS/FTP/AS2 server that stores files directly in Amazon S3 or EFS. No EC2 management required. Elastic IPs can be assigned to the endpoint for stable IPs. Authentication supports Service-managed users, Active Directory via Route 53, or a custom identity provider (Lambda-based) reading from Secrets Manager. Files are stored as native S3 objects with full S3 features (versioning, lifecycle, replication)."
       },
@@ -140,7 +140,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Write shuffle data to instance store NVMe (highest throughput, ephemeral OK); write checkpoint data to Amazon EBS gp3 (persists across stop/start).",
+        text: "Write shuffle data to instance store NVMe for throughput, and checkpoint data to Amazon EBS gp3 for persistence.",
         isCorrect: true,
         explanation: "Correct — EC2 instance store NVMe delivers the lowest latency and highest sequential write throughput because it is physically attached to the host server (no network hop). Shuffle data is ephemeral and can be discarded when the job ends, making instance store ideal. Checkpoint data must survive instance stop/start, so an EBS volume (gp3 or io2) is required — EBS persists independently of the EC2 instance lifecycle."
       },
@@ -180,7 +180,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Create EBS snapshots in us-east-1, copy them to ap-southeast-1 using snapshot copy (which is incremental), and share the snapshots in ap-southeast-1 with the DR partner's AWS account ID.",
+        text: "Create EBS snapshots in us-east-1, copy them incrementally to ap-southeast-1, and share them with the partner's account ID.",
         isCorrect: true,
         explanation: "Correct — EBS snapshot copy across regions is incremental: only changed blocks since the last copy are transferred (when copying in a chain). Cross-region snapshot copies are stored in S3 in the destination region. Snapshots can be shared with specific AWS account IDs or made public using ModifySnapshotAttribute. The DR partner can launch EC2 instances from shared snapshots without a separate copy."
       },
@@ -232,7 +232,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "D",
-        text: "P: Lambda@Edge viewer-request trigger; Q: Lambda@Edge origin-request trigger; CloudFront Functions are not applicable because Lambda@Edge is always preferred for lower latency.",
+        text: "P: Lambda@Edge viewer-request trigger; Q: Lambda@Edge origin-request trigger, since Lambda@Edge is always lower latency.",
         isCorrect: false,
         explanation: "Wrong — CloudFront Functions run at edge PoPs (<1 ms, $0.10/M invocations), which is faster and cheaper than Lambda@Edge for simple logic requiring no network calls. Lambda@Edge runs at ~13 Regional Edge Cache locations (fewer than edge PoPs), has higher per-invocation cost ($0.60/M), and has ~ms initialization overhead. For a simple URL rewrite, CloudFront Functions are strictly better. Lambda@Edge is needed only when you need network calls, longer timeout, or origin triggers."
       }
@@ -254,13 +254,13 @@ export const domain3NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Enable API Gateway stage-level caching with a TTL of 3,600 seconds, and allow clients to invalidate cache entries using the Cache-Control: max-age=0 header.",
+        text: "Enable API Gateway stage caching with a 3,600-second TTL, allowing clients to invalidate via Cache-Control headers.",
         isCorrect: true,
         explanation: "Correct — API Gateway caching is configured per stage. With caching enabled, the API Gateway serves cached responses for identical requests (matching cache key: method + path + configured headers/query strings), completely bypassing Lambda invocations. TTL default is 300 seconds (max 3,600 seconds). Clients can send Cache-Control: max-age=0 (with the execute-api:InvalidateCache IAM permission) to bypass the cache and force a fresh response. This eliminates redundant Lambda calls with no application code changes."
       },
       {
         id: "B",
-        text: "Configure an Amazon ElastiCache Redis cluster and add caching logic inside each Lambda function.",
+        text: "Configure an Amazon ElastiCache Redis cluster and add caching logic inside each of the Lambda functions.",
         isCorrect: false,
         explanation: "Wrong — Adding ElastiCache caching inside Lambda requires code changes in every Lambda function (add cache check, handle cache miss, write to cache on miss). This adds complexity and still invokes Lambda for cache misses. API Gateway-level caching eliminates Lambda invocations entirely for cached requests without any code changes."
       },
@@ -300,7 +300,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Lazy loading (cache-aside) with a TTL of 60 seconds — cache misses fetch from RDS and populate the cache; stale data expires within 60 seconds; only frequently READ data occupies cache memory.",
+        text: "Lazy loading (cache-aside) with a 60-second TTL — misses populate the cache and stale entries expire within 60 seconds.",
         isCorrect: true,
         explanation: "Correct — Lazy loading ensures only data that is actually requested occupies cache space (no pollution from write-only data). A 60-second TTL caps staleness within the acceptable limit. For a 95:5 read:write ratio, the vast majority of requests hit cache after initial population. The cache miss penalty (extra round-trip to RDS) only occurs on first access and after TTL expiry. Stale data tolerance of 60 seconds makes lazy loading with TTL the cost-effective, low-DB-load choice."
       },
@@ -334,13 +334,13 @@ export const domain3NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Store all data on hot data nodes; use provisioned IOPS to reduce query latency.",
+        text: "Store all data on hot data nodes and use provisioned IOPS to reduce the query latency.",
         isCorrect: false,
         explanation: "Wrong — Storing 2 years of logs on hot data nodes (SSD/EBS-backed) is extremely expensive and provides no cost benefit for 8–730 day-old data that is rarely queried. OpenSearch Service has purpose-built cost-efficient tiers for older data."
       },
       {
         id: "B",
-        text: "Hot tier for 0–7 days; UltraWarm tier for 8–90 days; Cold storage for 90 days–2 years. Use Index State Management (ISM) to automate transitions.",
+        text: "Hot for 0–7 days, UltraWarm for 8–90 days, Cold for 90 days–2 years, automated with ISM.",
         isCorrect: true,
         explanation: "Correct — Amazon OpenSearch Service storage tiers: Hot = data node SSD/EBS (sub-second queries, highest cost). UltraWarm = S3-backed queryable tier (~90% cheaper than hot, up to 5-second query latency, no data node requirement for warm data). Cold storage = S3-only, no attached compute, cheapest, requires attaching before query (minutes delay). ISM policies automate hot→UltraWarm→cold→delete transitions by age. This maps exactly to the query latency requirements."
       },
@@ -374,7 +374,7 @@ export const domain3NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Migrate to Redshift RA3 nodes (decoupled compute and managed storage) for the 10 TB dataset; use Redshift Spectrum to query the 200 TB historical S3 data in place.",
+        text: "Migrate to Redshift RA3 nodes for the 10 TB dataset and use Redshift Spectrum to query the 200 TB in S3 in place.",
         isCorrect: true,
         explanation: "Correct — RA3 nodes use managed storage (RMS) that separates compute from storage. Data beyond the local SSD cache automatically tiers to S3-backed managed storage — you scale compute and storage independently. DC2 nodes couple compute and storage tightly (can't scale one without the other). Redshift Spectrum enables SQL queries against external tables in S3 (Parquet, ORC, CSV, JSON) directly from Redshift without loading the data into the cluster. Bills per TB scanned, like Athena."
       },
@@ -414,7 +414,7 @@ export const domain3NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Enable Redshift Concurrency Scaling — automatic transient clusters handle query bursts during business hours, with 1 free credit hour per day.",
+        text: "Enable Redshift Concurrency Scaling — transient clusters absorb query bursts, with one free credit hour per day.",
         isCorrect: true,
         explanation: "Correct — Amazon Redshift Concurrency Scaling automatically adds transient read clusters when the main cluster's query queue depth exceeds a threshold. Queries are routed to the scaling clusters transparently. Critically, Redshift provides 1 free hour of Concurrency Scaling credit per day per cluster. For a cluster that is busy only during business hours (8 hours/day), the free credit covers a significant portion of the scaling cost. After the free credit, additional Concurrency Scaling time is billed per second."
       },
@@ -500,7 +500,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "The data engineer is correct — Athena charges per TB scanned, and columnar formats (Parquet/ORC) with partitioning dramatically reduce the bytes scanned per query. Converting from CSV to Parquet can reduce scan costs by 85–99% depending on column selectivity and partition pruning.",
+        text: "The data engineer is correct — Athena bills per TB scanned, and Parquet with partitioning can cut bytes scanned by 85–99%.",
         isCorrect: true,
         explanation: "Correct — Athena's $5/TB is charged on BYTES SCANNED per query. Parquet/ORC are columnar: selecting 5 of 200 columns reads only ~2.5% of column data. Adding Snappy compression further reduces file sizes. Date partitioning means Athena reads only the relevant date directories (partition pruning). Together, these optimizations reduce bytes scanned by 85–99%+ vs full CSV scans. A query costing $250 on CSV might cost ~$2–3 on partitioned Parquet."
       },
@@ -540,7 +540,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon Kinesis Video Streams (KVS) is the correct service — it is purpose-built to ingest, store, and process video/audio streams from devices such as cameras and IoT sensors. KVS and Kinesis Data Streams are completely different services despite the shared 'Kinesis' branding.",
+        text: "Amazon Kinesis Video Streams is the correct service — it is purpose-built to ingest and store video streams from cameras and IoT devices.",
         isCorrect: true,
         explanation: "Correct — Amazon Kinesis Video Streams is a completely separate service from Kinesis Data Streams. KVS ingests video/audio/radar data from media devices and cameras using the KVS Producer SDK or WebRTC. It stores fragments durably, supports HLS/DASH playback APIs, integrates with Amazon Rekognition Video for ML analysis, and can trigger Batch processing. KDS is an event record streaming service for application-generated records — not video/audio media. The shared 'Kinesis' prefix does NOT mean they are the same service or interchangeable."
       },
@@ -574,13 +574,13 @@ export const domain3NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Amazon Data Firehose with Lambda transformation",
+        text: "Amazon Data Firehose with a Lambda transformation function",
         isCorrect: false,
         explanation: "Wrong — Amazon Data Firehose has a minimum buffering interval of 60 seconds and does not support stateful windowed aggregations. Lambda transformations in Firehose run per-batch (per buffer flush), not as a continuous sliding window processor with state. Firehose is a delivery service, not a stream processor."
       },
       {
         id: "B",
-        text: "Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics for Apache Flink)",
+        text: "Amazon Managed Service for Apache Flink (formerly Kinesis Data Analytics)",
         isCorrect: true,
         explanation: "Correct — Amazon Managed Service for Apache Flink provides fully managed real-time stream processing using Apache Flink on KDS or MSK inputs. It supports stateful computations (keyed state, operator state), sliding/tumbling/session windows, exactly-once semantics, sub-second latency, and auto-scaling. It directly reads from Kinesis Data Streams and can write to S3, DynamoDB, OpenSearch, Kinesis, or custom sinks. This is the AWS-native answer for stateful windowed stream analytics."
       },
@@ -626,7 +626,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "C",
-        text: "AWS Lake Formation with column-level grants (excluding SSN/credit_card_number for Data Scientists), row-level filters (transaction_type='audit' for Auditors), and table-level grants on aggregate views for Executives.",
+        text: "AWS Lake Formation with column-level grants, row-level filters, and table-level grants on aggregate views.",
         isCorrect: true,
         explanation: "Correct — AWS Lake Formation enforces fine-grained access control at the column level (exclude specific columns from principals), row level (row-level filters based on column values), and table/view level. These are enforced by query engines that honor Lake Formation permissions: Athena, Redshift Spectrum, EMR (Spark/Trino/Hive), and Glue ETL. Central management via Lake Formation console/CLI with LF-Tags for scalable permission management. No data movement required."
       },
@@ -660,7 +660,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Import the Redshift dataset into Amazon QuickSight SPICE (Super-fast Parallel In-memory Calculation Engine) and schedule periodic refreshes.",
+        text: "Import the Redshift dataset into Amazon QuickSight SPICE in-memory storage and schedule periodic refreshes.",
         isCorrect: true,
         explanation: "Correct — SPICE is QuickSight's in-memory columnar calculation engine that stores datasets in AWS-managed memory (~10× faster than direct query). Once data is imported into SPICE, dashboard interactions query the in-memory dataset instead of Redshift — achieving sub-second response times regardless of Redshift load. SPICE datasets are refreshed on a schedule (or manually) to keep data current. This requires no changes to the Redshift cluster or ETL pipelines."
       },
@@ -700,7 +700,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "DynamoDB Streams has a FIXED 24-hour retention and supports at most 2 Lambda triggers per stream; Kinesis Data Streams for DynamoDB has configurable retention up to 365 days, supports more consumers, and integrates with the full KDS ecosystem — making them NOT interchangeable for use cases requiring longer retention or more consumers.",
+        text: "DynamoDB Streams has fixed 24-hour retention and at most 2 consumers; Kinesis Data Streams supports up to 365 days and more consumers.",
         isCorrect: true,
         explanation: "Correct — DynamoDB Streams: 24-hour (fixed) retention, up to 2 simultaneous Lambda consumers (per stream), useful for simple change-driven automation. KDS for DynamoDB: configurable retention (24 hours to 365 days), supports the full KDS consumer ecosystem (Lambda, Managed Flink, Firehose, Enhanced Fan-Out up to 20 consumers), supports fan-out to multiple systems. The choice depends on retention requirements and consumer count. They are NOT interchangeable."
       },
@@ -740,7 +740,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Aurora Parallel Query — pushes filters, aggregations, and projections down to the Aurora distributed storage layer, reducing data transferred to the query node.",
+        text: "Aurora Parallel Query — pushes filters and aggregations down to the Aurora distributed storage layer.",
         isCorrect: true,
         explanation: "Correct — Aurora Parallel Query (MySQL only) is a feature that pushes row filtering, column projection, and aggregation computations down to the storage layer nodes instead of the DB instance compute layer. This reduces the volume of data transmitted from storage to the query node and parallelizes processing across storage nodes. AWS claims up to 2 orders of magnitude faster analytical queries on operational data. Available on Aurora MySQL 5.6.10a+ and certain r* instance classes."
       },
@@ -780,7 +780,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Enable Aurora PostgreSQL zero-ETL integration with Amazon Redshift — replication is automatic, seconds-level, requires no ETL code, and does not impact Aurora performance.",
+        text: "Enable Aurora PostgreSQL zero-ETL integration with Amazon Redshift — replication is automatic and requires no ETL code.",
         isCorrect: true,
         explanation: "Correct — Aurora zero-ETL integration with Redshift (Aurora PostgreSQL GA October 2024) replicates data changes from Aurora to Redshift with seconds-level latency. No ETL pipelines to build or maintain. Replication uses Aurora's log-based change capture and does not require additional compute on the Aurora cluster. Target can be Redshift Serverless or RA3 provisioned. Up to 5 integrations per source DB. NOTE: auto-pause (scale-to-zero) on Aurora serverless is incompatible with zero-ETL."
       },
@@ -814,13 +814,13 @@ export const domain3NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Increase the RDS instance size to db.r6g.4xlarge which supports more connections.",
+        text: "Increase the RDS instance size to db.r6g.4xlarge, which supports more connections.",
         isCorrect: false,
         explanation: "Wrong — Increasing instance size raises the max_connections ceiling, but as Lambda concurrency continues to grow (auto-scaling), the connection count will eventually exceed any instance's max_connections. This is an arms race, not a structural fix. The root problem is 1-connection-per-Lambda-invocation architecture."
       },
       {
         id: "B",
-        text: "Deploy Amazon RDS Proxy between Lambda and RDS — RDS Proxy pools and multiplexes database connections, reducing the actual number of RDS connections from N×Lambda to a pool size that fits within RDS max_connections.",
+        text: "Deploy Amazon RDS Proxy between Lambda and RDS to pool and multiplex database connections.",
         isCorrect: true,
         explanation: "Correct — Amazon RDS Proxy maintains a persistent connection pool to RDS. Lambda functions connect to the RDS Proxy endpoint (not directly to RDS). The Proxy multiplexes thousands of Lambda connections onto a small pool of actual database connections using transaction-level multiplexing. In this scenario, 2,000 concurrent Lambda executions might map to only 50–100 actual RDS connections. RDS Proxy also handles failover faster (up to 66% reduction in failover time) and supports IAM authentication + Secrets Manager credential rotation."
       },
@@ -832,7 +832,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "D",
-        text: "Set Lambda reserved concurrency to 1,700 to match the max_connections limit.",
+        text: "Set Lambda reserved concurrency to 1,700 to match the RDS max_connections limit.",
         isCorrect: false,
         explanation: "Wrong — Capping Lambda at 1,700 concurrent executions prevents the crash, but it also caps throughput and can cause throttling (429 errors) during traffic peaks. This throttles the application to protect the database instead of solving the connection problem. RDS Proxy eliminates the problem without limiting Lambda throughput."
       }
@@ -900,7 +900,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Use AWS DataSync with a DataSync agent on-premises connected to the NFS source, configured with both an initial transfer task and a scheduled recurring task for ongoing sync over Direct Connect.",
+        text: "Use AWS DataSync with an on-premises agent on the NFS source, with an initial transfer task and a scheduled recurring sync.",
         isCorrect: true,
         explanation: "Correct — AWS DataSync is purpose-built for exactly this use case: (1) Initial bulk transfer of 500 TB at up to 10 Gbps utilizing the full Direct Connect bandwidth (DataSync can use multiple parallel streams). (2) Scheduled incremental tasks run on a configurable schedule, transferring only new/modified files since the last run using file metadata comparison. Built-in features: data integrity verification (checksum), encryption in transit (TLS), bandwidth throttling, CloudWatch metrics, PrivateLink support. No custom scripting required."
       },
@@ -940,7 +940,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon Athena Federated Query — use Lambda-based connectors for DynamoDB and RDS PostgreSQL, and native Glue Data Catalog for the S3 Parquet table, then join all three in a single Athena SQL query.",
+        text: "Amazon Athena Federated Query — Lambda connectors for DynamoDB and RDS plus the Glue catalog for S3, joined in one SQL query.",
         isCorrect: true,
         explanation: "Correct — Athena Federated Query uses Lambda-based data source connectors to query external data stores (DynamoDB, RDS, DocumentDB, Redshift, OpenSearch, HBase, CloudWatch Logs, on-premises databases, etc.) alongside S3 data cataloged in the Glue Data Catalog. A single Athena SQL query can JOIN tables from DynamoDB, RDS PostgreSQL, and S3 Parquet in one statement. AWS provides pre-built connectors for common sources. No data migration required."
       },
@@ -974,13 +974,13 @@ export const domain3NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Switch to step scaling to react more aggressively when CPU threshold is breached.",
+        text: "Switch to step scaling to react more aggressively when the CPU threshold is breached.",
         isCorrect: false,
         explanation: "Wrong — Step scaling reacts more aggressively than simple scaling when metrics breach thresholds, but it is still REACTIVE — it only triggers after CPU rises above the threshold. The problem is that traffic ramps up before scaling can respond. Any reactive policy (target tracking, step, simple) has this inherent lag."
       },
       {
         id: "B",
-        text: "Enable Predictive Scaling on the Auto Scaling group — it uses machine learning to forecast traffic and proactively adds capacity before demand increases.",
+        text: "Enable Predictive Scaling on the Auto Scaling group — ML forecasts traffic and adds capacity before demand rises.",
         isCorrect: true,
         explanation: "Correct — Predictive Scaling uses ML-based forecasting on the last 14 days of traffic patterns (requires at least 24 hours of history) to predict load 48 hours ahead. It pre-scales the group BEFORE demand arrives (typically 5–10 minutes before predicted peak). This solves the morning ramp-up lag without manually creating scheduled actions for each day. Start in ForecastOnly mode to validate predictions before enabling ForecastAndScale."
       },
@@ -1014,13 +1014,13 @@ export const domain3NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Enable ElastiCache cluster mode with 500 shards to distribute operations across more nodes.",
+        text: "Enable ElastiCache cluster mode with 500 shards to distribute operations across many more nodes.",
         isCorrect: false,
         explanation: "Wrong — ElastiCache cluster mode enables horizontal sharding, but the question specifies the SAME cluster configuration (same number of nodes). Adding 500 shards would increase the number of nodes significantly. The question asks for improvement on the same node configuration — specifically addressing the single-threaded bottleneck."
       },
       {
         id: "B",
-        text: "Upgrade from ElastiCache for Redis OSS 7 to ElastiCache for Valkey 8 (Valkey 8.0/8.1 adds I/O threading that achieves up to 230% higher throughput and 70% lower latency with no topology changes).",
+        text: "Upgrade from ElastiCache for Redis OSS 7 to ElastiCache for Valkey 8, whose I/O threading raises throughput substantially.",
         isCorrect: true,
         explanation: "Correct — Amazon ElastiCache for Valkey is the AWS-recommended Redis OSS alternative (Valkey is a Redis 7.2.4 fork, drop-in API compatible). Valkey 8.0/8.1 adds I/O threading, which addresses the single-threaded bottleneck: up to 230% higher throughput, 70% lower latency, and ~20% memory savings compared to Redis OSS. In-place zero-downtime upgrade from Redis OSS is supported. Same cluster topology, same sorted set API, same client code."
       },
@@ -1060,7 +1060,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "AWS Global Accelerator with two static anycast IPv4 addresses, endpoint groups in us-east-1 and eu-west-1, and health-check-based traffic dials.",
+        text: "AWS Global Accelerator with two static anycast IPs, endpoint groups in both regions, and health-check traffic dials.",
         isCorrect: true,
         explanation: "Correct — AWS Global Accelerator provides exactly 2 static anycast IPv4 addresses that never change (client firewalls can whitelist these permanently). Endpoint groups in multiple regions perform health checks on the regional endpoints. If us-east-1 becomes unhealthy, Global Accelerator automatically reroutes to eu-west-1 within approximately 30 seconds (sub-minute failover). Since Global Accelerator routes TCP traffic to the live endpoint without caching, every request reaches the regional application."
       },
@@ -1100,7 +1100,7 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon MSK does NOT support in-place ZooKeeper-to-KRaft migration — a new KRaft-mode MSK cluster must be created and data migrated separately.",
+        text: "Amazon MSK does NOT support in-place ZooKeeper-to-KRaft migration — a new KRaft cluster must be created and data migrated.",
         isCorrect: true,
         explanation: "Correct — AWS documented that MSK does not support in-place ZK→KRaft migration. Teams must create a new MSK cluster configured for KRaft mode and migrate workloads (using MSK Replicator for topic replication or redirecting producers/consumers). KRaft mode benefits: eliminates ZooKeeper dependency, up to 60 brokers per cluster (vs 30 in ZooKeeper mode), available from Kafka 3.7+, required from Kafka 4.0+. Kafka 3.9 supports both ZK and KRaft; Kafka 4.0 is KRaft-only."
       },
@@ -1140,13 +1140,13 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Lambda cost = GB-seconds = (memory in GB) × (duration in seconds) × (invocations). Going from 512 MB / 3,000 ms to 1,769 MB / 1,500 ms: GB-seconds change from (0.5 × 3.0) = 1.5 to (1.769 × 1.5) = 2.65 per invocation — a 77% cost INCREASE despite halving execution time.",
+        text: "GB-seconds go from 0.5 × 3.0 = 1.5 to 1.769 × 1.5 = 2.65 per invocation — a 77% cost increase despite halving duration.",
         isCorrect: true,
         explanation: "Correct — Lambda is priced per GB-second. Math: Before: 512 MB = 0.5 GB × 3.0 s = 1.5 GB-s per invocation. After: 1,769 MB ≈ 1.769 GB × 1.5 s = 2.65 GB-s per invocation. Cost increases ~77% per invocation. The key insight: to REDUCE Lambda cost, you need execution time to drop MORE than the proportional memory increase. At 1,769 MB (1 vCPU = 1,769 MB), you need <1,500 ms to break even. Use AWS Compute Optimizer or Lambda Power Tuning tool to find the optimal memory setting."
       },
       {
         id: "C",
-        text: "Lambda cost is fixed per invocation regardless of memory and duration settings.",
+        text: "Lambda cost is fixed per invocation regardless of the memory and duration settings.",
         isCorrect: false,
         explanation: "Wrong — Lambda pricing has two components: (1) Number of requests ($0.20 per million), and (2) Duration (GB-seconds: memory × time). Duration-based billing makes memory and execution time directly impact cost. Higher memory = higher per-second billing rate."
       },
@@ -1180,19 +1180,19 @@ export const domain3NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Create Gateway VPC Endpoints for S3 and DynamoDB in the VPC — traffic routes directly to these services via the VPC endpoint without leaving the AWS network and without incurring NAT Gateway data processing fees. Gateway VPC Endpoints are free.",
+        text: "Create Gateway VPC Endpoints for S3 and DynamoDB — traffic stays on the AWS network at no endpoint cost.",
         isCorrect: true,
         explanation: "Correct — Gateway VPC Endpoints for S3 and DynamoDB are the only VPC endpoint type that is completely FREE (no hourly charge, no data processing charge). Traffic to S3 and DynamoDB from private subnets routes through the Gateway Endpoint directly to the service without traversing the NAT Gateway — eliminating all NAT data processing fees for those services. EC2 instances stay in private subnets. Update subnet route tables to add the S3/DynamoDB prefix list routes pointing to the Gateway Endpoint."
       },
       {
         id: "C",
-        text: "Replace the NAT Gateway with a NAT instance (EC2-based) to eliminate per-GB data processing fees.",
+        text: "Replace the NAT Gateway with an EC2-based NAT instance to eliminate per-GB data processing fees.",
         isCorrect: false,
         explanation: "Wrong — A NAT instance (EC2-based NAT) requires managing EC2 patching and HA configuration. More importantly, S3 and DynamoDB traffic through a NAT instance still incurs the NAT instance's bandwidth costs (EC2 data transfer + the instance hourly cost). Gateway VPC Endpoints eliminate the network path through any NAT, which is the structurally correct solution."
       },
       {
         id: "D",
-        text: "Create Interface VPC Endpoints for S3 and DynamoDB in each AZ.",
+        text: "Create Interface VPC Endpoints for S3 and DynamoDB in each Availability Zone.",
         isCorrect: false,
         explanation: "Wrong — Interface VPC Endpoints for S3 and DynamoDB exist (S3 Interface Endpoint is useful for on-premises access via DX/VPN, where Gateway Endpoints don't work). However, Interface Endpoints charge hourly per-AZ ($0.01/AZ-hour) plus per-GB processing. For eliminating NAT costs on S3/DynamoDB for VPC-internal EC2, Gateway Endpoints are free and the cost-optimal answer. Interface Endpoints for S3 cost MORE than the NAT charges they replace for pure EC2→S3 intra-VPC traffic."
       }

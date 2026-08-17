@@ -19,19 +19,19 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Use AWS Database Migration Service (AWS DMS) full-load task over the internet to migrate all 30 TB during the maintenance window, then switch the application connection string to Aurora.",
+        text: "Run an AWS DMS full-load task over the internet to migrate all 30 TB during the maintenance window, then repoint the application to Aurora.",
         isCorrect: false,
         explanation: "Wrong — A 1 Gbps link shared with production can realistically transfer roughly 300–400 GB/hour at best. Migrating 30 TB would take 75–100 hours, far exceeding the 6-hour window and the 15-minute downtime target. DMS alone is not suitable for initial bulk load of this size over a constrained link."
       },
       {
         id: "B",
-        text: "Ship the database export to AWS via AWS Snowball Edge Storage Optimized to load the bulk data into Amazon Simple Storage Service (Amazon S3), restore into Aurora, then use AWS DMS in change-data-capture (CDC) mode to sync changes during the maintenance window and cut over within 15 minutes.",
+        text: "Ship the export via AWS Snowball Edge to load bulk data into S3, restore into Aurora, then use AWS DMS in CDC mode to sync and cut over in the window.",
         isCorrect: true,
         explanation: "Correct — Snowball Edge handles the bulk 30 TB transfer offline (no bandwidth contention). Once data is in S3 and restored to Aurora, DMS CDC tracks only the delta (changes since the export), which is far smaller than 30 TB and easily transfers within the maintenance window. Cutover is just stopping writes, letting CDC drain, and switching the connection string — achievable in under 15 minutes. Snowball + DMS combined cost is well within $20,000 and the Aurora cluster handles PERFORMANCE requirements."
       },
       {
         id: "C",
-        text: "Use AWS Schema Conversion Tool (AWS SCT) and AWS DMS with a full-load-and-CDC task starting one week before the maintenance window, then halt replication and cut over during the window.",
+        text: "Use AWS SCT and AWS DMS with a full-load-and-CDC task started a week before the window, then halt replication and cut over.",
         isCorrect: false,
         explanation: "Wrong — Starting a full-load task over a 1 Gbps shared uplink for 30 TB one week before would saturate production bandwidth for days. Even if it completes, the ongoing CDC replication during that week generates significant DMS cost and risks data drift issues. The Snowball approach is superior for this data size and bandwidth constraint."
       },
@@ -107,7 +107,7 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Use AWS Lake Formation column-level permissions and row-level filter expressions to restrict access. Partition S3 data by business-unit and region. Configure Athena workgroups per business unit with query result reuse enabled.",
+        text: "Use AWS Lake Formation column-level permissions and row-level filters, partition the S3 data by business unit and region, and use per-unit Athena workgroups.",
         isCorrect: true,
         explanation: "Correct — Lake Formation natively enforces column-level security and row-level filters at query time without needing separate data copies. Partitioning by business-unit and region means Athena prunes partitions before scanning, dramatically reducing data scanned per query (PERFORMANCE + COST). Workgroups with result reuse cache repeated queries, further cutting scan costs. This satisfies SECURITY (column + row restrictions), PERFORMANCE (partition pruning keeps scans small), and COST (less scanned data = lower Athena per-TB charge)."
       },
@@ -151,7 +151,7 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Migrate ECS tasks to EC2 launch type using Amazon EC2 C5 instances with 3-year Compute Savings Plans. Use ECS rolling update deployment with minimum 100% healthy percent. Deploy across 3 Availability Zones.",
+        text: "Migrate ECS tasks to the EC2 launch type on C5 instances with 3-year Compute Savings Plans, deployed across three Availability Zones.",
         isCorrect: true,
         explanation: "Correct — For stable 24/7 workloads running 100 tasks continuously, EC2 with 3-year Compute Savings Plans reduces compute cost by ~66% vs Fargate on-demand pricing, easily achieving the 40% total cost reduction. ECS on EC2 with rolling update (minimumHealthyPercent=100, maximumPercent=200) keeps automated deployments identical to Fargate — ECS manages task placement and rolling replacement automatically. Multi-AZ placement constraints maintain HIGH AVAILABILITY. Compute Savings Plans apply to ECS EC2 tasks automatically."
       },
@@ -169,7 +169,7 @@ export const crossDomainQuestions2: Question[] = [
       },
       {
         id: "D",
-        text: "Keep Fargate and purchase 1-year Compute Savings Plans covering 100% of current vCPU usage.",
+        text: "Keep Fargate and purchase 1-year Compute Savings Plans covering 100% of the current vCPU usage.",
         isCorrect: false,
         explanation: "Wrong — 1-year Compute Savings Plans offer ~40% discount on Fargate. However, the question asks for at least 40% reduction in the $9,800 total, meaning the target is ~$5,880/month. Fargate with 1-year Savings Plans would be approximately $5,880 — borderline. But the question specifies 3-year RI for EC2 which achieves ~66% reduction to ~$3,332/month, far exceeding the target while EC2 Savings Plans are more cost-effective at this sustained scale."
       }
@@ -195,13 +195,13 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Keep CloudFront Price Class All. Add an Amazon S3 bucket in the Asia-Pacific Region as an additional CloudFront origin. Configure CloudFront origin failover with the US origin as primary and the Asia-Pacific origin as secondary.",
+        text: "Keep Price Class All and add an Asia-Pacific S3 bucket as a second CloudFront origin with origin failover from the US origin.",
         isCorrect: false,
         explanation: "Wrong — This adds a second S3 bucket in Asia-Pacific (storage + replication costs), but origin failover only activates on 4xx/5xx responses from the primary — it does not reduce latency for cache misses because CloudFront still fetches from the primary US origin first on each miss. The 8-second delay is a cache-miss path problem, not a failover problem."
       },
       {
         id: "B",
-        text: "Create an Amazon S3 bucket in an Asia-Pacific AWS Region. Configure Amazon S3 Cross-Region Replication to replicate HLS segments to the Asia-Pacific bucket. Set the Asia-Pacific bucket as the CloudFront origin with Price Class 200 (includes Asia-Pacific edge locations).",
+        text: "Create an S3 bucket in an Asia-Pacific Region, replicate the HLS segments to it with CRR, and set it as the CloudFront origin with Price Class 200.",
         isCorrect: true,
         explanation: "Correct — Cross-Region Replication (CRR) pushes HLS segments to an Asia-Pacific S3 bucket, reducing origin fetch distance for CloudFront Asia-Pacific edge nodes from US to a regional S3. Price Class 200 includes Asia-Pacific edge locations and costs ~20% less than Price Class All, staying within budget. If the primary Region fails, the Asia-Pacific bucket remains available for continued delivery. This satisfies LATENCY (origin closer to viewers), COST (Price Class 200 < Price Class All), and AVAILABILITY (segments replicated independently in Asia-Pacific)."
       },
@@ -213,7 +213,7 @@ export const crossDomainQuestions2: Question[] = [
       },
       {
         id: "D",
-        text: "Enable CloudFront real-time logs, analyze with Amazon Kinesis Data Firehose, and use the insights to manually increase CloudFront TTL for HLS segments to reduce cache misses.",
+        text: "Enable CloudFront real-time logs and use the insights to manually raise the TTL for HLS segments to reduce cache misses.",
         isCorrect: false,
         explanation: "Wrong — Increasing TTL reduces repeat-viewer cache misses but does nothing for the first viewer in a geographic area who triggers the origin fetch. For a live stream with new segments every 2–6 seconds, TTL-based caching provides minimal benefit. This doesn't address the fundamental distance problem causing 8-second delays in Asia-Pacific."
       }
@@ -239,7 +239,7 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Add a second 1 Gbps AWS Direct Connect dedicated connection from a different Direct Connect location. Attach both connections to an AWS Transit Gateway via a Direct Connect Gateway. Configure BGP active-active for load balancing across both connections.",
+        text: "Add a second 1 Gbps Direct Connect dedicated connection from a different DX location, attach both to a Transit Gateway via a DX Gateway, and run BGP active-active.",
         isCorrect: true,
         explanation: "Correct — Two dedicated Direct Connect connections from different DX locations provide the physical redundancy required for AWS's 99.99% network SLA. Active-active BGP provides both redundancy and bandwidth aggregation. A Direct Connect Gateway + Transit Gateway connects all three VPCs through a single hub. Cost: second DX port $2,200 + $1,800 transfer = $4,000/month additional, total ~$8,000/month — well within the $15,000 budget. Direct Connect dedicated connections deliver sub-10ms latency. This satisfies AVAILABILITY (99.99% with dual DX from different locations), LATENCY (<10ms dedicated fiber), and COST (<$15,000/month)."
       },
@@ -283,19 +283,19 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Use Amazon FSx for NetApp ONTAP with an SSD storage tier, NFS protocol mounts, and AWS KMS customer-managed key encryption. Enable SnapMirror replication to a second FSx for NetApp ONTAP file system in the second Region.",
+        text: "Use Amazon FSx for NetApp ONTAP on SSD with NFS mounts and customer-managed KMS encryption, replicated by SnapMirror to a second Region.",
         isCorrect: true,
         explanation: "Correct — FSx for NetApp ONTAP supports NFS (POSIX semantics), delivers up to 12.5 GB/s read throughput with SSD tiers, uses AWS KMS CMKs for encryption at rest (FIPS 140-2 Level 2 validated endpoints), and supports NetApp SnapMirror for cross-region replication with RPO in minutes — well within the 15-minute window. This satisfies POSIX/NFS, THROUGHPUT, ENCRYPTION/COMPLIANCE, and REPLICATION requirements."
       },
       {
         id: "B",
-        text: "Use Amazon Simple Storage Service (Amazon S3) with server-side encryption using AWS KMS (SSE-KMS), S3 Cross-Region Replication, and mount via Amazon S3 Mountpoint.",
+        text: "Use Amazon S3 with SSE-KMS encryption, S3 Cross-Region Replication, and access via Amazon S3 Mountpoint on the instances.",
         isCorrect: false,
         explanation: "Wrong — Amazon S3 Mountpoint provides basic POSIX read semantics but does not support full POSIX file-system semantics required by sequencing software (no random writes, no file locking, no rename atomicity). S3 does not provide 12 GB/s single-client read throughput — typical S3 GET throughput is in the 100s of MB/s range per prefix, not GB/s scale for a single workload mount."
       },
       {
         id: "C",
-        text: "Use Amazon Elastic File System (Amazon EFS) with AWS KMS customer-managed key encryption in Provisioned Throughput mode set to 12 GB/s, and AWS Backup with cross-region copy for replication.",
+        text: "Use Amazon EFS with customer-managed KMS encryption in Provisioned Throughput mode at 12 GB/s, plus AWS Backup cross-region copy.",
         isCorrect: false,
         explanation: "Wrong — Amazon EFS maximum throughput is 10 GB/s for the entire file system (not 12 GB/s), which is below the stated requirement. Additionally, AWS Backup cross-region copy is not continuous replication — it is a scheduled backup, and the RPO/replication time cannot be guaranteed at 15-minute intervals for 200 GB/hour of new data."
       },
@@ -327,7 +327,7 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Enable AWS Cost Explorer with cost allocation tags. Apply Service Control Policies (SCPs) that deny Cost Explorer access to accounts in other organizational units. Create AWS Budgets alerts with Amazon SNS notifications to account managers when spend exceeds $10,000.",
+        text: "Enable Cost Explorer with cost allocation tags, apply SCPs restricting Cost Explorer access by OU, and create AWS Budgets alerts with SNS at $10,000.",
         isCorrect: true,
         explanation: "Correct — Cost allocation tags applied to resources in each account enable per-project cost breakdown in Cost Explorer. SCPs restricting Cost Explorer access between OUs provide cross-team cost SECURITY (team A's OU can only query its own account data). AWS Budgets with SNS notification at $10,000 threshold sends alerts to account managers without blocking deployments — satisfying the OPERATIONS requirement. Tag-based cost allocation + SCP isolation + Budgets alerts is the minimal-overhead standard pattern."
       },
@@ -339,7 +339,7 @@ export const crossDomainQuestions2: Question[] = [
       },
       {
         id: "C",
-        text: "Consolidate all billing into the management account. Grant each team read-only IAM access to AWS Cost Explorer filtered by their cost center tag. Use AWS Lambda triggered by CloudWatch Events to send SNS notifications when monthly spend exceeds $10,000.",
+        text: "Consolidate billing into the management account, grant teams read-only Cost Explorer access filtered by cost center tag, and send SNS alerts above $10,000.",
         isCorrect: false,
         explanation: "Wrong — Granting all teams access to Cost Explorer in the management account with tag-based filtering relies on correct tagging and IAM policy precision to prevent cross-team visibility — it is operationally complex and error-prone. Cost Explorer IAM filtering by tags is not a security boundary; a misconfigured policy could expose another team's data. The SCP-at-OU-level approach is architecturally stronger for isolation."
       },
@@ -415,13 +415,13 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Use Amazon Cognito User Pools as the API Gateway authorizer. Enable MFA in the Cognito User Pool. Configure API Gateway usage plans with per-user throttling at 100 req/s. Attach AWS WAF with IP reputation managed rule group to the API Gateway stage. Enable AWS CloudTrail logging for API Gateway and Cognito.",
+        text: "Use Cognito User Pools with MFA as the API Gateway authorizer, add usage plans throttling at 100 req/s, attach AWS WAF with the IP reputation rule group, and enable CloudTrail.",
         isCorrect: true,
         explanation: "Correct — Cognito User Pools natively support MFA (TOTP and SMS). API Gateway usage plans enforce per-user rate limiting (keyed on API key or Cognito sub) at 100 req/s. AWS WAF with the AWS Managed Rules IP reputation list blocks known malicious IPs and provides DDoS-layer-7 protection to maintain AVAILABILITY. CloudTrail captures Cognito authentication events (via Cognito data events) and API Gateway calls, satisfying AUDITABILITY. All four constraints are met by native AWS service integrations."
       },
       {
         id: "B",
-        text: "Use a Lambda authorizer that calls an external identity provider for MFA validation. Implement rate limiting in the Lambda function code using Amazon DynamoDB to store per-user counters. Block IPs with API Gateway resource policies.",
+        text: "Use a Lambda authorizer calling an external IdP for MFA, rate-limit in function code with DynamoDB counters, and block IPs with resource policies.",
         isCorrect: false,
         explanation: "Wrong — Lambda authorizer results are cached by API Gateway (up to 3,600 seconds TTL by default). During the cache window, per-user rate limiting in the Lambda code won't be called, defeating the 100 req/s enforcement. API Gateway resource policies can block specific IPs but are static — they cannot adapt to dynamic threat lists the way WAF managed rules do. This approach also introduces operational complexity and a custom DDoS-mitigation gap."
       },
@@ -433,7 +433,7 @@ export const crossDomainQuestions2: Question[] = [
       },
       {
         id: "D",
-        text: "Place Amazon CloudFront in front of API Gateway with CloudFront geo-restriction and field-level encryption. Use Cognito User Pools for authentication without MFA. Enable CloudTrail for CloudFront.",
+        text: "Place Amazon CloudFront in front of API Gateway with geo-restriction and field-level encryption, using Cognito User Pools without MFA, and enable CloudTrail.",
         isCorrect: false,
         explanation: "Wrong — Cognito User Pools without MFA explicitly fails the MFA requirement. CloudFront geo-restriction blocks by country, not by malicious IP, and cannot replace WAF IP reputation lists. Field-level encryption protects specific data fields in transit but does not address rate limiting or DDoS requirements."
       }
@@ -503,13 +503,13 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Keep AWS Lambda. Lambda auto-scales to any concurrency, handles burst traffic automatically, and processes events from Amazon SQS. Enable Lambda Reserved Concurrency to limit costs.",
+        text: "Keep AWS Lambda — it auto-scales to any concurrency and processes SQS events; use Reserved Concurrency to cap costs.",
         isCorrect: false,
         explanation: "Wrong — Lambda is the more expensive option here. The math shows: 100,000 events/hour × 24 hours × 30 days × 30s × 1 GB × $0.0000166667 ≈ $1,500/month. For a sustained, predictable 24/7 workload at this volume, EC2 Reserved beats Lambda. Reserved Concurrency limits throughput and doesn't reduce cost — it caps concurrency which could cause queue backup."
       },
       {
         id: "B",
-        text: "Run 2 c6g.2xlarge EC2 Reserved Instances (1-year) continuously to handle base load (57,600 events/hour each = 115,200 total). Add Amazon EC2 Auto Scaling with On-Demand c6g.2xlarge instances triggered by Amazon SQS queue depth for burst handling up to 300,000 events/hour. Use SQS as the event buffer to prevent event loss.",
+        text: "Run two c6g.2xlarge Reserved Instances for base load and add an EC2 Auto Scaling group of On-Demand instances driven by SQS queue depth for bursts.",
         isCorrect: true,
         explanation: "Correct — 2 Reserved c6g.2xlarge instances handle 115,200 events/hour base load at $0.2368/hour × 2 × 720 hours = $341/month. For 300,000 events/hour burst, need 6 total instances (300,000 / 57,600 ≈ 5.2, round up to 6); the 4 additional On-Demand instances cost $0.4736/hour × 4 × (burst hours only) — for occasional bursts, total monthly cost stays well under $1,500. SQS as a buffer ensures NO events are lost during scaling. Auto Scaling on SQS queue depth handles the 3x burst. This is clearly LOWEST COST vs Lambda for this sustained throughput, with full RELIABILITY (SQS) and SCALE (Auto Scaling)."
       },
@@ -521,7 +521,7 @@ export const crossDomainQuestions2: Question[] = [
       },
       {
         id: "D",
-        text: "Use AWS Lambda with Provisioned Concurrency set to 100 to eliminate cold starts and reduce p99 latency. This provides cost savings compared to on-demand Lambda invocations.",
+        text: "Use AWS Lambda with Provisioned Concurrency set to 100 to eliminate cold starts and reduce p99 latency at lower cost.",
         isCorrect: false,
         explanation: "Wrong — Lambda Provisioned Concurrency charges $0.0000041667/GB-second whether or not the function is invoked (always-on warm instances). 100 provisioned instances × 1 GB × 86,400 seconds/day × 30 days × $0.0000041667 = ~$1,080/month just for Provisioned Concurrency — plus additional on-demand charges for actual invocations. This increases cost, not decreases it. The question is about cost reduction, and EC2 Reserved is the answer."
       }
@@ -547,7 +547,7 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Enable Amazon S3 Cross-Region Replication with 'Replicate objects encrypted with AWS KMS' selected. Create a separate AWS KMS CMK in eu-west-1. Configure the replication rule to use the eu-west-1 CMK for encrypting replicated objects at the destination. Grant the S3 replication IAM role kms:GenerateDataKey and kms:Decrypt permissions on both the source and destination CMKs.",
+        text: "Enable S3 Cross-Region Replication with KMS replication enabled, create a separate eu-west-1 CMK for the destination, and grant the replication role kms:Decrypt and kms:GenerateDataKey on both keys.",
         isCorrect: true,
         explanation: "Correct — S3 Cross-Region Replication supports SSE-KMS encrypted objects when you explicitly enable the KMS replication option. The source CMK is region-specific (us-east-1 only); you must create a separate CMK in eu-west-1 for the destination. S3's replication role decrypts using the source CMK (kms:Decrypt) and re-encrypts using the destination CMK (kms:GenerateDataKey). This is fully automatic, uses customer-managed keys at both ends, and satisfies all constraints."
       },
@@ -555,7 +555,7 @@ export const crossDomainQuestions2: Question[] = [
         id: "B",
         text: "Create an AWS KMS multi-region key with replicas in both us-east-1 and eu-west-1. Encrypt the source objects with the multi-region primary key. Enable S3 Cross-Region Replication with the multi-region replica key used at the destination.",
         isCorrect: false,
-        explanation: "Wrong — This is actually a valid alternative approach, but it requires the source data to be encrypted with a multi-region key from the start. If data is already encrypted with a non-multi-region CMK (as stated: 'CMK specific to us-east-1'), this option requires re-encrypting all existing objects — violating the 'NO manual re-encryption' requirement. Option A works with the existing region-specific CMK without re-encrypting source data."
+        explanation: "Wrong — This is actually a valid alternative approach, but it requires the source data to be encrypted with a multi-region key from the start. If data is already encrypted with a non-multi-region CMK (as stated: 'CMK specific to us-east-1'), this option requires re-encrypting all existing objects — violating the 'NO manual re-encryption' requirement. The correct answer — a separate destination CMK in eu-west-1 — works with the existing region-specific CMK without re-encrypting source data."
       },
       {
         id: "C",
@@ -591,19 +591,19 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Create Amazon DynamoDB Global Tables with replica tables in us-east-1 and ap-southeast-1. Use on-demand capacity mode in both regions. Configure Amazon Route 53 latency-based routing to direct users to the nearest region.",
+        text: "Create DynamoDB Global Tables with replica tables in us-east-1 and ap-southeast-1 using on-demand capacity, with Route 53 latency-based routing to the nearest region.",
         isCorrect: true,
         explanation: "Correct — DynamoDB Global Tables provide active-active multi-region replication with sub-second RPO (typically <1 second) and automatic failover within 30 seconds (RTO < 30 seconds), satisfying the availability requirements. Multi-active means both Regions accept writes simultaneously with eventual consistency propagation. On-demand capacity avoids pre-provisioning. Route 53 latency routing directs each user to the nearest region. Cost: 50,000 writes/second in Global Tables uses replicated write request units (rWRUs) charged at roughly 2x standard WRU. 50,000 rWRU/s × 3600 × 720 × $0.000001875 per rWRU ≈ within the $8,000 budget for the write pattern described. This meets AVAILABILITY, RPO, RTO, and COST."
       },
       {
         id: "B",
-        text: "Create an Amazon DynamoDB table in us-east-1 with Multi-AZ enabled. Enable DynamoDB Streams and use AWS Lambda to replicate writes to a separate DynamoDB table in ap-southeast-1.",
+        text: "Create a DynamoDB table in us-east-1 with Multi-AZ, enable Streams, and use AWS Lambda to replicate writes to a table in ap-southeast-1.",
         isCorrect: false,
         explanation: "Wrong — DynamoDB is Multi-AZ by default; this is not a configuration option. Lambda-based replication via DynamoDB Streams introduces replication lag (seconds to minutes) — RPO is NOT 0. Lambda replication is not automatic failover; if Lambda or Streams fail, replication stops. This custom solution lacks the atomicity and consistency guarantees of Global Tables."
       },
       {
         id: "C",
-        text: "Deploy Amazon DynamoDB with provisioned capacity in us-east-1 as the primary and use Amazon Aurora MySQL Global Database in ap-southeast-1 as a read replica for Asia-Pacific reads.",
+        text: "Deploy DynamoDB with provisioned capacity in us-east-1 as primary and Aurora MySQL Global Database in ap-southeast-1 for regional reads.",
         isCorrect: false,
         explanation: "Wrong — Using Aurora as a read target for a DynamoDB table makes no architectural sense — they are different database services with different data models. This is not a valid configuration. Aurora Global Database cannot replicate from DynamoDB."
       },
@@ -635,7 +635,7 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Configure Amazon CloudFront with an Origin Access Control (OAC) on the Amazon S3 origin. Disable public S3 bucket access. Use CloudFront signed URLs (generated by a trusted key group) with a 24-hour expiration. Use CloudFront Price Class 200 (North America, Europe, Asia).",
+        text: "Configure CloudFront with an Origin Access Control on the S3 origin, disable public bucket access, and use signed URLs with a 24-hour expiration.",
         isCorrect: true,
         explanation: "Correct — OAC restricts S3 to accept requests only from the specific CloudFront distribution (no direct S3 URL access possible), satisfying SECURITY. CloudFront signed URLs with a 24-hour TTL prevent URL sharing. Price Class 200 includes North America, Europe, and Asia PoPs (sub-500ms TTFB for edge-cached content), satisfying PERFORMANCE. CloudFront data transfer at Price Class 200 for 100 TB/month costs approximately $1,700–1,900/month (at ~$0.017–0.019/GB blended), staying within budget — satisfying COST. All three constraints are met."
       },
@@ -729,7 +729,7 @@ export const crossDomainQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Use AWS Snowball Edge Storage Optimized devices to export the 100 TB SQL Server database backup to S3. Restore the backup into Aurora using AWS DMS S3 source task. Enable DMS CDC from SQL Server to Aurora for ongoing changes during Snowball transit. Cut over when CDC lag is under 5 minutes.",
+        text: "Use AWS Snowball Edge to export the 100 TB backup to S3 and restore into Aurora, running DMS CDC during transit and cutting over when lag is under 5 minutes.",
         isCorrect: true,
         explanation: "Correct — Snowball Edge handles the 100 TB bulk transfer offline (Snowball holds up to 80 TB usable per device; order 2 devices). Snowball transit takes 1–2 weeks, well within 3 months. DMS CDC from SQL Server starts immediately when Snowball ships, tracking changes during transit. When the Snowball data is loaded and CDC lag reaches under 5 minutes, stop application writes, let CDC drain, and cut over — achieving the 1-hour RTO and 5-minute RPO. Total approach: Snowball (bulk) + DMS CDC (delta) is the standard AWS pattern for multi-terabyte database migrations."
       },
@@ -767,7 +767,7 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Lambda monthly cost ≈ $130/month — approximately 90% cheaper than EC2. Replace the EC2 fleet with Lambda functions triggered by SQS. Lambda scales automatically to zero during off-hours and to required concurrency during business hours.",
+        text: "Lambda monthly cost ≈ $130/month — about 90% cheaper than EC2. Replace the fleet with Lambda triggered by SQS, scaling to zero off-hours.",
         isCorrect: true,
         explanation: "Correct — Math: 2,000 events/min × 60 min × 12 hours × 22 business days = 31,680,000 events/month. Compute cost: 31,680,000 × 5 seconds × 0.5 GB × $0.0000166667/GB-s = 31,680,000 × $0.0000416667 = $1,320 — wait, let me recalculate. 31.68M × 5s × 0.5GB = 79.2M GB-seconds × $0.0000166667 = $1,320. Plus $0.20/million × 31.68 = $6.34. Total ≈ $1,326. Hmm — but the key insight is: this is workday-only traffic. If we take 22 business days, Lambda is roughly equivalent but for 30-day months with weekends, off-hours savings are significant. For 30-day month with 12 active hours/day: 2,000 × 60 × 12 × 30 = 43.2M events. 43.2M × 5s × 0.5GB × $0.0000166667 = 43.2M × 0.0000416667 = $1,800. This actually EXCEEDS EC2 at this sustained rate during active hours. This is the trap: Lambda is NOT always cheaper. The correct answer acknowledges Lambda saves money by scaling to zero during 12 off-hours, but the compute cost during active hours is comparable to EC2. Net Lambda cost is ~$1,320/month for the event-driven portion — slightly less than $1,382 EC2 due to the zero-cost off-hours period. For pure cost, Lambda wins marginally here, with the added benefit of zero operational management and automatic scaling."
       },
@@ -775,7 +775,7 @@ export const crossDomainQuestions2: Question[] = [
         id: "B",
         text: "Lambda monthly cost ≈ $4,500/month — more expensive than EC2. Keep the EC2 fleet but use Scheduled Scaling to terminate instances during off-hours (8 PM–8 AM), saving 50% of compute cost.",
         isCorrect: false,
-        explanation: "Wrong — The $4,500 figure is incorrect. Lambda cost for this workload is approximately $1,320/month (see Option A explanation). The scheduled scaling approach for EC2 would save ~$691/month (12 off-hours × 20 instances × $0.096 × 30 days / 2 ≈ not quite that — 20 instances × $0.096/hr × 12 off-hours/day × 30 days = $691/month saved), making EC2 cost ~$691/month — this would actually be CHEAPER than Lambda at this scale. But the question is about which approach to recommend, not just cost."
+        explanation: "Wrong — The $4,500 figure is incorrect. Lambda cost for this workload is approximately $1,320/month (see the correct answer's explanation). The scheduled scaling approach for EC2 would save ~$691/month (12 off-hours × 20 instances × $0.096 × 30 days / 2 ≈ not quite that — 20 instances × $0.096/hr × 12 off-hours/day × 30 days = $691/month saved), making EC2 cost ~$691/month — this would actually be CHEAPER than Lambda at this scale. But the question is about which approach to recommend, not just cost."
       },
       {
         id: "C",
@@ -811,25 +811,25 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Yes, 99.99% SLA is achieved because two Hosted Direct Connect connections from the same partner provide physical redundancy via separate ports. No changes needed.",
+        text: "Yes — two Hosted Direct Connect connections from the same partner provide physical redundancy via separate ports; no changes needed.",
         isCorrect: false,
         explanation: "Wrong — This is the key trap. Two Hosted Direct Connect connections from the SAME partner at the SAME DX location do NOT achieve AWS's 99.99% SLA. AWS's maximum resiliency model for 99.99% requires connections from at least TWO different Direct Connect locations (not just different ports at the same location). If the partner's facility, uplink, or the shared DX location infrastructure fails, both connections fail simultaneously. Hosted connections share underlying infrastructure within a partner's network."
       },
       {
         id: "B",
-        text: "No, 99.99% SLA is NOT achieved. The correct architecture requires one Hosted Direct Connect connection from the current DX partner location AND one Hosted Direct Connect connection from a DIFFERENT DX partner location (geographically separate). Both connect to the same AWS Transit Gateway via Direct Connect Gateway.",
+        text: "No — the SLA requires one Hosted DX connection at the current partner location and a second at a geographically separate location.",
         isCorrect: true,
         explanation: "Correct — AWS's resiliency model for 99.99% ('Maximum Resiliency') explicitly requires connections from different Direct Connect locations. Two connections from the same DX location fail together during a location-level event. Adding a connection from a geographically separate DX partner location ensures that a single-facility failure cannot take down both connections. Hosted connections specifically share the DX partner's physical plant, making same-location redundancy weaker than dedicated connections at separate locations."
       },
       {
         id: "C",
-        text: "No, 99.99% SLA is NOT achieved. The correct fix is to upgrade both Hosted Direct Connect connections to Dedicated Direct Connect connections at the same DX location. Dedicated connections provide physically isolated fiber, eliminating shared bandwidth risk.",
+        text: "No — the fix is to upgrade both Hosted connections to Dedicated Direct Connect at the same location for physically isolated fiber.",
         isCorrect: false,
         explanation: "Wrong — Dedicated Direct Connect connections provide physically isolated fiber from the DX location to AWS, but if both dedicated connections terminate at the SAME DX location and that location experiences a facility outage, both connections still fail. The AWS 99.99% SLA requires geographic diversity of DX locations, not just dedicated vs hosted at the same location."
       },
       {
         id: "D",
-        text: "No, 99.99% SLA is NOT achieved. Add a Site-to-Site VPN as a third path in active standby mode. The combination of two Hosted DX connections plus a VPN backup achieves 99.99%.",
+        text: "No — add a Site-to-Site VPN as a third standby path; two Hosted DX connections plus a VPN backup together achieve 99.99%.",
         isCorrect: false,
         explanation: "Wrong — AWS's documentation on Direct Connect resiliency specifies that adding a VPN backup to Direct Connect provides 'high resiliency' (99.9%) not 'maximum resiliency' (99.99%). The reason is VPN traverses the internet — if the internet path is degraded, the VPN failover is also unreliable. 99.99% requires two Direct Connect connections from separate DX locations."
       }
@@ -855,19 +855,19 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Use AWS Fargate Spot for all ECS tasks. Configure the ECS Service with a capacity provider strategy of 100% Fargate Spot. Implement SQS message visibility timeout of 35 minutes so interrupted tasks automatically re-queue for retry.",
+        text: "Use AWS Fargate Spot for all ECS tasks with a 100% Fargate Spot capacity provider strategy and a 35-minute SQS visibility timeout for re-queue.",
         isCorrect: true,
         explanation: "Correct — Fargate Spot provides up to 70% discount vs standard Fargate pricing. For this workload, individual task interruptions are acceptable (jobs retry via SQS), satisfying RELIABILITY. Throughput is maintained because Fargate Spot scales to the same concurrency as standard Fargate — the pool is just reclaimed capacity. A 35-minute visibility timeout (slightly longer than the 30-minute max job duration) ensures that if a Fargate Spot task is reclaimed before completing, the SQS message becomes visible again and is picked up by a new task. This satisfies RELIABILITY, PERFORMANCE, and achieves >50% COST reduction."
       },
       {
         id: "B",
-        text: "Use AWS Fargate Spot for all ECS tasks. Set SQS message retention to 1 minute so that interrupted jobs expire from the queue and the client is notified to resubmit.",
+        text: "Use AWS Fargate Spot for all tasks and set SQS message retention to 1 minute so interrupted jobs expire and clients resubmit.",
         isCorrect: false,
         explanation: "Wrong — Setting SQS message retention to 1 minute means any job not completed within 1 minute (all jobs take 10–30 minutes) expires from the queue permanently. Interrupted tasks would lose their jobs, violating the RELIABILITY requirement that all jobs must eventually complete."
       },
       {
         id: "C",
-        text: "Switch from AWS Fargate to Amazon EC2 Spot Instances for ECS tasks. Implement ECS task draining with a 30-minute draining timeout to complete in-flight jobs before Spot interruption.",
+        text: "Switch from Fargate to EC2 Spot Instances for ECS tasks, with ECS task draining set to a 30-minute timeout for in-flight jobs.",
         isCorrect: false,
         explanation: "Wrong — EC2 Spot Instance interruption gives only a 2-minute warning, not 30 minutes. ECS draining timeout cannot extend beyond the 2-minute Spot interruption notice. Any job currently running at interruption time will not complete, requiring re-queue. This is functionally equivalent to Fargate Spot but adds EC2 management overhead (OS patching, AMI management, cluster scaling). It doesn't provide additional cost savings over Fargate Spot for this use case."
       },
@@ -905,7 +905,7 @@ export const crossDomainQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon Aurora DSQL — provides active-active distributed SQL with PostgreSQL compatibility, multi-Region ACID transactions, sub-10ms reads, RPO = 0 via synchronous replication, and automatic failover within seconds.",
+        text: "Amazon Aurora DSQL — active-active distributed SQL with PostgreSQL compatibility, multi-Region ACID transactions, RPO = 0, and automatic failover.",
         isCorrect: true,
         explanation: "Correct — Amazon Aurora DSQL (introduced in 2024) is specifically designed for active-active multi-Region SQL databases. It provides: PostgreSQL-compatible SQL with full JOIN support, ACID transactions across Regions, active-active writes in both Regions, RPO = 0 via the distributed transaction protocol, and sub-60-second automated failover. It addresses the gap that previously required Aurora Global Database (which is only active-active for reads, not writes) by enabling true active-active write distribution with distributed transactions."
       },
@@ -943,7 +943,7 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Migrate from Amazon API Gateway REST API to Amazon API Gateway HTTP API. HTTP API natively supports JWT authorizers (Cognito User Pools), CORS, Lambda proxy integration, and route-level throttling — all existing features. HTTP API costs $1.00/million vs REST API's $3.50/million.",
+        text: "Migrate from API Gateway REST API to HTTP API — it supports JWT authorizers, CORS, and Lambda proxy at $1.00/million versus $3.50/million.",
         isCorrect: true,
         explanation: "Correct — HTTP API has lower internal overhead than REST API, resulting in 20–40ms lower p99 latency (pushing p99 from 450ms toward 200ms range). Cost: 5M requests/day × 30 days = 150M requests/month × $1.00/million = $150/month vs current $1,750 — a 91% cost reduction, well under the $900 target. HTTP API natively supports JWT authorizers (pointing to Cognito User Pool), CORS configuration, Lambda proxy, and per-route throttling. Since the startup uses NONE of the REST API-specific features (no API keys, usage plans, service proxies), migration is straightforward. All three constraints are resolved."
       },
@@ -955,13 +955,13 @@ export const crossDomainQuestions2: Question[] = [
       },
       {
         id: "C",
-        text: "Replace Amazon API Gateway with an Application Load Balancer (ALB) with Lambda targets. ALB has lower per-request costs ($0.008/LCU-hour) and lower latency overhead than API Gateway.",
+        text: "Replace API Gateway with an Application Load Balancer with Lambda targets — lower per-request cost and lower latency overhead.",
         isCorrect: false,
         explanation: "Wrong — ALB with Lambda targets lacks native JWT authentication, CORS configuration, per-route throttling, and the operational simplicity of API Gateway. Implementing these features requires custom Lambda middleware code, increasing complexity — directly violating the simplicity requirement. ALB Lambda targets also have limitations (18 MB request size, no native request transformations)."
       },
       {
         id: "D",
-        text: "Enable Amazon API Gateway REST API Edge-Optimized endpoint type with Amazon CloudFront distribution. This reduces latency by serving requests from CloudFront edge locations and caches responses.",
+        text: "Enable the REST API Edge-Optimized endpoint type with CloudFront to serve and cache requests at edge locations.",
         isCorrect: false,
         explanation: "Wrong — Edge-Optimized REST API routes through a CloudFront distribution managed by API Gateway, but the API Gateway processing still happens in a single Region. The latency reduction is primarily for users far from the Region — for a mobile banking app with users concentrated in one Region, the improvement is minimal. It does not reduce the per-request cost of REST API ($3.50/million). The fundamental cost and latency issues with REST API remain."
       }
@@ -987,13 +987,13 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Replace all 15 On-Demand nodes with EC2 Spot Instances. Configure the EKS managed node group with multiple instance types (m5.xlarge, m5a.xlarge, m4.xlarge) across all 3 AZs to reduce interruption risk. Use the EKS cluster autoscaler to maintain minimum node count.",
+        text: "Replace all 15 On-Demand nodes with EC2 Spot Instances, using multiple instance types across 3 AZs and the cluster autoscaler.",
         isCorrect: false,
         explanation: "Wrong — Running ALL nodes on Spot for a 99.9% SLA application is risky. During periods of high Spot capacity demand, multiple AZ-level interruptions can occur simultaneously, potentially dropping below minimum capacity. While diversifying instance types reduces this risk, running zero On-Demand nodes provides no guaranteed baseline capacity for a 99.9% SLA requirement."
       },
       {
         id: "B",
-        text: "Configure two EKS node groups: a baseline On-Demand node group with 6 m5.xlarge instances (2 per AZ) and a Spot node group with 9 m5.xlarge instances (3 per AZ). Use Kubernetes pod disruption budgets to ensure at least 70% of pods remain running during Spot interruptions. Configure the Application Load Balancer with health checks.",
+        text: "Configure two EKS node groups — 6 On-Demand and 9 Spot m5.xlarge instances across 3 AZs — with pod disruption budgets keeping 70% of pods running.",
         isCorrect: true,
         explanation: "Correct — 6 On-Demand nodes provide guaranteed baseline capacity to serve traffic in all 3 AZs even if all Spot nodes are interrupted simultaneously (6 × 2 vCPU/8 GB handles 2,000 req/s at reduced capacity). Spot nodes provide burst capacity at ~70% discount. If one AZ fails, 2 On-Demand + 3 Spot nodes in the remaining 2 AZs maintain service. Pod disruption budgets prevent too many pods being evicted at once. Cost: 6 On-Demand × $0.192 × 720 = $829 + 9 Spot × ~$0.058 × 720 = $375 = $1,204/month — 42% reduction from $2,074. AVAILABILITY and LATENCY maintained with 2-minute pod rescheduling. All three constraints met."
       },
@@ -1005,7 +1005,7 @@ export const crossDomainQuestions2: Question[] = [
       },
       {
         id: "D",
-        text: "Use AWS Fargate profiles for all EKS pods. Fargate eliminates node management overhead, scales to zero during off-hours, and costs less than On-Demand EC2 for variable workloads.",
+        text: "Use AWS Fargate profiles for all EKS pods — no node management, scales to zero off-hours, and cheaper than On-Demand EC2.",
         isCorrect: false,
         explanation: "Wrong — Fargate for EKS is priced at $0.04048/vCPU-hour and $0.004445/GB-hour. For 15 nodes equivalent of 2 vCPU/8 GB (30 vCPU total): 30 vCPU × $0.04048 × 720 = $874 (CPU) + 120 GB × $0.004445 × 720 = $384 (memory) = $1,258/month. This is a 39% reduction — borderline. However, Fargate does NOT guarantee 99.9% availability for AZ-failure scenarios the same way a mixed On-Demand/Spot EKS node group does, and Fargate has higher startup latency (no pre-warmed nodes) affecting the <2-minute rescheduling SLA."
       }
@@ -1031,7 +1031,7 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Apply Service Control Policies (SCPs) at the appropriate OU level: an SCP on all OUs denying cloudtrail:StopLogging and cloudtrail:DeleteTrail; an SCP on the Production OU denying ec2:RunInstances where vpc is not specified; an SCP on the Development OU denying ec2:RunInstances for all regions except us-east-1 and us-west-2.",
+        text: "Apply SCPs at the appropriate OU level: deny cloudtrail:StopLogging and cloudtrail:DeleteTrail on all OUs; deny ec2:RunInstances without a VPC on the Production OU; restrict the Development OU to us-east-1 and us-west-2.",
         isCorrect: true,
         explanation: "Correct — SCPs are the only Organizations control that persists even when a member account's administrator or root user attempts to override them. SCPs define the maximum permission boundary for all principals (including root) in the OU. Applying the CloudTrail deny SCP at the root level propagates to all OUs. The EC2-Classic deny applies only to Production OU. The region restriction applies only to Development OU. SCPs are automatic (inherited by all accounts in the OU) and cannot be removed by member account administrators. All three requirements are met."
       },
@@ -1075,7 +1075,7 @@ export const crossDomainQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Kinesis Data Streams → Amazon Kinesis Data Firehose (with dynamic partitioning, Parquet conversion, and 60-second buffering) → Amazon S3. Configure AWS Glue Data Catalog to automatically crawl new S3 prefixes on a 5-minute schedule. Use Amazon Athena for ad-hoc queries on the cataloged data.",
+        text: "Kinesis Data Streams → Data Firehose with dynamic partitioning and Parquet conversion → S3, with a Glue crawler on a schedule and Athena for queries.",
         isCorrect: true,
         explanation: "Correct — Kinesis Data Firehose with 60-second buffering delivers data to S3 within 60–90 seconds. Firehose's native Parquet conversion (via Glue Data Catalog schema) converts raw records to cost-optimized columnar format before writing to S3, satisfying COST. The Glue crawler on a 5-minute schedule adds new S3 partitions to the Data Catalog, making data queryable via Athena within 5 minutes of arrival. If Athena or Glue becomes unavailable, Firehose independently continues delivering to S3 (AVAILABILITY — storage is decoupled from analytics). Firehose and Athena are fully serverless (OPERATIONS). All four constraints are satisfied."
       },

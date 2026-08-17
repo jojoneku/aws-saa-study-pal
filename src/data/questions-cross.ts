@@ -25,7 +25,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Store records in Amazon S3 Glacier Deep Archive with Amazon S3 Object Lock in Compliance mode and server-side encryption using AWS Key Management Service (AWS KMS) customer-managed keys (SSE-KMS). Apply a seven-year retention period.",
+        text: "Store records in Amazon S3 Glacier Deep Archive with S3 Object Lock in Compliance mode and SSE-KMS customer-managed keys, with a seven-year retention period.",
         isCorrect: true,
         explanation: "Correct — S3 Glacier Deep Archive is the lowest-cost storage class (~$0.00099/GB-month), fully supports Object Lock in Compliance mode for WORM, and supports SSE-KMS with customer-managed keys. Quarterly retrieval at this volume is acceptable given the audit-only access pattern."
       },
@@ -104,25 +104,25 @@ export const crossDomainQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Run a fixed fleet of On-Demand instances sized to peak load.",
+        text: "Run a fixed fleet of On-Demand instances sized to handle the peak processing load at all times of day.",
         isCorrect: false,
         explanation: "Wrong — sizing to peak load wastes money during low-volume periods. On-Demand at peak capacity is the most expensive option and does not adapt to variable load."
       },
       {
         id: "B",
-        text: "Use an Auto Scaling group of Spot Instances across multiple instance families and Availability Zones, with SQS visibility timeout set to 35 minutes and a dead-letter queue for jobs that fail after three attempts.",
+        text: "Use an Auto Scaling group of Spot Instances across multiple families and AZs, with a 35-minute SQS visibility timeout.",
         isCorrect: true,
         explanation: "Correct — Spot Instances provide up to 90% savings over On-Demand and are ideal for retry-tolerant batch workloads. Using multiple instance families (instance fleet/attribute-based selection) across AZs dramatically reduces interruption risk. The SQS visibility timeout at 35 minutes (exceeding max job length of 30 min) ensures interrupted jobs become visible again for retry. The DLQ catches any persistent failures."
       },
       {
         id: "C",
-        text: "Purchase 1-year Standard Reserved Instances at the expected average load and supplement with On-Demand instances for spikes.",
+        text: "Purchase 1-year Standard Reserved Instances at the expected average load and add On-Demand instances for the spikes.",
         isCorrect: false,
         explanation: "Wrong — Reserved Instances require a 1-year commitment and are priced for steady-state, predictable workloads. For unpredictable variable volume, paying for reserved capacity that may sit idle is less cost-effective than Spot for retry-tolerant jobs."
       },
       {
         id: "D",
-        text: "Use AWS Lambda with a 15-minute maximum execution timeout and trigger it from the SQS queue.",
+        text: "Use AWS Lambda triggered from the SQS queue, subject to its 15-minute maximum execution timeout.",
         isCorrect: false,
         explanation: "Wrong — Lambda has a maximum execution timeout of 15 minutes, but individual transcoding jobs can take up to 30 minutes. Lambda is not suitable for this workload's execution duration requirements."
       }
@@ -145,13 +145,13 @@ export const crossDomainQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Deploy a full-size active-active Amazon Aurora Global Database across us-east-1 and us-west-2 with all application servers running in both Regions at all times.",
+        text: "Deploy a full-size active-active Aurora Global Database across both Regions with all application servers running in both at all times.",
         isCorrect: false,
         explanation: "Wrong — active-active doubles the cost of compute in both regions. While it exceeds RTO/RPO requirements, running full capacity in both Regions simultaneously is the most expensive DR strategy and violates the 'lowest cost' requirement."
       },
       {
         id: "B",
-        text: "Create an Amazon Aurora Global Database with the primary cluster in us-east-1 and a secondary read-only cluster (minimum instance size) in us-west-2. In a Regional failure, promote the secondary cluster to primary and update Amazon Route 53 DNS records. Pre-warm application infrastructure in us-west-2 using AWS CloudFormation.",
+        text: "Create an Aurora Global Database with a minimal secondary cluster in us-west-2; on failure, promote it and update Route 53 records.",
         isCorrect: true,
         explanation: "Correct — this is a Warm Standby strategy. Aurora Global Database replicates with typical RPO < 1 second (well within 5 minutes). The secondary cluster running at minimum size keeps standby costs low. Promotion to primary takes minutes (within 15-minute RTO). Pre-deployed CloudFormation templates enable rapid application scale-up without paying for idle compute."
       },
@@ -189,19 +189,19 @@ export const crossDomainQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "The S3 replication configuration does not have permission to replicate encrypted objects. Fix it by adding kms:GenerateDataKey permission to the S3 replication IAM role for the source KMS key.",
+        text: "The replication role lacks permission to replicate encrypted objects. Add kms:GenerateDataKey on the source KMS key to that role.",
         isCorrect: false,
         explanation: "Wrong — this is a prerequisite for replication (the replication role needs kms:GenerateDataKey and kms:Decrypt for the source key and kms:GenerateDataKey for the destination key), but it addresses replication failure, not the decryption failure by the secondary team. If objects are successfully replicated, the IAM role has sufficient KMS access. The issue is that the replicated objects use a key that only exists in us-east-1."
       },
       {
         id: "B",
-        text: "Regular KMS customer-managed keys are Region-specific. The source CMK from us-east-1 cannot be used to decrypt objects in eu-west-1. Replace the source CMK with an AWS KMS multi-Region key (primary key in us-east-1, replica key in eu-west-1), then configure S3 replication to re-encrypt replicated objects with the eu-west-1 replica key.",
+        text: "Regular CMKs are Region-specific. Replace the source CMK with a KMS multi-Region key and configure replication to use the eu-west-1 replica.",
         isCorrect: true,
         explanation: "Correct — standard KMS CMKs are scoped to a single AWS Region. Objects encrypted with a us-east-1 CMK cannot be decrypted using a key ARN in eu-west-1. Multi-Region KMS keys share the same key material across Regions but have different ARNs. When configured for replication, S3 can re-encrypt objects with the destination Region's replica key, enabling the secondary team to decrypt using their regional key ARN."
       },
       {
         id: "C",
-        text: "The secondary application team's IAM role lacks kms:Decrypt permission on the source key. Grant them cross-Region kms:Decrypt permission on the us-east-1 KMS key ARN.",
+        text: "The secondary team's IAM role lacks kms:Decrypt on the source key. Grant cross-Region kms:Decrypt on the us-east-1 key ARN.",
         isCorrect: false,
         explanation: "Wrong — KMS API calls must be made to the Region where the key lives. The secondary team's applications in eu-west-1 would need to make KMS API calls to us-east-1 to decrypt, which adds latency and a cross-Region dependency that defeats the purpose of DR. Additionally, KMS API calls must be directed to the correct Regional endpoint."
       },
@@ -230,13 +230,13 @@ export const crossDomainQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Store credentials in AWS Systems Manager Parameter Store (SecureString). Write Lambda code to retrieve and refresh credentials on every invocation. Use retry logic with exponential backoff during failovers.",
+        text: "Store credentials in Parameter Store as a SecureString and have Lambda retrieve and refresh them on every invocation, with retry backoff.",
         isCorrect: false,
         explanation: "Wrong — retrieving credentials on every Lambda invocation adds latency and API call costs at scale. The retry/backoff approach does reduce failover errors but does not eliminate the 60-second window. This requires significant code changes and does not address the underlying connection pooling problem."
       },
       {
         id: "B",
-        text: "Enable AWS Secrets Manager with automatic rotation for the RDS credentials, and deploy Amazon RDS Proxy in front of the RDS instance. Configure Lambda functions to connect through RDS Proxy using the Secrets Manager endpoint.",
+        text: "Enable AWS Secrets Manager rotation for the RDS credentials and deploy Amazon RDS Proxy, with the Lambda functions connecting through the proxy.",
         isCorrect: true,
         explanation: "Correct — Secrets Manager handles automatic credential rotation (including updating the running database) with no downtime. RDS Proxy maintains a persistent connection pool to the database and transparently routes connections to the new primary after a Multi-AZ failover, typically within seconds. Lambda functions connect to the stable RDS Proxy endpoint (not the RDS endpoint directly), eliminating stale connection errors. Minimal code change: just update the connection string to point to the Proxy."
       },
@@ -248,7 +248,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "Migrate the database to Amazon Aurora with Multi-AZ. Aurora's faster failover (30 seconds vs. 60 seconds) combined with Secrets Manager rotation meets the requirements.",
+        text: "Migrate the database to Amazon Aurora with Multi-AZ — its faster failover combined with Secrets Manager rotation meets the requirements.",
         isCorrect: false,
         explanation: "Wrong — Aurora does have faster failover than RDS Multi-AZ, but 30 seconds of connection errors is still a problem for hundreds of concurrent Lambda functions. This also requires a database migration (significant operational overhead) and does not address the credential rotation-connection handoff issue as cleanly as RDS Proxy."
       }
@@ -280,7 +280,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Block public access on the S3 bucket. Create a CloudFront Origin Access Control (OAC) and update the S3 bucket policy to allow only the OAC principal. Enable CloudFront edge caching with range-request support. Associate an AWS WAF web ACL for additional security.",
+        text: "Block public access, create a CloudFront Origin Access Control and restrict the bucket policy to it, and associate an AWS WAF web ACL.",
         isCorrect: true,
         explanation: "Correct — OAC is the current recommended mechanism for restricting S3 access to CloudFront only (security). Range-request support allows CloudFront to fetch partial chunks of large video files in parallel, dramatically reducing time-to-first-byte for large files (performance). CloudFront's global edge network of 400+ PoPs brings cached content close to Asian users, achieving sub-200ms TTFB after first cache hit. WAF adds application-layer security."
       },
@@ -315,13 +315,13 @@ export const crossDomainQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "No additional steps are required. DAX automatically uses the same KMS key as the underlying DynamoDB table.",
+        text: "No additional steps are required — DAX automatically uses the same KMS key as the underlying DynamoDB table.",
         isCorrect: false,
         explanation: "Wrong — this is the trap answer. DAX is a separate service with its own encryption configuration. DAX cluster encryption at rest must be explicitly enabled with a customer-managed KMS key when creating the cluster. By default, DAX can use AWS-managed keys or no encryption, which would violate the compliance requirement."
       },
       {
         id: "B",
-        text: "Enable DAX cluster encryption at rest with the same customer-managed KMS key used by DynamoDB, deploy the DAX cluster in the same VPC and private subnets as the EC2 instances, and create a VPC Gateway Endpoint for DynamoDB so that DAX-to-DynamoDB traffic stays on the private network.",
+        text: "Enable DAX encryption at rest with the same customer-managed KMS key, place the cluster in private subnets, and add a Gateway Endpoint.",
         isCorrect: true,
         explanation: "Correct — three things are required: (1) DAX cluster encryption must be explicitly configured with the CMK (DAX does not inherit DynamoDB's encryption settings); (2) DAX must be deployed in the same VPC to keep traffic private; (3) a DynamoDB Gateway Endpoint ensures DAX-to-DynamoDB traffic (cache misses and write-throughs) stays on the AWS private network rather than routing through the public internet. All three are necessary to maintain compliance."
       },
@@ -365,7 +365,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Keep Aurora Multi-AZ as-is. Enable Multi-AZ for the ElastiCache for Redis cluster (automatic failover), so the replica automatically promotes to primary when the primary node fails.",
+        text: "Keep Aurora Multi-AZ as-is and enable Multi-AZ with automatic failover on the ElastiCache for Redis cluster.",
         isCorrect: true,
         explanation: "Correct — ElastiCache for Redis with Multi-AZ enabled and automatic failover allows the replica node to automatically promote to primary when the primary fails, typically within 1–2 minutes. This directly addresses the session loss problem. Aurora Multi-AZ already handles database failover correctly. Enabling Multi-AZ automatic failover on the existing Redis cluster is the minimal, targeted fix."
       },
@@ -400,13 +400,13 @@ export const crossDomainQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Use Amazon Kinesis Data Streams with enhanced fan-out. Assign events to shards by payment ID. Use Lambda function consumers with the Kinesis event source mapping. Lambda automatically retries on failure.",
+        text: "Use Kinesis Data Streams with enhanced fan-out, sharding by payment ID, and Lambda consumers via the event source mapping with automatic retries.",
         isCorrect: false,
         explanation: "Wrong — Lambda's Kinesis event source mapping retries the entire failed batch repeatedly until the records expire (default 24 hours), which can block processing of subsequent records in the shard. For payment processing with a 30-second recovery requirement, this behavior could delay all subsequent events in that shard far beyond 30 seconds. Enhanced fan-out also adds cost."
       },
       {
         id: "B",
-        text: "Use Amazon Kinesis Data Streams with one shard per payment ID range and EC2-based consumer applications using the Kinesis Client Library (KCL). KCL checkpoints progress to DynamoDB; on consumer failure, another instance picks up from the last checkpoint within the heartbeat timeout.",
+        text: "Use Kinesis Data Streams with EC2 consumers running the Kinesis Client Library, which checkpoints to DynamoDB so another instance resumes on failure.",
         isCorrect: true,
         explanation: "Correct — Kinesis Data Streams provides ordered delivery per shard. Partitioning by payment ID ensures per-payment-ID ordering. KCL handles lease management (automatic rebalancing to healthy consumers), checkpointing to DynamoDB (durable offset tracking), and failover within the heartbeat timeout (~10–30 seconds), meeting the 30-second recovery requirement. KCL also handles the exactly-once processing guarantee at the application level via idempotent checkpointing."
       },
@@ -418,7 +418,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "Use Amazon Managed Streaming for Apache Kafka (Amazon MSK) with consumer groups and auto-committed offsets. Enable at-least-once delivery and handle duplicates in the storage layer.",
+        text: "Use Amazon MSK with consumer groups and auto-committed offsets, handling at-least-once duplicates in the storage layer.",
         isCorrect: false,
         explanation: "Wrong — at-least-once delivery with auto-committed offsets does not satisfy the exactly-once requirement unless you add idempotency logic in the consumer. Auto-committed offsets can acknowledge records before processing completes, leading to data loss on failure. While MSK supports exactly-once semantics (EOS) with Kafka transactions, this requires explicit configuration not mentioned here."
       }
@@ -450,19 +450,19 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Add one Amazon Aurora Read Replica and place Amazon ElastiCache for Redis in front of the application for query-result caching of frequently accessed, read-heavy data.",
+        text: "Add one Aurora Read Replica and place Amazon ElastiCache for Redis in front for query-result caching of hot reads.",
         isCorrect: true,
         explanation: "Correct — a single Read Replica offloads replication lag-tolerant reads directly from Aurora, while ElastiCache for Redis (sub-millisecond latency) caches the most frequent query results in memory, handling the bulk of read traffic without additional Aurora instances. This reduces the number of queries hitting even the replica significantly. One replica + one ElastiCache cluster costs less than two replicas and achieves better read latency (Redis in-memory is faster than Aurora disk reads)."
       },
       {
         id: "C",
-        text: "Upgrade the primary Aurora instance to a larger instance class to handle the increased read load.",
+        text: "Upgrade the primary Aurora instance to a larger instance class to absorb the increased read load.",
         isCorrect: false,
         explanation: "Wrong — scaling up the primary instance addresses write capacity but does not scale read throughput. Reads will continue to go to the primary instance, and a larger instance still has a single-node bottleneck. This is more expensive than adding a read-specific layer and does not achieve sub-5ms read latency."
       },
       {
         id: "D",
-        text: "Migrate to Amazon DynamoDB to get automatic horizontal scaling for read capacity.",
+        text: "Migrate to Amazon DynamoDB to get automatic horizontal scaling of read capacity.",
         isCorrect: false,
         explanation: "Wrong — migrating from Aurora MySQL to DynamoDB is a major architectural change that requires redesigning the data model from relational to key-value. This has substantial development cost and operational risk, and is a disproportionate response to a read-scaling problem that can be solved with caching."
       }
@@ -491,13 +491,13 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Apply an S3 Lifecycle policy to transition objects after 90 days to S3 Standard-IA.",
+        text: "Apply an S3 Lifecycle policy that transitions objects to S3 Standard-IA after 90 days.",
         isCorrect: false,
         explanation: "Wrong — S3 Standard-IA has a minimum storage duration of 30 days and a minimum object size of 128 KB. More importantly, it charges retrieval fees per GB. For unpredictable access patterns where some objects are accessed daily, Standard-IA retrieval charges can exceed the storage savings. S3 Intelligent-Tiering is specifically designed for unpredictable access patterns."
       },
       {
         id: "C",
-        text: "Transition data older than 90 days to Amazon S3 Intelligent-Tiering. S3 Intelligent-Tiering automatically moves objects between access tiers based on access patterns with no retrieval charges.",
+        text: "Transition data older than 90 days to S3 Intelligent-Tiering, which auto-tiers by access pattern with no retrieval charges.",
         isCorrect: true,
         explanation: "Correct — S3 Intelligent-Tiering monitors object access patterns and automatically moves objects between Frequent Access, Infrequent Access, Archive Instant Access, and Archive Access tiers with NO retrieval charges. Objects accessed daily stay in Frequent Access (S3 Standard pricing); objects not accessed for 30 days move to Infrequent Access (40% cheaper); 90 days to Archive Instant Access (68% cheaper). This is exactly the right storage class for unpredictable access at scale, and Athena queries work natively against all Intelligent-Tiering access tiers."
       },
@@ -541,7 +541,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "C",
-        text: "Deploy an AWS PrivateLink interface endpoint in each spoke VPC to consume the compliance-scanning API from the Services VPC. The Services VPC exposes the API through a Network Load Balancer as a VPC Endpoint Service.",
+        text: "Deploy a PrivateLink interface endpoint in each spoke VPC to consume the compliance API, exposed from the Services VPC via an NLB endpoint service.",
         isCorrect: true,
         explanation: "Correct — AWS PrivateLink is specifically designed for this pattern: a service provider (Services VPC) exposes a service via NLB, and consumers create interface endpoints in their own VPCs. Traffic never leaves the AWS backbone. Unlike Transit Gateway, PrivateLink is unidirectional (consumers call the service; they cannot reach other spoke VPCs), enforcing least-privilege connectivity. Cost: interface endpoint ($0.01/hour per AZ) + data processing ($0.01/GB) — often cheaper than Transit Gateway for asymmetric hub-and-spoke service consumption."
       },
@@ -570,13 +570,13 @@ export const crossDomainQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Enable S3 Cross-Region Replication (CRR) to a destination bucket in us-west-2. Use S3 Standard storage class in both buckets. Apply a bucket key to reduce AWS KMS API request costs. Use the same customer-managed key (with a multi-Region replica in us-west-2).",
+        text: "Enable S3 Cross-Region Replication to us-west-2 using S3 Standard in both buckets, with a bucket key and a multi-Region replica key.",
         isCorrect: false,
         explanation: "Wrong — using S3 Standard in the destination bucket charges full Standard pricing for 50 million objects (10 TB total). Since the replicated copy is a DR standby accessed only after a Regional failure, Standard storage pricing is unnecessarily expensive for infrequent-access replicas."
       },
       {
         id: "B",
-        text: "Enable S3 Cross-Region Replication to a destination bucket in us-west-2. Configure replication to use S3 Standard-IA as the destination storage class. Enable S3 Bucket Key on both buckets to reduce per-object KMS API costs. Use a multi-Region KMS key for seamless decryption in us-west-2.",
+        text: "Enable S3 Cross-Region Replication to us-west-2 with S3 Standard-IA as the destination class, S3 Bucket Key, and a multi-Region KMS key.",
         isCorrect: true,
         explanation: "Correct — four cost optimizations combine: (1) S3 Standard-IA in the destination reduces storage cost by ~58% vs. Standard for infrequently accessed DR copies; (2) S3 Bucket Key reduces KMS API request costs by ~99% by generating one data key per bucket-level key rather than per-object (critical at 50 million objects); (3) Multi-Region KMS key enables the destination Region to decrypt without cross-Region KMS API calls; (4) Standard-IA still provides millisecond access for fast recovery after a Regional failure."
       },
@@ -588,7 +588,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "Use AWS Backup with cross-Region copy enabled to create daily backups in us-west-2. Restore from backup during a Regional failure.",
+        text: "Use AWS Backup with cross-Region copy enabled for daily backups in us-west-2, restoring from backup during a Regional failure.",
         isCorrect: false,
         explanation: "Wrong — daily backups create a maximum RPO of 24 hours. The requirement states 'a copy must exist at all times,' implying continuous replication, not periodic backup. S3 CRR provides continuous, object-level replication with near-zero RPO."
       }
@@ -611,7 +611,7 @@ export const crossDomainQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Deploy AWS Security Hub (with auto-enable for new accounts), enable AWS Config with the S3 encryption conformance pack and Auto Remediation using AWS Systems Manager Automation, and apply SCPs at the root OU to deny cloudtrail:StopLogging and guardduty:DisableOrganizationAdminAccount. Delegate Security Hub administration to a security account.",
+        text: "Deploy AWS Security Hub with auto-enable, AWS Config with the S3 encryption conformance pack and SSM auto-remediation, and root-OU SCPs denying cloudtrail:StopLogging.",
         isCorrect: true,
         explanation: "Correct — each service addresses a distinct requirement: SCPs (free) prevent CloudTrail/GuardDuty disablement as a preventive control; AWS Config with the S3 encryption conformance pack and SSM Automation remediation detects and fixes unencrypted buckets within minutes (detective + remediation); Security Hub with organization integration aggregates findings from all accounts into the delegated admin account (single pane of glass) and supports per-account pricing with volume discounts. This combination covers all four requirements at optimized cost."
       },
@@ -661,7 +661,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Place Amazon CloudFront in front of the API Gateway HTTP API with cache behaviors configured for the high-traffic endpoints (TTL 5 minutes). Add an AWS WAF web ACL to the CloudFront distribution. Configure CloudFront to forward the Authorization header for cache bypass on sensitive endpoints.",
+        text: "Place Amazon CloudFront in front of the HTTP API with 5-minute cache behaviors, attach an AWS WAF web ACL, and forward the Authorization header.",
         isCorrect: true,
         explanation: "Correct — CloudFront's 400+ edge PoPs serve cached API responses from locations near users in Asia and Europe, reducing latency from 800–1200 ms to under 50 ms for cache hits. TTL of 5 minutes matches the data freshness requirement. AWS WAF at the CloudFront layer provides DDoS protection and is cheaper than WAF at the API Gateway level for high-request volumes (CloudFront+WAF billing is per-WebACL + per-million requests, often cheaper than REST API). CloudFront edge caching can reduce origin Lambda invocations by up to 80% (matching the access pattern), significantly reducing Lambda and API Gateway costs."
       },
@@ -708,7 +708,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "C",
-        text: "Deploy Aurora PostgreSQL with one writer (right-sized, 1-year Reserved Instance) and use Aurora Auto Scaling to manage a fleet of Reader instances between a minimum of 1 and maximum of 5, right-sized based on actual load. Encrypt with a customer-managed KMS key.",
+        text: "Deploy Aurora PostgreSQL with a right-sized writer on a 1-year Reserved Instance and Aurora Auto Scaling readers between 1 and 5, encrypted with a customer-managed key.",
         isCorrect: true,
         explanation: "Correct — Aurora Auto Scaling adds/removes read replicas based on CPU or connections metrics, ensuring sub-2ms read latency under peak load while minimizing idle replica costs during off-peak hours. Reserving the writer (predictable 24/7 usage) saves 40–60% vs. On-Demand. Auto Scaling replicas can remain On-Demand since they are ephemeral. Customer-managed KMS key satisfies HIPAA encryption requirements. This achieves the 40% cost reduction vs. on-premises through right-sizing, reserved pricing, and elastic scaling."
       },
@@ -740,19 +740,19 @@ export const crossDomainQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Purchase 1-year Standard Reserved Instances to cover the full peak capacity across all AZs.",
+        text: "Purchase 1-year Standard Reserved Instances sized to cover the full peak capacity across all three Availability Zones.",
         isCorrect: false,
         explanation: "Wrong — covering full peak capacity (3× baseline) with Reserved Instances means paying for reserved capacity that sits idle 30% of the time (off-peak). Reserved Instances at peak sizing is over-provisioning and wastes the cost savings advantage of Reserved Instances, which are best for steady baseline usage."
       },
       {
         id: "B",
-        text: "Use Compute Savings Plans to cover 70% of baseline at the committed spend level. Add an Auto Scaling group configured with a mix of On-Demand (20%) and Spot Instances (80%) to handle the variable peak, using Spot capacity rebalancing and instance diversification.",
+        text: "Use Compute Savings Plans for 70% of baseline, plus an Auto Scaling group mixing 20% On-Demand and 80% Spot with capacity rebalancing.",
         isCorrect: false,
         explanation: "Wrong — Spot Instances can be interrupted at any time with a 2-minute warning. Although the application is stateless, if a Spot instance is interrupted mid-request, that user request fails. The problem states instances cannot be interrupted during active requests. Using 80% Spot for peak traffic creates unacceptable interruption risk for in-flight requests."
       },
       {
         id: "C",
-        text: "Use Compute Savings Plans to cover 70% baseline compute spend. Configure Auto Scaling with On-Demand instances (launch template using current-generation instance types) to handle the variable peak. Deploy across 3 AZs with minimum 1 instance per AZ.",
+        text: "Use Compute Savings Plans for 70% baseline and Auto Scaling with On-Demand for the variable peak, across 3 AZs with 1 instance minimum each.",
         isCorrect: true,
         explanation: "Correct — Compute Savings Plans provide up to 66% savings on the predictable 70% baseline without committing to specific instance types or AZs. On-Demand instances for the variable peak (0–2× baseline above the savings plan coverage) provide full availability without interruption risk. Multi-AZ deployment with minimum 1 instance per AZ ensures fault tolerance. The combination maximizes savings on the known baseline while maintaining flexibility and reliability for the peak."
       },
@@ -781,25 +781,25 @@ export const crossDomainQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Deploy Amazon Aurora Global Database with a primary cluster in us-east-1, secondary clusters in eu-west-1 and ap-southeast-1 (read-only). Use ElastiCache for Redis in each Region for product catalog caching. Accept that writes always go to us-east-1.",
+        text: "Deploy Aurora Global Database with a primary in us-east-1 and read-only secondaries in both Regions, with ElastiCache caching; writes always go to us-east-1.",
         isCorrect: false,
         explanation: "Wrong — an Aurora Global Database secondary cluster cannot accept writes during normal operations (it is read-only until promoted). This fails the 'accept writes from any Region' requirement. Also, global database secondaries do have low-latency reads but adding ElastiCache in each Region increases both cost and instance count."
       },
       {
         id: "B",
-        text: "Deploy separate Aurora MySQL clusters in each Region (us-east-1, eu-west-1, ap-southeast-1) with binlog-based replication between them. Each Region accepts writes and replicates to the others.",
+        text: "Deploy separate Aurora MySQL clusters in each of the three Regions with binlog-based replication between them, each accepting writes.",
         isCorrect: false,
         explanation: "Wrong — Aurora does not natively support multi-master binlog replication between clusters in different Regions with automatic conflict resolution. This would require a custom replication solution, which has high operational complexity and conflict-resolution challenges. Aurora Multi-Master was limited to a single Region and has been discontinued."
       },
       {
         id: "C",
-        text: "Use Amazon Aurora Global Database and enable write forwarding on the secondary clusters. Secondary clusters can forward write requests to the primary, and ElastiCache for Redis in the primary Region handles catalog caching.",
+        text: "Use Aurora Global Database with write forwarding on the secondaries, which forward writes to the primary, plus ElastiCache in the primary Region.",
         isCorrect: false,
         explanation: "Wrong — Aurora Global Database write forwarding routes secondary-Region writes to the primary Region over the network, meaning write latency from Asia to us-east-1 is still high (150+ ms). Under this architecture, writes from secondary Regions are not truly 'local' writes and cannot provide the same performance. This also does not meet the requirement to 'accept writes from any Region during normal operations' in the low-latency sense expected by a global e-commerce application."
       },
       {
         id: "D",
-        text: "Deploy Amazon Aurora Global Database with one writer instance in us-east-1 and Aurora Auto Scaling reader instances (minimum 1) in each secondary cluster in eu-west-1 and ap-southeast-1. Use Aurora Global Database's managed failover (RPO < 1 second, RTO < 60 seconds) for write availability. Use the Regional reader endpoint in each Region for product catalog reads.",
+        text: "Deploy Aurora Global Database with a writer in us-east-1 and Auto Scaling readers in each secondary cluster, using managed failover and Regional reader endpoints.",
         isCorrect: true,
         explanation: "Correct — Aurora Global Database achieves: (1) sub-10ms catalog read latency from local reader instances in each Region; (2) managed planned/unplanned failover within 60 seconds (Global Database managed failover promotes a secondary to new primary within ~60 seconds RTO); (3) minimum instances — one writer + auto-scaled readers in each Region is the minimum viable configuration. Write forwarding is not needed because the architecture accepts that writes go to the primary Region (the question says 'accept writes FROM any Region' which write forwarding supports, but the real performance concern is reads). Managed failover satisfies the 60-second write recovery requirement."
       }
@@ -828,7 +828,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Replace On-Demand EC2 instances with AWS Fargate Spot tasks triggered by Amazon EventBridge Scheduler. Fargate Spot provides up to 70% savings over Fargate On-Demand and tasks are idempotent so interruptions are handled via SQS requeue.",
+        text: "Replace On-Demand EC2 with AWS Fargate Spot tasks triggered by EventBridge Scheduler — up to 70% savings, with interruptions handled by SQS requeue.",
         isCorrect: true,
         explanation: "Correct — Fargate Spot provides up to 70% discount over Fargate On-Demand with no EC2 instance management overhead (satisfying the 'no management overhead' constraint). Tasks are idempotent, so Spot interruptions simply return the SQS message to the queue for retry. The SQS queue handles task distribution; ECS with Fargate Spot processes tasks from the queue. Starting 500 Fargate Spot tasks concurrently maintains the same total job completion time. This exceeds the 60% cost-reduction target with zero infrastructure management."
       },
@@ -872,7 +872,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Configure Amazon CloudFront with Origin Access Control (OAC) to restrict S3 access, use CloudFront signed URLs for content authorization, enable CloudFront Origin Shield in a Region near us-east-1 to reduce S3 origin fetches, commit to a 1-year CloudFront Security Savings Bundle for cost reduction, and configure multi-origin failover (S3 primary + S3 in us-west-2 replica as failover) for 99.99% availability.",
+        text: "Use CloudFront with Origin Access Control and signed URLs, enable Origin Shield to cut S3 origin fetches, commit to a 1-year Security Savings Bundle, and add multi-origin failover.",
         isCorrect: true,
         explanation: "Correct — OAC ensures only CloudFront can read from S3 (security, satisfying DRM/direct access prevention). Signed URLs restrict per-user content access. Origin Shield acts as a caching layer between edge PoPs and the S3 origin, reducing origin fetches by 60–80% (lowers S3 request costs and CDN-origin transfer costs, helping achieve 30% cost reduction). CloudFront Security Savings Bundle reduces CloudFront costs 30–35% for committed usage. Multi-origin failover with a replicated S3 bucket in us-west-2 provides origin redundancy for 99.99% availability. OAC supports SSE-KMS, satisfying the encryption requirement."
       },
@@ -907,25 +907,25 @@ export const crossDomainQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Deploy Aurora Global Database (primary in us-east-1, secondary in eu-west-1). Use a single KMS key replicated via AWS KMS multi-Region keys to both Regions. Deploy RDS Proxy in front of the Aurora primary to manage Lambda connections. Purchase Aurora Reserved Instances for the primary cluster writer.",
+        text: "Deploy Aurora Global Database with a single KMS multi-Region key replicated to both Regions, RDS Proxy in front of the primary, and Aurora Reserved Instances for the writer.",
         isCorrect: false,
         explanation: "Wrong — this is almost correct but uses a single multi-Region key replicated to both Regions. While multi-Region keys have the same key material, the requirement states 'independently auditable per Region.' A single key with a replica has a single key policy. Truly independent per-Region audit trails and key policies require separate customer-managed CMKs in each Region (configured as the encryption key for each Aurora cluster independently). The distinction matters for regulatory compliance."
       },
       {
         id: "B",
-        text: "Deploy Aurora Global Database (primary in us-east-1, secondary in eu-west-1). Use separate customer-managed KMS keys in each Region (us-east-1 CMK for primary cluster, eu-west-1 CMK for secondary cluster). Deploy RDS Proxy in front of the primary Aurora cluster. Purchase Compute Savings Plans to cover Aurora instance costs. Enable Aurora Auto Scaling for reader instances in both Regions.",
+        text: "Deploy Aurora Global Database with separate customer-managed KMS keys per Region, RDS Proxy on the primary, Compute Savings Plans, and Auto Scaling readers.",
         isCorrect: true,
         explanation: "Correct — separate CMKs per Region provides independent key policies, independent CloudTrail audit trails, and independent key rotation schedules (satisfying regulatory requirement 1). Aurora Global Database managed failover achieves RTO < 15 minutes and RPO < 1 minute (requirement 2). RDS Proxy handles 20,000 concurrent Lambda connections by multiplexing them into a smaller Aurora connection pool (requirement 3 — Aurora has a maximum connection limit based on instance memory; without Proxy, 20,000 connections would exhaust resources). Compute Savings Plans + Aurora Auto Scaling (scale in readers when not needed) reduces idle infrastructure costs by 25%+ (requirement 4)."
       },
       {
         id: "C",
-        text: "Deploy Aurora Global Database with write forwarding enabled. Use the same CMK in both Regions by sharing the key ARN. Lambda functions connect directly to Aurora without a proxy. Use 1-year Reserved Instances for all Aurora instances.",
+        text: "Deploy Aurora Global Database with write forwarding, the same CMK shared across Regions, no proxy, and 1-year Reserved Instances.",
         isCorrect: false,
         explanation: "Wrong — sharing a CMK ARN across Regions is not directly possible for standard CMKs (they are Region-specific). Write forwarding routes writes from secondary to primary over the network, adding latency for write operations. Lambda connecting directly to Aurora at 20,000 concurrent connections will exhaust Aurora's connection limit, causing connection refused errors (no RDS Proxy). Reserved Instances for all Aurora instances (including auto-scaled readers) over-provisions for variable load."
       },
       {
         id: "D",
-        text: "Deploy Aurora Multi-AZ in us-east-1 (primary) and us-west-2 (secondary) as two separate clusters with cross-Region automated backups. Use separate CMKs per Region. RDS Proxy manages Lambda connections. Reserved Instances cover both clusters.",
+        text: "Deploy two separate Aurora Multi-AZ clusters with cross-Region backups, separate CMKs per Region, RDS Proxy, and Reserved Instances.",
         isCorrect: false,
         explanation: "Wrong — two separate Aurora Multi-AZ clusters with cross-Region backup is not equivalent to Aurora Global Database. Cross-Region automated backup RPO is limited by backup frequency (not sub-minute) and RTO for restore is 15–60+ minutes for large databases. This fails both the RTO (<15 min) and RPO (<1 min) requirements. Aurora Global Database is required for these targets."
       }
@@ -954,7 +954,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Configure DynamoDB with On-Demand capacity mode. Deploy a DAX cluster in the application's VPC with encryption at rest using the same customer-managed KMS key. Create a DynamoDB VPC Gateway Endpoint to keep DAX-to-DynamoDB traffic private.",
+        text: "Configure DynamoDB with On-Demand capacity mode. Deploy a DAX cluster encrypted at rest with the same customer-managed KMS key, and create a DynamoDB VPC Gateway Endpoint.",
         isCorrect: true,
         explanation: "Correct — On-Demand mode handles instant bursts to 500,000 RCU without pre-provisioning, paying only for actual reads consumed. At 95% low-load utilization, On-Demand is more cost-effective than provisioning for peak (no idle capacity charges). DAX provides sub-millisecond (<1 ms) single-item lookup latency. DAX with customer-managed KMS key encryption satisfies requirement 3. VPC Gateway Endpoint ensures DAX-to-DynamoDB traffic (cache misses) stays on the private AWS network, adding a free security and performance benefit."
       },
@@ -1001,7 +1001,7 @@ export const crossDomainQuestions: Question[] = [
       },
       {
         id: "C",
-        text: "Purchase EC2 Instance Savings Plans for the 60% always-on baseline (matched to the specific instance types required for database write services). Purchase Compute Savings Plans for the remaining 30% predictable business-hours workload. Use On-Demand for the 10% unpredictable spike traffic.",
+        text: "Purchase EC2 Instance Savings Plans for the 60% always-on baseline, Compute Savings Plans for the 30% business-hours workload, and On-Demand for the 10% spikes.",
         isCorrect: true,
         explanation: "Correct — EC2 Instance Savings Plans (up to 72% savings) are appropriate for the database write services that require a specific instance type and cannot flex to other families. The remaining baseline workload uses Compute Savings Plans (66% savings) for flexibility across instance families. The predictable 30% business-hours component is covered by extending Compute Savings Plans commitment to cover that usage (since Savings Plans apply to any usage regardless of time of day). On-Demand for the 10% spike traffic ensures zero interruption risk. Combined savings: ~66-72% on 90% of compute = well over 55% total reduction."
       },
@@ -1030,25 +1030,25 @@ export const crossDomainQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "(1) SCP with Deny for all actions where aws:RequestedRegion not in approved list. (2) SCP with Deny for ec2:RunInstances unless aws:RequestTag/CostCenter is present. (3) AWS Config rule 's3-bucket-server-side-encryption-enabled' with SSM Automation remediation. (4) AWS IAM Access Analyzer with notifications to the security team.",
+        text: "(1) SCP Deny where aws:RequestedRegion is not approved. (2) SCP Deny for ec2:RunInstances without aws:RequestTag/CostCenter. (3) Config S3 encryption rule with SSM remediation. (4) IAM Access Analyzer notifications to the security team.",
         isCorrect: false,
         explanation: "Wrong — (4) fails. IAM Access Analyzer identifies external or cross-account access findings and generates findings for overly permissive policies, but it is a detective and advisory tool. It does not prevent IAM policy changes from taking effect or enforce a human review/approval gate before changes are applied. Access Analyzer cannot create a 'change freeze' on IAM policies."
       },
       {
         id: "B",
-        text: "(1) AWS Config managed rule 'approved-amis-by-region' to flag out-of-region resources. (2) AWS Config rule to check for missing 'CostCenter' tags on EC2 instances. (3) AWS Config rule with Lambda auto-remediation for S3 encryption. (4) AWS CloudTrail with CloudWatch alarms for IAM API calls.",
+        text: "(1) Config rule 'approved-amis-by-region' for out-of-region resources. (2) Config rule for missing CostCenter tags. (3) Config rule with Lambda remediation for S3 encryption. (4) CloudTrail alarms for IAM API calls.",
         isCorrect: false,
         explanation: "Wrong — (1) and (2) fail. AWS Config rules are detective: they identify non-compliance after resources are created but do not prevent deployment. The question requires preventing resource creation outside approved Regions and preventing EC2 launch without the required tag. Only SCPs (preventive controls) can block API calls before they execute."
       },
       {
         id: "C",
-        text: "(1) SCP Deny for all actions with aws:RequestedRegion condition not matching approved Regions. (2) SCP Deny for ec2:RunInstances where aws:RequestTag/CostCenter key is missing. (3) AWS Config 's3-bucket-server-side-encryption-enabled' rule with AWS Systems Manager Automation remediation on NON_COMPLIANT findings, targeting 30-minute evaluation frequency. (4) AWS CloudFormation Hooks (pre-provision hook) that calls a Lambda function to validate IAM policy changes and pause for approval via AWS Step Functions human approval task.",
+        text: "(1) SCP Deny on aws:RequestedRegion outside approved Regions. (2) SCP Deny for ec2:RunInstances missing CostCenter. (3) Config S3 encryption rule with SSM remediation. (4) CloudFormation Hooks calling Lambda to validate IAM changes.",
         isCorrect: true,
         explanation: "Correct — (1) Region restriction SCP uses aws:RequestedRegion global condition key as a preventive control; (2) Tag enforcement SCP uses aws:RequestTag condition to deny EC2 launch without required tag; (3) Config rule + SSM Automation provides detective + remediation for S3 encryption within the evaluation window; (4) CloudFormation Hooks intercept resource creation/update API calls in CloudFormation templates and can call a Lambda that triggers a Step Functions workflow with a human approval task — this creates the required pre-change approval gate for IAM policies deployed via IaC."
       },
       {
         id: "D",
-        text: "(1) Deploy AWS Control Tower and enable the 'Disallow resource creation in non-approved Regions' detective guardrail. (2) Use AWS Service Catalog with launch constraints that enforce tagging. (3) Enable Amazon Macie on all S3 buckets to detect unencrypted data. (4) Use AWS Config Advanced Queries to monitor IAM policy changes.",
+        text: "(1) AWS Control Tower with the non-approved-Regions detective guardrail. (2) Service Catalog launch constraints enforcing tagging. (3) Macie on all S3 buckets. (4) Config Advanced Queries for IAM policy changes.",
         isCorrect: false,
         explanation: "Wrong — (1) Control Tower detective guardrails detect but do not prevent resource creation. (2) Service Catalog launch constraints apply only to resources provisioned through Service Catalog, not all EC2 launches. (3) Amazon Macie identifies sensitive data classifications, not encryption configuration compliance. (4) AWS Config Advanced Queries is a reporting tool, not a pre-change approval mechanism. None of requirements (1), (2), or (4) are met with preventive or approval controls."
       }

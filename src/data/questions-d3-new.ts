@@ -20,7 +20,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Migrate all gp2 volumes to gp3 volumes.",
+        text: "Migrate all gp2 volumes to gp3 volumes with the baseline 3,000 IOPS.",
         isCorrect: true,
         explanation: "Correct — Amazon EBS gp3 provides a baseline of 3,000 IOPS and 125 MiB/s throughput at any volume size with NO burst credit mechanism. There is no burst balance to exhaust. gp3 is also approximately 20% cheaper per GiB than gp2. The migration is online (no downtime required via Elastic Volumes) and eliminates both the performance cliff and the cost premium."
       },
@@ -32,7 +32,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "Enable Fast Snapshot Restore on each gp2 volume.",
+        text: "Enable Fast Snapshot Restore on each of the gp2 volumes.",
         isCorrect: false,
         explanation: "Wrong — Fast Snapshot Restore pre-initializes volumes created from snapshots to eliminate lazy loading. It does not change the burst credit behavior of gp2 volumes that are already running and does not address the burst balance exhaustion problem."
       }
@@ -54,7 +54,7 @@ export const domain3NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Use Amazon S3 Standard with S3 Transfer Acceleration enabled.",
+        text: "Use Amazon S3 Standard with S3 Transfer Acceleration enabled on the bucket.",
         isCorrect: false,
         explanation: "Wrong — S3 Transfer Acceleration is designed for globally-distributed clients uploading to a single region via CloudFront edge ingress. It does not improve latency for EC2 instances within the same region. Training jobs co-located with the S3 bucket already use direct regional paths."
       },
@@ -66,7 +66,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "C",
-        text: "Switch to Amazon S3 Express One Zone directory buckets co-located in the same Availability Zone as the training instances.",
+        text: "Switch to Amazon S3 Express One Zone directory buckets in the same AZ as the training instances.",
         isCorrect: true,
         explanation: "Correct — Amazon S3 Express One Zone provides single-digit millisecond latency (10× faster than S3 Standard), up to 2 million GET/s and 200,000 PUT/s per bucket, and uses session-based authentication (CreateSession) for high-frequency access patterns. Directory buckets are designed specifically for AI/ML training data co-located with compute. Since the data is transient (tolerable AZ-level loss), the single-AZ durability model is acceptable."
       },
@@ -100,13 +100,13 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon FSx for NetApp ONTAP with NFS access from all cluster nodes.",
+        text: "Amazon FSx for NetApp ONTAP with NFS access from all of the cluster nodes.",
         isCorrect: false,
         explanation: "Wrong — Amazon FSx for NetApp ONTAP is designed for multi-protocol enterprise workloads (NFS + SMB + iSCSI), hybrid cloud, and database use cases. It does not provide the HPC-grade parallel I/O performance of FSx for Lustre, which is purpose-built for HPC with Data Repository Association (DRA) for S3 integration."
       },
       {
         id: "C",
-        text: "Amazon FSx for Lustre (Persistent 2) with a Data Repository Association to the S3 bucket and Elastic Fabric Adapter (EFA) networking.",
+        text: "Amazon FSx for Lustre Persistent 2 with a Data Repository Association to the S3 bucket and EFA networking.",
         isCorrect: true,
         explanation: "Correct — Amazon FSx for Lustre is purpose-built for HPC workloads: sub-millisecond SSD latency, parallel POSIX I/O, up to 1,200 Gbps aggregate throughput per client (Persistent 2 + EFA), and Data Repository Associations (DRA) that lazy-load from S3 on demand and write back via DataRepositoryTask. FSx for Lustre + Cluster Placement Group + EFA is the canonical AWS HPC pattern."
       },
@@ -146,7 +146,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "C",
-        text: "Amazon FSx for NetApp ONTAP with iSCSI LUNs for SQL Server FCI and NFS/SMB for application server access.",
+        text: "Amazon FSx for NetApp ONTAP with iSCSI LUNs for SQL Server FCI and SMB for the application servers.",
         isCorrect: true,
         explanation: "Correct — Amazon FSx for NetApp ONTAP is the only AWS managed file system supporting NFS v3/v4/v4.1, SMB v2/v3, AND iSCSI from the same storage system. This enables SQL Server FCI to use iSCSI LUNs for shared block storage while application servers simultaneously access report files over SMB. Active Directory integration is natively supported."
       },
@@ -174,7 +174,7 @@ export const domain3NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Enable Lambda SnapStart on the Node.js function.",
+        text: "Enable Lambda SnapStart on the Node.js function to reuse initialized environments.",
         isCorrect: false,
         explanation: "Wrong — Lambda SnapStart is available for Java 11+, Python 3.12+, and .NET 8+ runtimes. It is NOT supported for Node.js. The question specifies a Node.js function, so SnapStart is not applicable."
       },
@@ -186,13 +186,13 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "C",
-        text: "Configure Lambda Provisioned Concurrency at 500 concurrent environments, scheduled to activate at 8:45 AM and deactivate at 5:15 PM on weekdays using Application Auto Scaling scheduled actions.",
+        text: "Configure Lambda Provisioned Concurrency at 500, scheduled on weekdays from 8:45 AM to 5:15 PM.",
         isCorrect: true,
         explanation: "Correct — Provisioned Concurrency pre-initializes execution environments, completely eliminating cold start latency (sub-ms cold start). Scheduling it only during business hours (8:45 AM–5:15 PM weekdays) via Application Auto Scaling scheduled actions avoids charging for provisioned environments during the overnight idle period. This balances zero cold-start performance with cost minimization."
       },
       {
         id: "D",
-        text: "Keep 500 Provisioned Concurrency environments active 24/7 to guarantee sub-100 ms at all times.",
+        text: "Keep 500 Provisioned Concurrency environments active 24/7 to guarantee sub-100 ms latency at all times.",
         isCorrect: false,
         explanation: "Wrong — 24/7 Provisioned Concurrency is unnecessary when traffic is near-zero for 9+ hours overnight. Provisioned Concurrency is billed per GB-second even when idle. Scheduling it only during business hours achieves the same performance at significantly lower cost."
       }
@@ -214,13 +214,13 @@ export const domain3NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Double the Fargate task size to 8 vCPU and 16 GB memory to increase throughput.",
+        text: "Double the Fargate task size to 8 vCPU and 16 GB of memory to increase throughput.",
         isCorrect: false,
         explanation: "Wrong — Doubling task size doubles cost. While it increases per-task throughput, it does not improve price-performance — you are paying 2× for 2× throughput with no efficiency gain."
       },
       {
         id: "B",
-        text: "Rebuild the container images for the ARM64 architecture and update the ECS task definition to use the ARM64 platform, running on Fargate with Graviton-based compute.",
+        text: "Rebuild the container images for ARM64 and update the ECS task definition to use Graviton Fargate.",
         isCorrect: true,
         explanation: "Correct — AWS Graviton (ARM64) processors provide up to 40% better price-performance than equivalent x86 instances/Fargate configurations. For a Go application (which compiles natively to ARM64), rebuilding with GOARCH=arm64 produces a fully native binary. ECS Fargate supports ARM64 platform selection. The same 4 vCPU / 8 GB task delivers higher throughput per dollar — AWS charges less for ARM64 Fargate while Graviton delivers more CPU performance per core."
       },
@@ -232,7 +232,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "Enable ECS capacity provider with Spot Fargate to reduce costs.",
+        text: "Enable an ECS capacity provider with Fargate Spot to reduce the running costs.",
         isCorrect: false,
         explanation: "Wrong — Fargate Spot reduces costs by up to 70% for interruption-tolerant workloads. However, the question asks for INCREASED throughput AND reduced cost simultaneously. Fargate Spot does not change the underlying compute performance — you get the same vCPU/memory spec at a discount, not higher throughput."
       }
@@ -346,13 +346,13 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "C",
-        text: "A: Redis/Valkey, B: Redis/Valkey with cluster mode enabled",
+        text: "A: Redis/Valkey, B: Redis/Valkey cluster mode",
         isCorrect: false,
         explanation: "Wrong — Redis cluster mode enables sharding across up to 500 shards, but it is overkill for a simple HTML fragment cache. Memcached is explicitly multi-threaded and cheaper for simple key-value caching when no replication is needed. Using Redis for both is technically possible but ignores Memcached's architectural advantage for multi-threaded CPU-bound workloads."
       },
       {
         id: "D",
-        text: "A: Memcached with ElastiCache Multi-AZ, B: Redis/Valkey",
+        text: "A: Memcached with Multi-AZ, B: Redis/Valkey",
         isCorrect: false,
         explanation: "Wrong — ElastiCache Memcached does NOT support Multi-AZ replication. Each Memcached node is standalone with no replica. There is no Multi-AZ or replication feature in Memcached. This is a common exam trap. Only Redis/Valkey supports replication and Multi-AZ in ElastiCache."
       }
@@ -380,7 +380,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon MemoryDB for Valkey.",
+        text: "Amazon MemoryDB for Valkey with multi-AZ transaction log durability.",
         isCorrect: true,
         explanation: "Correct — Amazon MemoryDB is purpose-built as a durable, Redis-compatible primary database. It uses a distributed multi-AZ transaction log (similar to a write-ahead log) to persist every write before acknowledging it to the client. This guarantees zero data loss on single-node failure while still providing microsecond reads and single-digit-millisecond writes. MemoryDB supports all Redis/Valkey data structures including sorted sets and lists."
       },
@@ -420,7 +420,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Aurora serverless (Aurora Serverless v2) with minimum capacity set to 0 Aurora Capacity Units (ACUs) and the auto-pause threshold set to 5 minutes.",
+        text: "Aurora Serverless v2 with minimum capacity set to 0 ACUs and the auto-pause threshold set to 5 minutes.",
         isCorrect: true,
         explanation: "Correct — Aurora serverless with scale-to-zero (GA November 2024) sets minimum ACUs to 0, causing the database to auto-pause after the configured idle period (5 minutes–24 hours). Compute cost is $0 when paused — only storage is billed. On the first connection after pause, the database resumes in approximately 15 seconds. This handles unpredictable burst traffic without 24/7 compute charges."
       },
@@ -466,7 +466,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "C",
-        text: "On-Demand capacity mode.",
+        text: "DynamoDB On-Demand capacity mode, which bills per request and requires no capacity provisioning.",
         isCorrect: true,
         explanation: "Correct — DynamoDB On-Demand mode instantly accommodates any traffic level up to the doubled-previous-peak ceiling with no throttling and no advance capacity configuration. For a workload with predictable normal traffic and rare, unpredictable spikes, On-Demand eliminates throttling risk. After the November 2024 50% price reduction, On-Demand cost at normal traffic (500 WCU/s + 2,000 RCU/s) is far lower than 24/7 provisioned peak capacity."
       },
@@ -494,7 +494,7 @@ export const domain3NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "The RDS Multi-AZ DB Instance standby cannot serve read traffic; ElastiCache Memcached does not support replication or Multi-AZ failover.",
+        text: "The RDS Multi-AZ DB Instance standby cannot serve reads; ElastiCache Memcached does not support replication or failover.",
         isCorrect: true,
         explanation: "Correct — BOTH assumptions are wrong. (1) RDS Multi-AZ DB Instance maintains a hot standby for failover only — it is NOT readable. Only RDS Multi-AZ DB Cluster (MySQL + PostgreSQL) or Aurora read replicas provide readable standby/replica endpoints. (2) ElastiCache Memcached has NO replication and NO Multi-AZ failover capability. A Memcached node failure permanently loses all data on that node. Session stores requiring durability need ElastiCache Redis/Valkey."
       },
@@ -534,25 +534,25 @@ export const domain3NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Create a VPC peering connection between Company A and Company B VPCs.",
+        text: "Create a VPC peering connection between the two VPCs and update both route tables with the peer CIDR.",
         isCorrect: false,
         explanation: "Wrong — VPC peering does NOT support overlapping CIDR blocks. AWS explicitly blocks VPC peering when the IPv4 CIDR ranges of the two VPCs overlap. This is a hard technical limitation."
       },
       {
         id: "B",
-        text: "Connect both VPCs to an AWS Transit Gateway and configure route tables.",
+        text: "Connect both VPCs to an AWS Transit Gateway and add the required routes in each attachment route table.",
         isCorrect: false,
         explanation: "Wrong — Transit Gateway also does NOT support overlapping CIDR blocks between VPC attachments. Routing to an overlapping CIDR is ambiguous and TGW rejects the attachment configuration. Transit Gateway supports up to 5,000 VPCs but all must have non-overlapping CIDRs."
       },
       {
         id: "C",
-        text: "Company B exposes the microservice behind a Network Load Balancer and creates a VPC Endpoint Service (AWS PrivateLink). Company A creates an Interface VPC Endpoint, optionally with a private DNS name, to consume the service.",
+        text: "Company B publishes the service behind an NLB as a VPC Endpoint Service and Company A creates an Interface Endpoint.",
         isCorrect: true,
         explanation: "Correct — AWS PrivateLink is specifically designed to expose services across VPCs with overlapping CIDR blocks. The consumer connects to an Interface Endpoint (ENI with a private IP from the consumer's VPC CIDR) — the service's underlying IP is never exposed. Private DNS names can be attached to the endpoint. PrivateLink works regardless of CIDR overlap because it is service-based, not network-based routing."
       },
       {
         id: "D",
-        text: "Set up a Site-to-Site VPN between the two VPCs using Virtual Private Gateways.",
+        text: "Set up a Site-to-Site VPN between the two VPCs using virtual private gateways at each end of the tunnel.",
         isCorrect: false,
         explanation: "Wrong — Site-to-Site VPN between VPCs uses a VGW (which connects to on-premises, not other VPCs directly). More importantly, VPN between overlapping CIDRs would still have routing ambiguity. VPN is not the appropriate tool for VPC-to-VPC connectivity with overlapping CIDRs."
       }
@@ -614,7 +614,7 @@ export const domain3NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "The NLB is distributing traffic equally per AZ (33% each). Since AZ-b and AZ-c have fewer instances, each instance receives proportionally more traffic. Fix: Enable cross-zone load balancing on the NLB.",
+        text: "The NLB splits traffic evenly per AZ, so instances in the smaller AZs get more. Fix: enable cross-zone load balancing.",
         isCorrect: true,
         explanation: "Correct — NLB distributes traffic equally across its enabled AZs by default (each AZ gets 33% of traffic). Within each AZ, traffic distributes across the available targets. AZ-b (2 instances) and AZ-c (2 instances) each receive 33% of total traffic split across 2 instances = 16.5% per instance. AZ-a (8 instances) receives 33% split across 8 = 4% per instance. Enabling cross-zone load balancing makes the NLB distribute traffic across all 12 instances evenly (8.3% each). NOTE: NLB cross-zone is OFF by default and incurs inter-AZ data transfer charges when enabled."
       },
@@ -654,7 +654,7 @@ export const domain3NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Amazon Kinesis Data Streams in On-Demand mode with 30-day extended retention, using Enhanced Fan-Out consumers for each application.",
+        text: "Amazon Kinesis Data Streams On-Demand with 30-day retention and Enhanced Fan-Out consumers.",
         isCorrect: true,
         explanation: "Correct — Kinesis Data Streams On-Demand mode auto-scales to handle 50 MB/s (well within the default 200 MB/s ceiling). Up to 20 registered Enhanced Fan-Out (EFO) consumers are supported, each receiving a dedicated 2 MB/s push per shard with sub-200 ms latency. Extended retention to 30 days is a simple configuration option. No servers or Kafka clusters to manage — fully serverless. Ideal for teams without Kafka expertise."
       },
@@ -666,13 +666,13 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "C",
-        text: "Amazon Data Firehose with 8 delivery streams, one per consumer application.",
+        text: "Amazon Data Firehose with eight delivery streams, one per consumer application.",
         isCorrect: false,
         explanation: "Wrong — Amazon Data Firehose is a delivery service to destinations (S3, Redshift, OpenSearch, HTTP) with a minimum buffer of 60 seconds. It does not support multiple independent consumers reading the same stream at their own pace with replay. Firehose is near-real-time, not a replayable event log."
       },
       {
         id: "D",
-        text: "Amazon SQS Standard queue with one queue per consumer application.",
+        text: "Amazon SQS standard queues with one queue per consumer application.",
         isCorrect: false,
         explanation: "Wrong — SQS does not support replay — once a message is consumed and deleted, it cannot be re-read. With 8 queues, each consumer needs its own fan-out path (requiring SNS in front). SQS also has no concept of a retained event log with configurable retention beyond 14 days."
       }
@@ -694,7 +694,7 @@ export const domain3NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Amazon Data Firehose has a MINIMUM buffer interval of 60 seconds before delivering data to S3, making it a near-real-time service, not a real-time service.",
+        text: "Amazon Data Firehose has a minimum 60-second buffer interval before delivering to S3, so it is near-real-time.",
         isCorrect: true,
         explanation: "Correct — Amazon Data Firehose (renamed from Kinesis Data Firehose in February 2024) buffers incoming data before delivering it to destinations. For most destinations including S3, the minimum buffer interval is 60 seconds. This makes Firehose a near-real-time delivery service (typically 60–300 seconds). For 1-second fraud detection, Kinesis Data Streams with a Lambda event source mapping or Enhanced Fan-Out consumer is required."
       },
@@ -740,7 +740,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Enable AWS Glue job bookmarks on the existing job.",
+        text: "Enable AWS Glue job bookmarks on the existing job so it tracks and skips processed files.",
         isCorrect: true,
         explanation: "Correct — AWS Glue job bookmarks track which S3 files (by ETag and modification timestamp) have already been successfully processed. On the next run, Glue automatically reads only files not yet processed (incremental loads). This requires no changes to the ETL logic itself — just enabling the bookmark feature in the Glue job configuration. It handles the 'process only new files' requirement natively."
       },
@@ -860,7 +860,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Deploy an AWS Storage Gateway S3 File Gateway on-premises.",
+        text: "Deploy an AWS Storage Gateway S3 File Gateway on-premises with an NFS mount for the servers.",
         isCorrect: true,
         explanation: "Correct — AWS Storage Gateway S3 File Gateway presents an NFS (and SMB) interface to on-premises clients. Frequently accessed files are cached locally on the Gateway appliance for low-latency access. All files are stored as native S3 objects (backed by S3, Glacier, etc.). This provides the hybrid NFS namespace with local caching the question requires. Lifecycle policies can tier older S3 objects to Glacier automatically."
       },
@@ -934,13 +934,13 @@ export const domain3NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Placement strategy: binpack on CPU; constraint: none.",
+        text: "Placement strategy: binpack on CPU; no placement constraint.",
         isCorrect: false,
         explanation: "Wrong — Binpack places tasks on instances with the MOST existing tasks to minimize the number of instances used (cost optimization). This concentrates tasks, potentially putting all 6 tasks on the fewest possible instances, which maximizes correlated failure risk — the opposite of fault tolerance."
       },
       {
         id: "B",
-        text: "Placement strategy: spread by attribute:ecs.availability-zone; constraint: none.",
+        text: "Placement strategy: spread by attribute:ecs.availability-zone.",
         isCorrect: true,
         explanation: "Correct — The spread placement strategy distributes tasks as evenly as possible across the specified attribute. Spreading by ecs.availability-zone ensures that 6 tasks are distributed as 2 per AZ. Losing one AZ takes down 2 of 6 tasks (33%), not more than half. This is the default strategy for ECS services and is explicitly designed for fault tolerance across AZs."
       },
@@ -952,7 +952,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "Placement strategy: spread by instanceId; constraint: none.",
+        text: "Placement strategy: spread by instanceId; no placement constraint.",
         isCorrect: false,
         explanation: "Wrong — Spreading by instanceId distributes tasks evenly across instances but does NOT guarantee AZ distribution. If all instances happen to be in two AZs, tasks are spread across instances within those AZs but losing one AZ could still take down the majority of tasks. AZ-level spreading requires the ecs.availability-zone attribute."
       }
@@ -980,7 +980,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon Managed Streaming for Apache Kafka (MSK) with the same Apache Kafka cluster configuration.",
+        text: "Amazon Managed Streaming for Apache Kafka (MSK) with the same cluster configuration.",
         isCorrect: true,
         explanation: "Correct — Amazon MSK runs Apache Kafka natively. Existing Kafka applications connect to MSK brokers using standard Kafka Producer and Consumer APIs without modification. Exactly-once semantics (idempotent producer + transactions), consumer groups, and Kafka Streams topologies all work identically because MSK IS Apache Kafka — just fully managed. Clients update only the bootstrap.servers connection string."
       },
@@ -992,7 +992,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "Amazon MQ with the Apache Kafka engine.",
+        text: "Amazon MQ with the Apache Kafka broker engine enabled.",
         isCorrect: false,
         explanation: "Wrong — Amazon MQ supports Apache ActiveMQ and RabbitMQ engines only. There is no Kafka engine in Amazon MQ. Amazon MSK is the managed Kafka service on AWS."
       }
@@ -1014,25 +1014,25 @@ export const domain3NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "EFA requires all instances to be in the same VPC, but they can span multiple Availability Zones.",
+        text: "EFA requires all instances to be in the same VPC, but they may span multiple Availability Zones freely.",
         isCorrect: false,
         explanation: "Wrong — EFA operates at Layer 2 and requires all instances using EFA to be in the SAME subnet (same Availability Zone). EFA connections cannot span multiple subnets or AZs. This is a hard technical requirement because EFA uses SRD (Scalable Reliable Datagram) which relies on same-subnet Ethernet adjacency."
       },
       {
         id: "B",
-        text: "EFA requires all instances to be in the same subnet (same AZ), the Security Group must allow all traffic from itself (self-referencing rule), and the instances should be in a Cluster Placement Group for lowest intra-cluster latency.",
+        text: "EFA requires all instances in one subnet, a self-referencing security group rule, and a cluster placement group.",
         isCorrect: true,
         explanation: "Correct — EFA has three key requirements: (1) All instances MUST be in the same subnet/AZ — EFA uses OS-bypass via libfabric and SRD protocol which operates at Layer 2 within the same subnet. (2) The Security Group MUST have a self-referencing inbound rule (allowing all traffic from instances with the same SG) — EFA traffic is otherwise blocked at the Security Group. (3) Cluster Placement Group co-locates instances on the same rack, achieving the 10/25 Gbps single-flow bandwidth and nanosecond-range fabric latency required for MPI collectives."
       },
       {
         id: "C",
-        text: "EFA only works with p3 and p4 GPU instances and requires NVIDIA NCCL for MPI communication.",
+        text: "EFA only works with p3 and p4 GPU instances and requires NVIDIA NCCL for all MPI communication.",
         isCorrect: false,
         explanation: "Wrong — EFA supports a wide range of instance types beyond GPU instances, including Hpc7g (Graviton-based HPC), C6gn, Trn1, P5, and others. NCCL is used for GPU collective communications but MPI (Open MPI, Intel MPI) works with EFA's libfabric interface for CPU-based HPC without NCCL."
       },
       {
         id: "D",
-        text: "EFA requires a Dedicated Host and bare-metal instances to bypass the hypervisor.",
+        text: "EFA requires a Dedicated Host and bare-metal instances in order to bypass the hypervisor layer.",
         isCorrect: false,
         explanation: "Wrong — EFA works on standard EC2 Nitro-based instances (not just bare-metal or Dedicated Hosts). The OS-bypass in EFA uses the AWS Nitro hypervisor's EFA device — it bypasses the kernel networking stack on the GUEST side, not the hypervisor itself. Dedicated Hosts and bare-metal are not requirements."
       }
@@ -1054,13 +1054,13 @@ export const domain3NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Enable Athena query result reuse (cache) for a 7-day TTL.",
+        text: "Enable Athena query result reuse (cache) with a 7-day TTL on repeated queries.",
         isCorrect: false,
         explanation: "Wrong — Athena query result reuse caches the output of previously executed queries with the same SQL text and returns the cached result for identical subsequent queries. It does not help with partition discovery latency for new or varied queries (different time ranges). Result reuse only benefits repeated identical queries."
       },
       {
         id: "B",
-        text: "Use Athena partition projection to define the partition schema mathematically, eliminating Glue Metastore lookups.",
+        text: "Use Athena partition projection to define the partition schema mathematically instead of Glue lookups.",
         isCorrect: true,
         explanation: "Correct — Athena partition projection defines partition ranges using table properties (e.g., year=2023..2025, month=01..12, day=01..31, hour=00..23). When partition projection is configured, Athena computes valid partition paths directly without querying the Glue Metastore — eliminating the partition listing overhead entirely. This reduces partition discovery from seconds to milliseconds for time-series data."
       },
@@ -1140,7 +1140,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "The Aurora reader endpoint performs DNS-based load balancing per NEW connection, but a long-lived connection pool keeps connections open for up to 3,600 seconds, so all 50 connections established in the same DNS resolution cycle go to the same replica and stay there.",
+        text: "The reader endpoint balances per new connection, so a long-lived pool pins all connections to one replica.",
         isCorrect: true,
         explanation: "Correct — Aurora's reader endpoint uses DNS round-robin at connection time. The DNS TTL for the reader endpoint is approximately 1 second. HikariCP opens all 50 connections during pool initialization — all in the same DNS query cycle — so all resolve to the same replica IP. Since the pool recycles connections only every 3,600 seconds, those 50 connections stay on the same replica for an hour. This is documented Aurora behavior: the reader endpoint distributes PER NEW CONNECTION, not per query."
       },
@@ -1152,7 +1152,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "HikariCP is incompatible with Aurora and requires a different JDBC driver.",
+        text: "HikariCP is incompatible with Aurora and requires a different JDBC driver entirely.",
         isCorrect: false,
         explanation: "Wrong — HikariCP is fully compatible with Aurora MySQL (and Aurora PostgreSQL). The Aurora JDBC driver (aws-advanced-jdbc-wrapper) can improve failover behavior but is not required. The issue is connection pool architecture, not driver incompatibility."
       }
@@ -1180,7 +1180,7 @@ export const domain3NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "The warning is INCORRECT — Amazon S3 has provided strong read-after-write consistency for ALL operations including GET and LIST since December 2020, with no additional configuration required.",
+        text: "The warning is INCORRECT — S3 has provided strong read-after-write consistency for all operations since December 2020.",
         isCorrect: true,
         explanation: "Correct — AWS announced S3 strong consistency on December 1, 2020. Since that date, all S3 operations (GET, LIST, HEAD, COPY after PUT or DELETE) are strongly consistent — read-after-write is guaranteed immediately. No sleep, retry, or eventual consistency workaround is needed. No additional S3 configuration is required. This is the default behavior for all S3 buckets."
       },

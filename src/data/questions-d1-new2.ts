@@ -66,7 +66,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "C",
-        text: "AWS Artifact — it provides on-demand access to AWS's compliance reports and allows customers to review and accept agreements.",
+        text: "AWS Artifact — it provides on-demand access to AWS compliance reports and online agreements.",
         isCorrect: true,
         explanation: "AWS Artifact is the self-service portal for AWS compliance documentation. The Reports section provides downloadable copies of AWS's own third-party audit reports (SOC 1/2/3, PCI DSS AoC, ISO 27001, FedRAMP, HIPAA, GDPR, NIST, and more). The Agreements section allows customers to review and accept legal agreements such as the HIPAA BAA and NDA. No support case or manual request is required."
       },
@@ -100,7 +100,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "(1) Network ACL (NACL), (2) AWS WAF, (3) AWS Network Firewall, (4) Security Group",
+        text: "(1) Network ACL, (2) AWS WAF, (3) AWS Network Firewall, (4) Security Group",
         isCorrect: true,
         explanation: "NACLs support explicit Deny rules by CIDR — they are the correct mechanism to block specific malicious IP addresses at the subnet level. AWS WAF operates at Layer 7 HTTP/HTTPS and inspects request bodies for SQL injection patterns. AWS Network Firewall is a stateful firewall/IPS supporting Suricata-compatible rules for deep packet inspection. Security groups referencing each other (app-tier SG → DB SG on port 5432) are the right mechanism for tier-to-tier access control using logical security group IDs."
       },
@@ -139,7 +139,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Use AWS Firewall Manager with an AWS WAF policy. Define the policy in the Firewall Manager administrator account to automatically deploy the WAF Web ACL to all ALBs across all accounts in scope, and remediate non-compliant resources automatically.",
+        text: "Use AWS Firewall Manager with an AWS WAF policy to deploy the Web ACL to all in-scope ALBs across accounts and auto-remediate.",
         isCorrect: true,
         explanation: "AWS Firewall Manager is purpose-built for centrally managing WAF, Shield Advanced, Network Firewall, Route 53 Resolver DNS Firewall, security groups, and NACLs across an Organization. A single WAF policy in Firewall Manager automatically identifies all in-scope ALBs, attaches the specified Web ACL, and continuously enforces compliance — including on new ALBs created after policy creation. The Firewall Manager console provides centralized compliance visibility across all 80 accounts."
       },
@@ -172,7 +172,7 @@ export const domain1NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Amazon GuardDuty — navigate to the finding details to see correlated evidence.",
+        text: "Amazon GuardDuty — navigate to the finding details to review the correlated evidence and affected resources.",
         isCorrect: false,
         explanation: "GuardDuty generates findings based on anomaly detection but provides only the immediate context of each individual finding (the specific behavior that triggered the alert). It does not provide a graph-based investigation view connecting related entities (IAM roles, VPC flow data, historical API calls) across multiple findings over 30 days."
       },
@@ -184,7 +184,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "C",
-        text: "Amazon Detective — use the behavior graph to investigate the EC2 instance, related IAM role activity, and network connections over the 30-day historical window.",
+        text: "Amazon Detective — use the behavior graph to investigate the instance, related IAM activity, and network connections.",
         isCorrect: true,
         explanation: "Amazon Detective is specifically designed for post-incident investigation. It ingests CloudTrail, VPC Flow Logs, GuardDuty findings, and EKS audit logs and builds a behavior graph with up to one year of historical data. The Detective console allows investigators to pivot from the GuardDuty finding to the specific EC2 instance, see all API calls by its IAM role, visualize network connections to the mining pool IP over time, and identify related IAM principals from the same geography — all from a single investigation workflow."
       },
@@ -211,13 +211,13 @@ export const domain1NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Enable Amazon Macie in all 15 accounts and configure cross-account finding aggregation.",
+        text: "Enable Amazon Macie in all 15 accounts and configure cross-account finding aggregation in the admin account.",
         isCorrect: false,
         explanation: "Amazon Macie discovers sensitive data (PII, PHI) in S3 buckets and can detect public S3 buckets with sensitive data. However, Macie does not analyze IAM roles, KMS keys, SQS queues, Lambda functions, or other resource policies for external access patterns. Macie is a data classification service, not an access path analyzer."
       },
       {
         id: "B",
-        text: "Enable AWS IAM Access Analyzer with an Organization-level analyzer in the management or delegated administrator account. This automatically generates findings for all resources in member accounts that are accessible from outside the Organizations boundary.",
+        text: "Enable AWS IAM Access Analyzer with an Organization-level analyzer in the delegated administrator account.",
         isCorrect: true,
         explanation: "IAM Access Analyzer uses automated reasoning (not sampling) to analyze resource-based policies — S3 buckets, IAM roles, KMS keys, SQS queues, Lambda functions and layers, Secrets Manager secrets, EFS file systems, SNS topics, and ECR repositories. An Organization-level analyzer uses the entire Organization as the zone of trust, generating findings only for resources accessible from outside the Org boundary. Findings appear centrally in the administrator account with zero custom development."
       },
@@ -229,7 +229,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "D",
-        text: "Create a Lambda function that periodically calls GetBucketPolicy, GetKeyPolicy, GetQueueAttributes, and GetFunctionPolicy across all accounts and evaluates policy statements for cross-account principals.",
+        text: "Create a Lambda function that periodically fetches each resource policy across all accounts and checks for cross-account principals.",
         isCorrect: false,
         explanation: "Manually parsing policy documents for cross-account access is error-prone (policies have complex evaluation logic involving conditions, wildcards, and negations that automated reasoning handles correctly), requires cross-account roles in 15 accounts, misses new resources as they are created, and requires ongoing maintenance. IAM Access Analyzer's automated reasoning engine handles these complexities reliably at no custom development cost."
       }
@@ -295,13 +295,13 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Enable S3 Block Public Access — specifically the BlockPublicAcls and BlockPublicPolicy settings — at the bucket level.",
+        text: "Enable S3 Block Public Access with the BlockPublicAcls and BlockPublicPolicy settings on the bucket.",
         isCorrect: true,
         explanation: "S3 Block Public Access has four settings at both the bucket and account level: BlockPublicAcls (blocks new public ACLs and ignores existing ones), IgnorePublicAcls (treats all public ACLs as if they grant no access), BlockPublicPolicy (blocks bucket policy requests that would grant public access), and RestrictPublicBuckets (restricts access to bucket to only AWS services and authorized users when a public policy exists). Enabling BlockPublicAcls + IgnorePublicAcls handles ACL-based public access; BlockPublicPolicy + RestrictPublicBuckets handles policy-based public access. All four together provide complete protection."
       },
       {
         id: "C",
-        text: "Attach a bucket policy with an explicit Deny on s3:GetObject for Principal: '*'.",
+        text: "Attach a bucket policy with an explicit Deny on s3:GetObject for Principal '*' on all objects.",
         isCorrect: false,
         explanation: "An explicit Deny on Principal: '*' would block ALL access including legitimate applications and IAM roles — not just public access. More critically, individual object ACLs could still grant public-read access if the account-level Block Public Access is not enabled. A bucket policy Deny alone is not the same as Block Public Access."
       },
@@ -334,13 +334,13 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Data events caused the increase. Enable CloudTrail data events only for the specific Lambda function ARN rather than all Lambda functions, using advanced event selectors to filter by function ARN.",
+        text: "Data events caused the increase. Enable data events only for the specific Lambda function ARN using advanced event selectors.",
         isCorrect: true,
         explanation: "CloudTrail data events (Lambda Invoke, S3 object-level, DynamoDB item-level) are charged at $0.10 per 100,000 events. At 10 million invocations/day × 30 days = 300 million events/month = $300 for one function, but if all Lambda functions were enabled for data events, the cost multiplies. Advanced event selectors allow filtering data events by resource ARN — enabling data event logging for only the specific compliance-relevant function ARN eliminates logging for other functions, reducing cost proportionally while maintaining compliance coverage."
       },
       {
         id: "C",
-        text: "Insights events caused the increase. Disable CloudTrail Insights to reduce costs.",
+        text: "Insights events caused the increase. Disable CloudTrail Insights to bring the cost back down.",
         isCorrect: false,
         explanation: "CloudTrail Insights events detect anomalous API activity rates and cost $0.35 per 100,000 write management events analyzed. At typical account scale, Insights costs are modest. More importantly, Lambda Invoke logging is a data event — Insights do not log individual Lambda invocations."
       },
@@ -373,7 +373,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Deploy a conformance pack containing the managed Config rules rds-multi-az-support, rds-storage-encrypted, and rds-automatic-minor-version-upgrade-enabled across all 25 accounts using AWS Organizations integration. Add an SSM Automation remediation that triggers SNS notification on non-compliance.",
+        text: "Deploy a conformance pack with the managed RDS Config rules across all 25 accounts via AWS Organizations, with SSM remediation.",
         isCorrect: true,
         explanation: "AWS Config conformance packs bundle multiple Config rules (and optional remediations) into a single deployable unit. The managed rules rds-multi-az-support, rds-storage-encrypted, and rds-instance-backup-enabled (for automated backups) cover all three requirements. Deploying via Organizations integration pushes the conformance pack to all 25 accounts automatically and covers future accounts. SSM Automation documents can trigger SNS notifications on non-compliance — no custom Lambda code required."
       },
@@ -412,7 +412,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "In the KMS key policy, create two separate policy statements: one granting kms:CreateGrant, kms:ScheduleKeyDeletion, kms:PutKeyPolicy to the platform team's IAM role, and a separate statement granting kms:Encrypt, kms:Decrypt, kms:GenerateDataKey to the application team's IAM role.",
+        text: "In the key policy, grant kms:CreateGrant and kms:PutKeyPolicy to the platform team and kms:Encrypt and kms:Decrypt to the application team.",
         isCorrect: true,
         explanation: "KMS key policies allow granular action-level separation. The key policy can include separate statements with distinct Principal and Action elements — granting administrative actions (kms:CreateGrant, kms:ScheduleKeyDeletion, kms:PutKeyPolicy, kms:EnableKey, kms:DisableKey, kms:DescribeKey) to the platform team WITHOUT including usage actions (kms:Encrypt, kms:Decrypt, kms:GenerateDataKey, kms:GenerateDataKeyWithoutPlaintext). The application team statement includes usage actions but NOT management actions. KMS key policies support this precise separation natively."
       },
@@ -424,7 +424,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "D",
-        text: "Use IAM permission boundaries on the application team's IAM roles to deny all kms: management actions.",
+        text: "Use IAM permission boundaries on the application team's IAM roles to deny all kms: management actions on the key.",
         isCorrect: false,
         explanation: "Permission boundaries cap what an IAM policy can grant a principal. However, they require attaching a boundary to every application team role — operationally intensive. More importantly, even with a boundary, if the key policy grants management actions to the application team's role, the effective permission would still allow them (key policy + boundary intersection still includes management actions if the key policy grants them). The key policy is the root of trust for KMS — controlling actions at the key policy level is more authoritative."
       }
@@ -451,7 +451,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Create an S3 Gateway VPC Endpoint with an endpoint policy that allows access only to specific S3 bucket ARNs in the account. Additionally, add bucket policies on each target bucket with a Deny unless aws:SourceVpce matches the endpoint ID.",
+        text: "Create an S3 Gateway VPC Endpoint with an endpoint policy allowing only specific bucket ARNs, plus bucket policies denying unless aws:SourceVpce matches.",
         isCorrect: true,
         explanation: "A two-layer approach is needed: (1) The VPC endpoint policy restricts what S3 resources can be accessed THROUGH the endpoint — allow only the company's bucket ARNs, preventing any traffic to external/attacker-controlled S3 buckets. (2) The S3 bucket policy with aws:SourceVpce (or aws:SourceVpc) ensures the bucket only accepts requests from within the VPC via the specific endpoint, blocking public internet access. Together these create a bidirectional restriction: only company buckets via only the company VPC."
       },
@@ -490,7 +490,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon Cognito Identity Pool (Federated Identities) — it exchanges the User Pool ID token for temporary AWS credentials via STS AssumeRoleWithWebIdentity, mapped to an IAM role with an S3 policy scoped to the user's prefix.",
+        text: "Amazon Cognito Identity Pool — it exchanges the User Pool ID token for temporary credentials mapped to an IAM role scoped to the user's prefix.",
         isCorrect: true,
         explanation: "Cognito Identity Pools are the authorization component of Cognito. After the User Pool authenticates the user and issues an ID token, the Identity Pool calls STS AssumeRoleWithWebIdentity with the token to obtain temporary AWS credentials. An IAM role policy using the ${cognito-identity.amazonaws.com:sub} policy variable scopes S3 permissions to the individual user's prefix. The mobile app uses these temporary credentials to directly call s3:PutObject — no backend proxy required."
       },
@@ -529,7 +529,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "AWS Private Certificate Authority (AWS Private CA) — create a private CA hierarchy and issue private certificates for each EKS service. Integrate with ACM for automatic renewal.",
+        text: "AWS Private Certificate Authority — create a private CA hierarchy and issue private certificates for each EKS service.",
         isCorrect: true,
         explanation: "AWS Private CA (formerly ACM Private CA) provides a managed private PKI. Certificates issued by AWS Private CA are NOT trusted by public browsers — they are only trusted by systems that explicitly trust the private CA root. Integration with ACM enables automatic certificate renewal before expiration. AWS Private CA supports creating CA hierarchies (root CA + subordinate CAs) and issues certificates for internal workloads including EKS mTLS, IoT devices, and code signing. The cert-manager Kubernetes plugin integrates directly with AWS Private CA."
       },
@@ -563,13 +563,13 @@ export const domain1NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "VPC Flow Logs capture DNS queries made by EC2 instances to the Amazon Route 53 Resolver (VPC+2 address at 169.254.169.253), so the analyst can identify which domains the compromised instance resolved.",
+        text: "VPC Flow Logs capture DNS queries made to the Route 53 Resolver, so the analyst can identify which domains the instance resolved.",
         isCorrect: false,
         explanation: "This is a critical misconception. VPC Flow Logs explicitly do NOT log traffic to the VPC's DNS resolver (VPC+2 address, 169.254.169.253). DNS query logging requires a separate feature: Route 53 Resolver DNS query logs. An analyst trying to identify domains resolved by a compromised instance from Flow Logs alone will miss all DNS traffic."
       },
       {
         id: "B",
-        text: "VPC Flow Logs capture metadata (5-tuple, bytes, packets, action) for traffic that was allowed or rejected by security groups and NACLs. They do NOT capture traffic to the VPC DNS resolver, DHCP traffic, traffic to instance metadata (169.254.169.254), Windows KMS activation traffic, or packet payload contents.",
+        text: "VPC Flow Logs capture 5-tuple metadata for allowed and rejected traffic, but not traffic to the VPC DNS resolver, the metadata service, or packet payloads.",
         isCorrect: true,
         explanation: "This is the accurate description of VPC Flow Logs capabilities and exclusions. Flow Logs record the 5-tuple (source/destination IP, source/destination port, protocol), byte and packet counts, start/end time, and ACCEPT/REJECT action. Explicitly excluded from Flow Logs: traffic to/from 169.254.169.254 (instance metadata), traffic to/from 169.254.169.253 (Route 53 Resolver), DHCP traffic, Amazon DNS server traffic (when using AWS-provided DNS), and Windows license activation traffic to AWS KMS. Packet payloads require VPC Traffic Mirroring."
       },
@@ -602,13 +602,13 @@ export const domain1NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "The developer's IAM AdministratorAccess policy overrides the SCP Deny because AdministratorAccess is a higher-privilege policy. SCPs apply to all accounts including the management account.",
+        text: "The developer's AdministratorAccess policy overrides the SCP Deny, and SCPs apply to all accounts including the management account.",
         isCorrect: false,
         explanation: "Both claims are wrong. IAM policies cannot override SCP explicit Denies — SCPs always win because they operate at the authorization layer before IAM policy evaluation. And SCPs do NOT apply to the management account — the management account is exempt from SCP restrictions regardless of what SCPs are attached to the root or any OU."
       },
       {
         id: "B",
-        text: "The developer's ec2:DescribeInstances is being blocked by the SCP Deny because the allowlist SCP does not include ec2:DescribeInstances. The management account is exempt from all SCP restrictions — SCPs never apply to the management account.",
+        text: "The SCP allowlist omits ec2:DescribeInstances, but the management account is exempt from SCP restrictions — SCPs never apply to it.",
         isCorrect: true,
         explanation: "A Deny-all-except-allowlist SCP blocks any action not in the allowlist, regardless of what IAM policies the principal has — AdministratorAccess is irrelevant when an SCP explicitly denies the action. SCPs establish the maximum permissions boundary; explicit denies in SCPs cannot be overridden by IAM. Critically, AWS Organizations documentation explicitly states that SCPs DO NOT affect the management account — any principal in the management account retains full permissions regardless of attached SCPs. This is a fundamental SCP limitation companies must understand when designing their root OU policies."
       },
@@ -647,7 +647,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "IAM Identity Center is a single-region service. If the home region is unavailable, users cannot sign in via IAM Identity Center. As a contingency, the company should maintain emergency (break-glass) IAM user credentials or a separate SAML federation directly to IAM in a second region for critical workloads.",
+        text: "IAM Identity Center is a single-region service, so the company should keep break-glass IAM credentials or a second-region SAML federation.",
         isCorrect: true,
         explanation: "IAM Identity Center is a single-region service with no automatic failover. This is a documented limitation — AWS recommends organizations with strict availability requirements maintain break-glass access mechanisms: IAM users with MFA in each account, or a second SAML federation configured directly in IAM (AssumeRoleWithSAML with the Okta IdP) as a regional backup. The break-glass accounts should be stored in a physical safe and used only during IAM Identity Center outages. Note: IAM itself is global, so IAM user break-glass credentials work from any region."
       },
@@ -686,7 +686,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Account A owns and manages its EC2 instance in the shared subnet. Account N owns and manages the VPC, subnet, route tables, and NACLs. Account A CANNOT see EC2 instances deployed by Account B in the same shared subnet.",
+        text: "Account A owns its EC2 instance; Account N owns the VPC, subnet, and route tables, and Account A cannot see Account B's instances.",
         isCorrect: true,
         explanation: "This is the correct ownership model for shared VPCs. Each participant account manages only the resources it deploys — EC2 instances, security groups, Lambda functions. The owner account (N) manages all network primitives. Critically, accounts sharing the same subnet cannot see each other's resources — Account A's EC2 DescribeInstances call does not return Account B's instances, even though they are in the same subnet. Each account sees only its own resources. Security groups in Account A can reference security groups in Account B by ID, but not by discovery."
       },
@@ -725,7 +725,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Enable AWS Security Hub with a delegated administrator account using Organizations integration. Enable all integrated services (GuardDuty, Inspector v2, Macie, IAM Access Analyzer, Config). Security Hub normalizes findings to ASFF and aggregates across all 20 accounts.",
+        text: "Enable AWS Security Hub with a delegated administrator via Organizations, which normalizes findings to ASFF across all 20 accounts.",
         isCorrect: true,
         explanation: "AWS Security Hub is the native aggregation layer for AWS security findings. It integrates with 50+ AWS services and third-party tools. Findings from GuardDuty, Inspector v2, Macie, and IAM Access Analyzer are automatically ingested and normalized to the AWS Security Finding Format (ASFF). AWS Config compliance status surfaces as Security Hub controls findings. Organizations integration with a delegated administrator aggregates findings across all 20 member accounts with zero custom code. The Security Hub console provides the unified dashboard the CISO requires."
       },
@@ -758,19 +758,19 @@ export const domain1NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "The S3 bucket policy in Account A needs to explicitly allow Account B's IAM role to perform s3:GetObject.",
+        text: "The S3 bucket policy in Account A needs to explicitly allow Account B's IAM role to perform s3:GetObject on the objects.",
         isCorrect: false,
         explanation: "S3 bucket access is a separate authorization layer. However, the question states decryption fails — not that S3 GetObject fails. If the error were from S3, it would say s3:GetObject is denied. The error is KMS AccessDenied, suggesting the KMS authorization is incomplete despite the key policy change."
       },
       {
         id: "B",
-        text: "Account B's IAM policy for the IAM role does not include kms:Decrypt on the specific KMS key ARN in Account A. For cross-account KMS access, both the key policy in Account A AND an IAM policy in Account B must explicitly allow the action.",
+        text: "Account B's IAM role lacks kms:Decrypt on the key ARN — cross-account KMS needs both the key policy and an IAM policy to allow it.",
         isCorrect: true,
         explanation: "Cross-account KMS access requires a two-sided authorization: (1) The key policy in Account A must allow Account B's principal to perform kms:Decrypt. (2) An IAM policy in Account B must also explicitly allow kms:Decrypt on the specific Account A key ARN. Unlike same-account access where the key policy root delegation to IAM is sufficient, cross-account access requires explicit IAM policy permission IN Account B. Without step 2, the request fails with AccessDenied even though Account A's key policy was updated."
       },
       {
         id: "C",
-        text: "Multi-Region keys must be enabled on the KMS CMK before cross-account access is possible.",
+        text: "Multi-Region keys must be enabled on the KMS CMK before any cross-account access to the objects is possible.",
         isCorrect: false,
         explanation: "Multi-Region keys are an optional feature for cross-region decryption using the same key material. Cross-account KMS access does NOT require Multi-Region keys — it works with any KMS key type (single-region or multi-region). The issue here is the missing IAM policy in Account B, not the key type."
       },
@@ -842,7 +842,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Enable IAM Access Analyzer unused access analysis. This identifies IAM actions that the DataProcessingRole has been granted but has never used in the past 90 days, enabling the team to remove excess permissions.",
+        text: "Enable IAM Access Analyzer unused access analysis, which identifies actions the DataProcessingRole was granted but never used in 90 days.",
         isCorrect: true,
         explanation: "IAM Access Analyzer unused access analysis (launched November 2023) identifies unused IAM roles, unused access keys, unused passwords, and — critically — unused actions and services within active roles. For DataProcessingRole, Access Analyzer compares the policy's granted actions against CloudTrail-recorded usage over the past 90 days and highlights actions the role has permission to perform but has never actually performed. The team can then remove those actions, achieving least privilege. This is distinct from (and complementary to) external access findings."
       },
@@ -881,7 +881,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "The developer is correct specifically because IgnorePublicAcls = true treats all public ACLs as if they grant no access. Even though BlockPublicAcls = false (new public ACLs can still be applied), the existing public-read ACLs on objects are currently ignored. The objects are inaccessible to the public under the current configuration.",
+        text: "The developer is correct because IgnorePublicAcls = true makes S3 treat the existing public object ACLs as granting no access.",
         isCorrect: true,
         explanation: "IgnorePublicAcls = true causes Amazon S3 to ignore all public ACLs on the bucket and its objects — regardless of what ACLs are actually set. With IgnorePublicAcls = true, the public-read ACLs on the objects are effectively disabled: S3 treats requests as if the public-read grants do not exist. The developer is correct that the objects are currently inaccessible to unauthenticated users. However, a critical caveat: BlockPublicAcls = false means new public ACLs can still be added (they just won't take effect while IgnorePublicAcls = true). Best practice is to enable all four settings."
       },
@@ -920,7 +920,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Use AWS Nitro Enclaves to create a fully isolated compute environment within the EC2 instance. The enclave has no persistent storage, no external networking, and no interactive access — even the parent EC2 instance's operators cannot view or modify the enclave's memory.",
+        text: "Use AWS Nitro Enclaves to create an isolated environment with no persistent storage, no external networking, and no interactive access.",
         isCorrect: true,
         explanation: "AWS Nitro Enclaves create isolated virtual machines (using Nitro Hypervisor partitioning) within a parent EC2 instance. They have: no persistent storage, no external network interfaces (only a local vsock channel to the parent instance), no SSH/interactive access, and cryptographic attestation (proving the exact code running in the enclave). The parent instance's root user, AWS operators, and even AWS support cannot access the enclave's memory or execution context. Sensitive key material is processed exclusively inside the enclave and never exposed to the parent instance's OS."
       },
@@ -959,7 +959,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Apply an SCP at the root OU level that Denies s3:PutObject when the request condition s3:x-amz-server-side-encryption is null (missing) or not equal to 'aws:kms'. Use AWS Organizations Resource Control Policies (RCPs) for the same enforcement at the resource level.",
+        text: "Apply an SCP at the root OU that denies s3:PutObject when s3:x-amz-server-side-encryption is missing or not 'aws:kms'.",
         isCorrect: true,
         explanation: "An SCP denying s3:PutObject unless s3:x-amz-server-side-encryption is 'aws:kms' enforces KMS encryption requirements across all member accounts at the API call level. Additionally, AWS Resource Control Policies (RCPs) — released re:Invent 2024 — enforce controls at the resource level across the organization, covering cross-account access scenarios. The SCP Deny condition pattern: Deny s3:PutObject if StringNotEquals s3:x-amz-server-side-encryption aws:kms. This blocks all unencrypted uploads and SSE-S3 uploads organization-wide without touching individual bucket policies."
       },
@@ -999,7 +999,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "The claim is incorrect. VPC Flow Logs explicitly DO NOT capture: traffic to the VPC DNS resolver (169.254.169.253), DHCP traffic, traffic to the instance metadata service (169.254.169.254), Windows KMS activation traffic (169.254.169.250), and traffic between a Network Load Balancer private IP and instances. These exclusions mean Flow Logs cannot reconstruct complete instance network activity — DNS and metadata queries are invisible.",
+        text: "The claim is incorrect. Flow Logs exclude traffic to the DNS resolver, DHCP, the instance metadata service, and Windows KMS activation.",
         isCorrect: true,
         explanation: "AWS documentation explicitly lists the traffic NOT captured by VPC Flow Logs: (1) Traffic to the Amazon DNS server (including the VPC resolver at 169.254.169.253 and Route 53 Resolver). (2) Traffic generated by instances when they contact the Amazon Windows license activation server (169.254.169.250). (3) Traffic to and from 169.254.169.254 for instance metadata. (4) Traffic to and from 169.254.169.123 for the Amazon Time Sync Service. (5) DHCP traffic. (6) Traffic to the reserved IP address for the default VPC router. (7) Traffic between a Network Load Balancer interface and Fargate tasks or endpoint network interfaces. These exclusions represent significant gaps for complete network reconstruction."
       },
@@ -1038,7 +1038,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "The architect is incorrect about RDS for SQL Server. AD Connector supports WorkSpaces authentication via proxy, but RDS for SQL Server Windows Authentication requires AWS Managed Microsoft AD — AD Connector explicitly does NOT support the Kerberos/NTLM authentication flow that RDS SQL Server requires for Windows Auth.",
+        text: "The architect is incorrect about RDS. AD Connector proxies WorkSpaces auth, but RDS SQL Server Windows Auth needs AWS Managed Microsoft AD.",
         isCorrect: true,
         explanation: "This is the critical distinction. AD Connector supports: WorkSpaces login, AWS Management Console SSO, Amazon Chime, Amazon QuickSight, and some other AWS services. AD Connector does NOT support: RDS for SQL Server Windows Authentication, Amazon FSx for Windows File Server (joined to AD), Amazon RDS for Oracle with Windows Auth, or any service that requires Kerberos ticket issuance or LDAP queries that AD Connector cannot proxy correctly. For RDS SQL Server Windows Auth, the AD controllers must be directly reachable and Kerberos-compatible — this requires AWS Managed Microsoft AD (which runs real AD in AWS) or on-premises AD accessible via Direct Connect with the instance configured to join it directly."
       },
@@ -1077,7 +1077,7 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "The manager is overstating the capability. AWS Config rules are detective controls — they detect non-compliance after resource creation, not in real-time. There is inherent latency between resource creation and Config rule evaluation (minutes, not seconds). Config rules also CANNOT prevent resource creation — they can only detect and trigger post-creation remediation. For real-time prevention, SCPs or IAM conditions are required.",
+        text: "The manager is overstating it. Config rules are detective — they evaluate minutes after creation and cannot prevent it; SCPs are needed for that.",
         isCorrect: true,
         explanation: "AWS Config rules evaluate configurations at specific points — either periodically or on configuration changes detected by the Config recorder. Even change-triggered rules have a pipeline latency: Config recorder detects the change → delivers configuration item → rule evaluator runs → generates compliance finding → EventBridge triggers → remediation automation runs. This pipeline takes minutes, not seconds. More importantly, Config rules CANNOT block the API call at the time it is made — they are detective, not preventive. An unencrypted bucket exists for the duration of this pipeline. For true prevention, SCPs with s3:x-amz-server-side-encryption conditions, or S3 bucket policies enforced via Firewall Manager, are required."
       },
@@ -1116,13 +1116,13 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "IAM Access Analyzer now includes three distinct capabilities: (1) External access analysis (original) — finds resources accessible from outside the zone of trust. (2) Unused access analysis (added November 2023) — identifies IAM roles not used in 90 days, unused access keys, unused passwords, and specific IAM actions/services within active roles that have never been called. (3) Policy validation and generation (available since 2020-2021) — checks policies for errors and generates least-privilege policies from CloudTrail. The engineer's 2022 statement is incomplete.",
+        text: "Access Analyzer now also covers unused access analysis for unused roles, keys, and actions, plus policy validation and generation.",
         isCorrect: true,
         explanation: "IAM Access Analyzer expanded its scope significantly. The unused access feature (November 2023) is particularly important for least-privilege: it analyzes IAM roles, users, and access keys against CloudTrail data to identify: roles that have not been used in 90 days (suggesting they should be deleted or reviewed), access keys not used in 90 days, passwords not used in 90 days, and individual IAM permissions within an active role's policy that have never been exercised. This goes well beyond the original external access finding capability and is now a three-pillar service."
       },
       {
         id: "C",
-        text: "IAM Access Analyzer expanded to include network reachability analysis — it now scans VPC security groups and NACLs to determine if resources are network-accessible from the internet.",
+        text: "Access Analyzer expanded to include network reachability analysis, scanning security groups and NACLs for internet exposure.",
         isCorrect: false,
         explanation: "Network reachability analysis is a feature of Amazon Inspector v2 (network reachability findings for EC2 instances), not IAM Access Analyzer. Access Analyzer focuses on IAM/resource policy-based access analysis, not network-level reachability via security groups and NACLs."
       },
@@ -1155,19 +1155,19 @@ export const domain1NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Use Cognito Identity Pool role-based access control (RBAC) with Cognito User Pool groups — each group maps to a different IAM role. Users in different groups get different permissions without per-user roles.",
+        text: "Use Cognito Identity Pool role-based access control with User Pool groups — each group maps to a different IAM role, avoiding per-user roles.",
         isCorrect: false,
         explanation: "Group-to-role mapping reduces the number of roles (one per group, not one per user) but still requires a separate IAM role per permission group. For 1,000 users in 20 groups, you need 20 roles — better than 1,000, but this is not the approach the architect is likely suggesting for true per-user scoping."
       },
       {
         id: "C",
-        text: "Pass a session policy at AssumeRoleWithWebIdentity time via the Cognito Identity Pool configuration to further restrict permissions for individual users, combined with IAM policy variables (${cognito-identity.amazonaws.com:sub}) in the role policy to scope resource access to the individual user's identity.",
+        text: "Pass a session policy at AssumeRoleWithWebIdentity, combined with IAM policy variables such as the Cognito identity sub, to scope access per user.",
         isCorrect: true,
         explanation: "IAM policy variables enable per-user resource scoping within a single shared role. The policy variable ${cognito-identity.amazonaws.com:sub} resolves to the authenticated user's unique Cognito identity ID at policy evaluation time — enabling expressions like 'Resource: arn:aws:s3:::my-bucket/${cognito-identity.amazonaws.com:sub}/*' that scope each user to their own S3 prefix. Additionally, Cognito Identity Pool supports session tags derived from User Pool token claims, and session policies can be passed per-request to further restrict permissions. A single IAM role can serve all users with per-user resource isolation — no per-user roles required."
       },
       {
         id: "D",
-        text: "Configure Cognito Identity Pool with the 'Enhanced (Simplified) Auth Flow' instead of 'Basic Auth Flow.' The enhanced flow applies per-user permission rules automatically.",
+        text: "Configure the Identity Pool with the 'Enhanced (Simplified) Auth Flow' — the enhanced flow applies per-user permission rules automatically.",
         isCorrect: false,
         explanation: "The Enhanced Auth Flow simplifies the integration by allowing the Identity Pool to call STS on behalf of the user internally, versus the Basic Auth Flow where the client calls STS directly. Neither flow automatically applies per-user permission rules. The Enhanced flow uses a pre-configured role and does not dynamically scope permissions per user. Policy variables and session tags require configuration regardless of auth flow."
       }

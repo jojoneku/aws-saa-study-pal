@@ -15,7 +15,7 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "AWS Application Migration Service (AWS MGN) for the Windows Server, AWS Database Migration Service (AWS DMS) for the MySQL-to-Aurora replication, and AWS DataSync for the NAS-to-S3 file transfer.",
+        text: "AWS MGN for the Windows Server, AWS DMS for the MySQL-to-Aurora replication, and AWS DataSync for the NAS-to-S3 transfer.",
         isCorrect: true,
         explanation: "Correct — Each tool is purpose-matched: AWS MGN performs agent-based, continuous block-level replication of the entire server (OS + application + data) to AWS and converts it to an EC2 instance — no source code needed. AWS DMS continuously replicates the MySQL database to Aurora MySQL with change data capture (CDC), allowing a live cutover with minimal downtime. AWS DataSync is an agent-based file transfer service optimized for moving large amounts of data (NAS/NFS/SMB) to S3, EFS, or FSx at up to 10 Gbps per agent — far faster than a manual copy."
       },
@@ -61,7 +61,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "AWS Elastic Disaster Recovery (AWS DRS) with the DRS replication agent installed on each physical server — continuous block-level replication, sub-second RPO, 5–20-minute RTO, and a rolling 24-hour point-in-time recovery window.",
+        text: "AWS Elastic Disaster Recovery with the DRS agent on each server — continuous block-level replication, sub-second RPO, 5–20-minute RTO.",
         isCorrect: true,
         explanation: "Correct — AWS Elastic Disaster Recovery (DRS, formerly CloudEndure DR) uses an agent installed on the source server that continuously replicates block-level changes to a low-cost AWS staging area (a replication server + EBS volumes). The result: RPO = seconds (continuous replication, near real-time), RTO = 5–20 minutes (automated EC2 launch with OS conversion), and a rolling 24-hour point-in-time recovery window — you can recover to any point in the last 24 hours by second. Non-disruptive DR drills are also supported. Cost is ~$20/month per server."
       },
@@ -95,7 +95,7 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Step Functions Express Workflow — cheapest option for high-volume short workflows. Because Express Workflows guarantee at-least-once execution, the downstream Lambda functions MUST be idempotent.",
+        text: "Step Functions Express Workflow — cheapest for high-volume short workflows, but its at-least-once execution means the Lambdas must be idempotent.",
         isCorrect: true,
         explanation: "Correct — Express Workflows are billed per execution request + duration (not per state transition), making them significantly cheaper for high-volume, short-duration workloads. At 2M transactions/day and under 3-minute duration, Express Workflows are optimal. However, Express Workflows have at-least-once execution semantics — a workflow may execute more than once for the same input if retried or in failure scenarios. Therefore, the Lambda functions called by the workflow MUST be designed to be idempotent (same input produces same result, safe to retry). The workflow engine does NOT deduplicate — that responsibility falls to the application."
       },
@@ -135,7 +135,7 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Option A — Amazon MQ with an Apache ActiveMQ broker supports JMS, AMQP 1.0, MQTT, STOMP, OpenWire, and WSS protocols natively. Existing application code requiring no changes.",
+        text: "Option A — Amazon MQ with an ActiveMQ broker natively supports JMS, AMQP 1.0, MQTT, STOMP, and OpenWire, so existing code needs no changes.",
         isCorrect: true,
         explanation: "Correct — Amazon MQ is a managed Apache ActiveMQ (and RabbitMQ) broker. It natively supports the protocols the ERP system uses: JMS, AMQP 1.0, MQTT, STOMP, OpenWire, and WSS. Applications connect to Amazon MQ using the same client libraries and connection strings (updated hostname only), requiring zero code changes. This is the textbook 'lift-and-shift messaging migration' use case for Amazon MQ."
       },
@@ -147,7 +147,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "C",
-        text: "Option B is better because Amazon MQ does not support AMQP 1.0, which the ERP system requires.",
+        text: "Option B is better because Amazon MQ does not support AMQP 1.0, which the ERP system requires for its queues.",
         isCorrect: false,
         explanation: "Wrong — Amazon MQ with Apache ActiveMQ DOES support AMQP 1.0 natively. Amazon MQ with RabbitMQ supports AMQP 0-9-1. AMQP 1.0 is specifically listed in Amazon MQ's ActiveMQ supported protocol list. This option contains a false technical claim."
       },
@@ -175,7 +175,7 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Amazon AppFlow — a no-code, fully managed service for bidirectional data transfers between SaaS applications (Salesforce, ServiceNow, SAP, etc.) and AWS services, supporting scheduled and event-triggered flows, field mapping, filtering, and Salesforce PrivateLink connectivity.",
+        text: "Amazon AppFlow — a no-code managed service for bidirectional SaaS-to-AWS transfers with scheduled and event-triggered flows and field mapping.",
         isCorrect: true,
         explanation: "Correct — Amazon AppFlow is purpose-built for SaaS-to-AWS data integration without custom code. It supports 50+ SaaS connectors including Salesforce (with PrivateLink support for private connectivity), ServiceNow, SAP, Marketo, Zendesk, Google Analytics, and more. Flows can be triggered on a schedule, on-demand, or by SaaS events (Salesforce CDC). Field-level mapping, validation, transformation, and filtering are built in. Max 100 GB per flow run is a supported limit."
       },
@@ -215,7 +215,7 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "ALB sticky sessions (duration-based or application-based) on the target group for session affinity, and ALB weighted target groups to split traffic 90/10 between the existing and new task definition versions.",
+        text: "ALB sticky sessions on the target group for session affinity, plus weighted target groups to split traffic 90/10 between the two versions.",
         isCorrect: true,
         explanation: "Correct — ALB sticky sessions bind a user's requests to a specific target for the duration of the session cookie. Duration-based stickiness uses the `AWSALB` cookie (set by ALB); application-based stickiness uses your application's own cookie. For the blue/green deployment, ALB supports weighted target groups — two target groups registered on the same listener rule with weights (e.g., 90 to the blue group, 10 to the green group). Traffic splits are applied at the listener rule level. Both features can be used simultaneously on different target groups."
       },
@@ -233,7 +233,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "D",
-        text: "Enable ALB Multi-AZ across two AZs — the ALB routes sessions to the same AZ targets (providing session affinity) and balances new user traffic 50/50 between the two versions.",
+        text: "Enable ALB Multi-AZ across two AZs — the ALB pins sessions to same-AZ targets and splits new traffic 50/50 between versions.",
         isCorrect: false,
         explanation: "Wrong — Multi-AZ load balancing routes users to any healthy target across AZs — it does NOT provide session affinity. Cross-zone load balancing distributes requests across ALL targets regardless of AZ. Sticky sessions are a separate feature configured on the target group, not by enabling Multi-AZ."
       }
@@ -255,13 +255,13 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Application Load Balancer (ALB) with an HTTPS listener and an AWS Certificate Manager (ACM) certificate — ALB terminates TLS and forwards HTTP to EC2. ALB automatically assigns one static IP per AZ.",
+        text: "Application Load Balancer with an HTTPS listener and an ACM certificate — ALB terminates TLS and assigns one static IP per AZ.",
         isCorrect: false,
         explanation: "Wrong — ALB DOES support TLS termination with ACM certificates, but ALB does NOT provide static IP addresses. ALB uses dynamic DNS-based IPs that can change. For static IPs per AZ, a Network Load Balancer (NLB) is required."
       },
       {
         id: "B",
-        text: "Network Load Balancer (NLB) with a TLS listener using an ACM certificate — NLB terminates TLS and forwards TCP to the EC2 backend on port 80. NLB provides one static IP address (or Elastic IP) per AZ.",
+        text: "Network Load Balancer with a TLS listener using an ACM certificate — NLB terminates TLS and provides one static IP or EIP per AZ.",
         isCorrect: true,
         explanation: "Correct — NLB supports TLS termination at Layer 4 via TLS listeners (port 443) using ACM-managed certificates. After TLS decryption, NLB forwards the plaintext TCP traffic to the target group on port 80. NLB assigns one static IP per Availability Zone (automatically assigned or you can specify an Elastic IP), which is exactly what the firewall team needs for static-IP whitelisting. NLB also operates at extremely high throughput (millions of requests per second) with ultra-low latency."
       },
@@ -295,7 +295,7 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "AWS Global Accelerator with two endpoints (production ALB and staging ALB), using endpoint weights to set 95% weight on production and 5% on staging — the two static anycast IPs remain constant.",
+        text: "AWS Global Accelerator with production and staging ALB endpoints, using endpoint weights of 95 and 5 behind two static anycast IPs.",
         isCorrect: true,
         explanation: "Correct — AWS Global Accelerator provides exactly 2 static anycast IPv4 addresses that never change. Behind those IPs, you configure endpoint groups with endpoints (ALBs, NLBs, EC2 IPs, Elastic IPs). Each endpoint can have a weight (0–255), enabling traffic splitting between the production ALB (weight 95%) and staging ALB (weight 5%). Clients whitelist the 2 Global Accelerator IPs — they never see the underlying ALB IPs. Shifting traffic = adjusting weights without any DNS change or IP change."
       },
@@ -341,7 +341,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "ECS FARGATE_SPOT capacity provider with a base of 0 FARGATE on-demand tasks, weighted 100% toward FARGATE_SPOT — tasks run on spare capacity at ~70% discount and receive a 2-minute SIGTERM before interruption.",
+        text: "ECS FARGATE_SPOT capacity provider weighted 100% with no on-demand base — tasks get a 2-minute SIGTERM before interruption.",
         isCorrect: true,
         explanation: "Correct — FARGATE_SPOT uses spare Fargate capacity at approximately 70% discount versus on-demand Fargate pricing. When AWS needs capacity back, tasks receive a 2-minute SIGTERM interruption notice (sufficient for graceful shutdown of fault-tolerant batch jobs). For workloads that are fault-tolerant and can tolerate interruptions, using 100% FARGATE_SPOT maximizes savings. The ECS capacity provider strategy can set base = 0 (no guaranteed on-demand tasks) and weight = 100 on FARGATE_SPOT."
       },
@@ -381,7 +381,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "API server pods → EKS managed node group (EC2); batch pods → EKS managed node group (EC2) with Spot instances; developer test pods → EKS Fargate profiles.",
+        text: "API pods → EKS managed node group; batch pods → managed node group with Spot; developer test pods → Fargate profiles.",
         isCorrect: true,
         explanation: "Correct — EKS managed node group (EC2): supports DaemonSets, privileged containers, EBS PersistentVolumes, and all standard Kubernetes features. Managed node groups handle node provisioning and lifecycle (patching, drain, replacement). Spot instances on managed node groups provide ~70% discount for fault-tolerant batch. EKS Fargate profiles: each pod runs in its own Firecracker microVM, billed per-CPU/per-memory second — zero cost when no pods are scheduled. Perfect for dev test pods that are idle most of the time. Fargate limitations: no DaemonSets, no privileged containers, no EBS, no GPU, no hostNetwork."
       },
@@ -421,7 +421,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "ECR Lifecycle Policies — configure a policy to expire untagged images after 7 days and keep only the 10 most recent images in each branch-named tag prefix, with a separate rule to exclude 'production' tagged images from cleanup.",
+        text: "ECR lifecycle policies — expire untagged images after 7 days and keep only the 10 most recent images per tag prefix.",
         isCorrect: true,
         explanation: "Correct — ECR Lifecycle Policies are purpose-built for automated image cleanup. Rules can be based on: image count (keep only X most recent), image age (expire after N days), tag status (tagged/untagged/prefix matching), and tag prefix patterns. Rules are evaluated in priority order. A high-priority rule to EXCLUDE 'production' tagged images (rule priority 1: `tagStatus=tagged, tagPrefixList=['production'], action=keep`) prevents production images from matching any cleanup rule. Lower-priority rules then expire images by count or age."
       },
@@ -461,13 +461,13 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "AWS App Runner — point to an ECR image, and App Runner builds and deploys the containerized service to a fully managed HTTPS endpoint with automatic scaling, no infrastructure to configure.",
+        text: "AWS App Runner — point it at an ECR image and it deploys the service to a managed HTTPS endpoint with automatic scaling.",
         isCorrect: true,
         explanation: "Correct — AWS App Runner is the simplest container deployment service on AWS. You provide an ECR image URL (or source code from GitHub), set the port, and App Runner handles: provisioning compute, configuring HTTPS endpoint, load balancing, auto scaling (up and down to zero), health checks, and TLS certificates. There is no VPC, no EC2, no ALB to configure. A new App Runner service is live in 2–3 minutes. This is the canonical 'simplest container deployment' answer."
       },
       {
         id: "C",
-        text: "Amazon ECS with AWS Fargate — serverless container deployment with no EC2 management required.",
+        text: "Amazon ECS with AWS Fargate — serverless container deployment with no EC2 instances to manage.",
         isCorrect: false,
         explanation: "Wrong — ECS with Fargate is powerful and serverless but requires configuring: a VPC, subnets, security groups, an ALB with listener and target group, ECS task definitions, and ECS services. While no EC2 instances are managed, there is significant infrastructure configuration overhead (VPC, ALB, task definitions). This is more complex than App Runner for a simple containerized web API."
       },
@@ -495,7 +495,7 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Scheduled scaling actions for 8 AM, noon, and 6 PM to pre-scale the fleet, combined with target tracking scaling based on average CPU utilization to react to unplanned viral spikes.",
+        text: "Scheduled scaling actions at 8 AM, noon, and 6 PM to pre-scale, combined with target tracking on average CPU for viral spikes.",
         isCorrect: true,
         explanation: "Correct — Scheduled scaling pre-scales the fleet BEFORE the predictable morning and noon spikes, ensuring capacity is available before load arrives (not after). Target tracking scaling continuously adjusts capacity based on a metric (CPU utilization, request count per target) and reacts automatically to unplanned events like viral spikes. Together: scheduled scaling handles known patterns proactively; target tracking handles unknown/viral spikes reactively. This combination is the AWS-recommended approach for workloads with both predictable and unpredictable components."
       },
@@ -541,19 +541,19 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Immutable deployment — launches a full set of 20 new instances in a separate Auto Scaling group alongside the current 20 instances, performs health checks, then swaps all at once. Rollback = delete the new ASG instantly.",
+        text: "Immutable deployment — launches 20 new instances in a separate Auto Scaling group, health-checks them, then swaps all at once.",
         isCorrect: false,
         explanation: "Wrong — Immutable deployment achieves zero downtime AND instant rollback (delete the new ASG to revert immediately). However, it DOUBLES compute costs during deployment (40 instances running simultaneously: 20 old + 20 new). The question requires no additional compute cost, which immutable fails."
       },
       {
         id: "C",
-        text: "Rolling with additional batch — adds a new batch of instances first, then rolls updates through in batches. Maintains full capacity throughout. Instant rollback by redeploying previous version.",
+        text: "Rolling with additional batch — adds a batch first, then rolls through in batches, maintaining full capacity throughout.",
         isCorrect: false,
         explanation: "Wrong — Rolling with additional batch maintains full 20-instance capacity throughout (adds 1 batch extra during the transition, then removes it). It achieves zero downtime and full capacity, but like basic Rolling, rollback requires re-deploying the previous version through another batch deployment — not instant."
       },
       {
         id: "D",
-        text: "Blue/Green deployment — deploy a new Elastic Beanstalk environment (green) alongside the existing one (blue), validate, then use Route 53 or Elastic Beanstalk 'Swap Environment URLs' to shift traffic. Rollback = swap URLs back instantly.",
+        text: "Blue/Green — deploy a new Beanstalk environment alongside the existing one, validate, then swap environment URLs to shift traffic.",
         isCorrect: true,
         explanation: "Correct — Blue/Green in Elastic Beanstalk deploys an entirely new environment (same configuration, new version). Traffic is shifted to green via 'Swap Environment URLs' (Elastic Beanstalk built-in) or Route 53 weighted routing. If the new version fails: swap URLs back immediately (instant rollback, seconds). Zero downtime during deployment (blue continues serving 100% traffic until swap). Zero additional ongoing cost (blue environment is swapped OUT, then can be terminated). The separate environment also serves as a staging validation environment before cutover."
       }
@@ -581,7 +581,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "AWS CloudFormation StackSets with 'Service-Managed Permissions' targeting the entire AWS Organization or specific Organizational Units — automatically deploys to all current accounts and to new accounts as they join.",
+        text: "AWS CloudFormation StackSets with service-managed permissions targeting the Organization, so new accounts are covered automatically.",
         isCorrect: true,
         explanation: "Correct — CloudFormation StackSets enable deploying a single CloudFormation template to MULTIPLE accounts and regions simultaneously. With SERVICE-MANAGED permissions (uses AWS Organizations trust, no manual role creation required), you can target the entire organization, specific OUs, or individual accounts. Crucially, enabling 'automatic deployment' in StackSets deploys stack instances to NEW accounts as they join the target OU or organization — eliminating manual onboarding steps. The administrator account manages all instances from one StackSet."
       },
@@ -621,7 +621,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "An HTTP/HTTPS health check on the public ALB endpoint, and a CloudWatch Alarm health check for the RDS database (CloudWatch monitors RDS DatabaseConnections metric in the private subnet and Route 53 checks the alarm state).",
+        text: "An HTTP/HTTPS health check on the public ALB endpoint, and a CloudWatch alarm health check for the RDS database in the private subnet.",
         isCorrect: true,
         explanation: "Correct — Route 53 health check types: Endpoint health checks (HTTP/HTTPS/TCP) = public internet-accessible endpoints only. CloudWatch Alarm health checks = Route 53 monitors a CloudWatch alarm state; if the alarm is IN_ALARM, Route 53 marks the health check as failed. Since RDS is in a private subnet, the correct approach is: (1) create a CloudWatch alarm on RDS DatabaseConnections or RDS event notifications, and (2) create a Route 53 CloudWatch Alarm health check pointing to that alarm. This enables private resource health monitoring through Route 53 indirectly."
       },
@@ -695,25 +695,25 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Two Global Secondary Indexes (GSIs) — one with partition key 'merchantId' and sort key 'transactionDate', and one with partition key 'accountId' and sort key 'transactionAmount'. GSIs support strongly consistent reads for Query 2.",
+        text: "Two GSIs — one on 'merchantId' with sort key 'transactionDate', and another on 'accountId' with sort key 'transactionAmount'.",
         isCorrect: false,
         explanation: "Wrong — Global Secondary Indexes only support EVENTUALLY CONSISTENT reads. Strongly consistent reads are NOT supported on GSIs. Query 2 requires strongly consistent reads with the same partition key ('accountId') — this requires a Local Secondary Index (LSI), not a GSI."
       },
       {
         id: "B",
-        text: "A Global Secondary Index (GSI) with partition key 'merchantId' and sort key 'transactionDate' for Query 1, and a Local Secondary Index (LSI) with the same partition key 'accountId' and sort key 'transactionAmount' for Query 2. LSIs support both eventually and strongly consistent reads.",
+        text: "A GSI on 'merchantId' with sort key 'transactionDate' for Query 1, and an LSI on 'accountId' with sort key 'transactionAmount' for Query 2.",
         isCorrect: true,
         explanation: "Correct — GSIs use a different partition key than the base table, enabling Query 1 ('merchantId' as PK). GSIs always return eventually consistent results (acceptable for Query 1). LSIs use the SAME partition key as the base table ('accountId') but a different sort key ('transactionAmount'). LSIs support both eventually consistent and strongly consistent reads — enabling Query 2's strongly consistent requirement. Critical constraint: LSIs MUST be created when the table is first created and CANNOT be added later."
       },
       {
         id: "C",
-        text: "Two Local Secondary Indexes (LSIs) — one with sort key 'transactionDate' (same as base table but different PK) and one with sort key 'transactionAmount'. LSIs can have any partition key.",
+        text: "Two LSIs — one with sort key 'transactionDate' and one with sort key 'transactionAmount', both on a different partition key.",
         isCorrect: false,
         explanation: "Wrong — LSIs must use the SAME partition key as the base table. You cannot define an LSI with a different partition key. Query 1 requires 'merchantId' as the partition key (different from the base table's 'accountId'), which requires a GSI. An LSI with a different partition key is architecturally impossible."
       },
       {
         id: "D",
-        text: "A single GSI with a composite key (merchantId + transactionDate) and a Scan with a filter expression for transactionAmount — Scan is more flexible than secondary indexes.",
+        text: "A single GSI on 'merchantId' plus 'transactionDate', with a Scan and filter expression to satisfy the transactionAmount query.",
         isCorrect: false,
         explanation: "Wrong — DynamoDB Scans read the ENTIRE table and filter client-side, consuming all provisioned read capacity. For large tables, this is extremely expensive and slow. Scan is an anti-pattern for production query access patterns. Secondary indexes (GSI/LSI) are the correct solution for non-primary-key access patterns."
       }
@@ -741,7 +741,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Aurora Fast Clone — creates a copy-on-write clone of the cluster in seconds to minutes, sharing the original storage pages until modified. The clone only consumes storage for data that diverges from production.",
+        text: "Aurora Fast Clone — creates a copy-on-write clone in minutes, sharing storage pages until data diverges from production.",
         isCorrect: true,
         explanation: "Correct — Aurora Fast Clone uses a copy-on-write mechanism at the storage layer. The clone initially points to the SAME physical storage pages as the source cluster — no data is copied at clone creation time. The clone provisions in seconds to minutes (depending on instance start time). Additional storage is consumed only as the clone or source modifies pages (copy-on-write). This means initial storage cost is near-zero, and the clone is fully isolated from production (writes to the clone don't affect production). Aurora Cloning is available within the same Aurora cluster or to a different account."
       },
@@ -781,7 +781,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "The flaw is that Express Workflows have AT-LEAST-ONCE execution semantics — a workflow may execute more than once for the same input if errors or retries occur. For exactly-once payment processing, Standard Workflows must be used, or the Lambda functions must be idempotent (e.g., using a unique transaction ID stored in DynamoDB to detect and skip duplicate charges).",
+        text: "The flaw is that Express Workflows are at-least-once — payment processing needs Standard Workflows or idempotent Lambda functions.",
         isCorrect: true,
         explanation: "Correct — AWS Step Functions Express Workflows guarantee AT-LEAST-ONCE execution semantics, not exactly-once. The team member's claim is false. Standard Workflows guarantee exactly-once execution per state transition. For payment processing where duplicate execution = duplicate charges, you need either: (1) Standard Workflows (exactly-once), or (2) Express Workflows with idempotent Lambda functions (check DynamoDB for the transaction ID before charging, skip if already processed). The synchronous API call pattern of Synchronous Express Workflows does NOT change the at-least-once execution guarantee."
       },
@@ -821,7 +821,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon API Gateway WebSocket API — maintains persistent stateful connections, routes incoming messages to Lambda handlers by route selection expression, and allows the backend to proactively push to connected clients via the connection management API.",
+        text: "Amazon API Gateway WebSocket API — persistent stateful connections that route messages to Lambda and let the backend push to clients.",
         isCorrect: true,
         explanation: "Correct — API Gateway WebSocket API is designed for real-time bidirectional communication. Each connected client gets a unique connectionId. Lambda is triggered on connection ($connect), disconnection ($disconnect), and custom message routes. The backend can PROACTIVELY push messages to any connected client by calling the API Gateway Management API (POST to /@connections/{connectionId}). Connection IDs are typically stored in DynamoDB for the backend to look up which clients to notify when state changes."
       },
@@ -855,13 +855,13 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Enable S3 versioning on the bucket — when an object is deleted without specifying a version ID, S3 inserts a Delete Marker instead of permanently removing data, preserving all previous versions.",
+        text: "Enable S3 versioning — deleting without a version ID inserts a delete marker rather than removing data, preserving all versions.",
         isCorrect: false,
         explanation: "Correct on the Delete Marker behavior, but INCOMPLETE for the requirement. With versioning enabled, a delete without a version ID adds a Delete Marker (recoverable). However, if an operator runs `aws s3api delete-object --bucket X --key Y --version-id Z`, it permanently deletes that version. This does not add protection against operators with s3:DeleteObjectVersion permission permanently removing versions. The question asks for ADDITIONAL protection beyond just versioning."
       },
       {
         id: "B",
-        text: "Enable S3 versioning with MFA Delete — requires the root account + a registered MFA device to permanently delete a specific version ID or change the versioning state. Accidental AWS CLI deletes without version IDs add Delete Markers only; permanently removing a version requires MFA authentication.",
+        text: "Enable S3 versioning with MFA Delete — permanently deleting a version requires the root account plus a registered MFA device.",
         isCorrect: true,
         explanation: "Correct — S3 versioning + MFA Delete requires Multi-Factor Authentication to perform two operations: (1) permanently delete a specific object version (delete-object with version-id), and (2) change the bucket versioning state (suspend/re-enable). Without the MFA token, s3:DeleteObjectVersion calls fail even for bucket owners. This prevents rogue scripts or compromised credentials from permanently deleting versions. Authorized legal purges still work — the operator provides the MFA token. MFA Delete must be enabled via the AWS CLI by the bucket owner (root account)."
       },
@@ -895,7 +895,7 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "CloudFormation Change Sets (preview proposed changes without applying) and CloudFormation Drift Detection (compare current resource configurations against the stack template to identify out-of-band changes).",
+        text: "CloudFormation Change Sets to preview proposed changes before applying, and Drift Detection to find out-of-band configuration changes.",
         isCorrect: true,
         explanation: "Correct — CloudFormation Change Sets: create a change set from a modified template to preview what will be added (Add), modified (Modify — direct/indirect replacement), or removed (Remove) from the stack. The change set is not executed until you choose to execute it. CloudFormation Drift Detection: compares the current actual configuration of stack resources against the expected configuration in the template. Resources modified outside CloudFormation (console, CLI, API) are flagged as DRIFTED with the specific property differences shown. Both are read-only operations that provide visibility without making changes."
       },
@@ -907,7 +907,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "C",
-        text: "AWS Config with CloudFormation-specific rules (detect manual changes) and CloudFormation StackSets (deploy the same template to verify no differences across all regions).",
+        text: "AWS Config with CloudFormation rules to detect manual changes, and StackSets to verify no differences across all regions.",
         isCorrect: false,
         explanation: "Wrong — AWS Config can detect resource configuration changes (including changes to EC2 security groups) via configuration history, but it is not the CloudFormation-native drift detection mechanism. CloudFormation Drift Detection is the purpose-built tool for identifying resources modified outside of CloudFormation management. StackSets are for multi-account/region deployment, not single-stack change preview."
       },
@@ -941,7 +941,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon MQ ActiveMQ Active/Standby broker with shared Amazon EFS storage across two AZs — the active broker handles all traffic; if it fails, the standby takes over and inherits the shared message store.",
+        text: "Amazon MQ ActiveMQ Active/Standby broker with shared EFS storage across two AZs — the standby inherits the shared message store.",
         isCorrect: true,
         explanation: "Correct — Amazon MQ ActiveMQ Active/Standby is the production HA configuration. Two broker instances (active in one AZ, standby in another AZ) share the same Amazon EFS file system as their message store. If the active broker fails, the standby broker takes over (fencing the active from EFS) and all messages persisted to EFS are immediately available on the standby. Clients reconnect using the failover transport URL, which includes both broker endpoints. This provides AZ-level resilience with no message loss for messages persisted before failure."
       },
@@ -975,13 +975,13 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Both the automated backups (7-day PITR) and all three manual snapshots are available for restore — RDS retains all backups and snapshots indefinitely when an instance is deleted.",
+        text: "Both the automated backups and all three manual snapshots remain available — RDS retains them indefinitely after instance deletion.",
         isCorrect: false,
         explanation: "Wrong — This is the critical trap. Automated backups are NOT retained indefinitely when an RDS instance is deleted. By default, deleting an RDS instance ALSO DELETES all its automated backups (unless you create a final snapshot during deletion). Only manually created snapshots persist after instance deletion."
       },
       {
         id: "B",
-        text: "Automated backups are deleted when the RDS instance is deleted. Only the three manual snapshots remain. PITR is not available because automated backup data no longer exists — the DBA can only restore to one of the three manual snapshot timestamps.",
+        text: "Automated backups are deleted along with the instance, so only the three manual snapshots remain and point-in-time recovery is unavailable.",
         isCorrect: true,
         explanation: "Correct — When you delete an RDS DB instance, automated backups (including the PITR transaction logs) are DELETED immediately with the instance by default. If you choose to skip creating a final snapshot during deletion (or if you click 'delete without creating final snapshot'), you lose automated backup history. The three manually created snapshots are independent resources that persist after instance deletion. The DBA can restore to one of those three manual snapshot timestamps, but PITR (point-in-time recovery to any second in the last 7 days) is no longer available."
       },
@@ -1021,7 +1021,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon EC2 Auto Scaling Predictive Scaling — uses ML-based 14-day traffic history to forecast demand 48 hours ahead and pre-provisions instances BEFORE load arrives, eliminating the reactive lag.",
+        text: "EC2 Auto Scaling predictive scaling — uses 14-day history to forecast demand and pre-provision capacity before load arrives.",
         isCorrect: true,
         explanation: "Correct — Predictive Scaling uses machine learning trained on up to 14 days of CloudWatch metrics (CPU utilization, network, request count) to produce a 48-hour demand forecast. It pre-launches instances BEFORE the forecasted load increase — typically 5–10 minutes before the spike. This eliminates the reactive lag (CPU must spike → alarm → launch → warm up) that target tracking alone causes. Predictive scaling can run in 'forecast only' mode (no actual scaling) for validation before enabling scale-out. It pairs well with target tracking (predictive handles predictable patterns; target tracking handles unexpected deviations)."
       },
@@ -1061,7 +1061,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "LSIs must be created at the time the DynamoDB table is first created — they CANNOT be added to an existing table. The team must create a new table with the LSI defined and migrate 500 million records.",
+        text: "LSIs must be defined when the table is created and cannot be added later, so the team must create a new table and migrate the records.",
         isCorrect: true,
         explanation: "Correct — This is the critical LSI constraint. Unlike GSIs (which can be added to an existing table at any time), LSIs are defined ONLY at table creation and cannot be added, modified, or deleted after the table exists. For the existing production table, the only path to adding an LSI-equivalent access pattern is: (1) create a NEW table with the LSI defined, (2) migrate all 500 million records to the new table (using DynamoDB Streams + Lambda, AWS Data Pipeline, or AWS Glue), and (3) cutover. This is a significant migration effort. Alternatively, use a GSI (can be added at any time) if eventual consistency is acceptable."
       },
@@ -1101,7 +1101,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Flaw 1: Amazon MQ is NOT a managed SQS — it is a managed Apache ActiveMQ and RabbitMQ broker service using open protocols (JMS, AMQP, MQTT, STOMP). Flaw 2: For NEW AWS-native applications, SQS/SNS should be the DEFAULT because they are infinitely scalable, serverless, and use AWS-native APIs with no infrastructure to manage. Amazon MQ is recommended for MIGRATING existing applications that depend on JMS/AMQP/MQTT protocols to avoid rewriting code.",
+        text: "Flaw 1: Amazon MQ is a managed ActiveMQ/RabbitMQ broker, not a managed SQS. Flaw 2: SQS/SNS should be the default for new AWS-native apps.",
         isCorrect: true,
         explanation: "Correct — The architect's statement contains two critical errors: (1) Amazon MQ is NOT a managed SQS. Amazon MQ manages message broker instances (ActiveMQ, RabbitMQ) that support open messaging protocols (JMS, AMQP 0-9-1/1.0, MQTT, STOMP, OpenWire, WSS). SQS is a fully managed, infinitely scalable, serverless queue with proprietary AWS SDK APIs. They are built on completely different architectures. (2) For NEW applications on AWS, SQS/SNS are the recommended defaults because they are truly serverless (no broker instances to size/patch), scale to unlimited messages, and cost nothing when idle. Amazon MQ is recommended when migrating existing on-premises applications that use standard broker protocols — avoiding code rewrites."
       },
@@ -1141,7 +1141,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Attach an ECR repository policy on the central repository in Account A that grants pull permissions (ecr:GetDownloadUrlForLayer, ecr:BatchGetImage, ecr:BatchCheckLayerAvailability) to specific IAM role ARNs from Accounts B–Z. Each development account's ECS task role or CI/CD role already has no cross-account role assumption needed.",
+        text: "Attach an ECR repository policy on the central repository granting pull permissions to the specific IAM role ARNs in each account.",
         isCorrect: true,
         explanation: "Correct — ECR supports resource-based repository policies (similar to S3 bucket policies). By attaching a repository policy to the central ECR repository in Account A that specifies the IAM role ARNs from development accounts (Accounts B–Z), those roles can authenticate to ECR and pull images using `aws ecr get-login-password` + docker pull — without any cross-account role assumption. ECS task roles and CI/CD pipeline IAM roles call ECR APIs directly; the repository policy grants them access cross-account. This is the least overhead approach: one repository policy update, no trust policy configuration in Account A, no assume-role calls needed."
       },
@@ -1181,7 +1181,7 @@ export const domain2NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "(A) Aurora Backtrack (in-place rewind to before the DELETE, MySQL only) → (B) Aurora Fast Clone (copy-on-write, provisions in minutes, minimal initial storage) → (C) Aurora Replica (up to 15 replicas, ~10–20 ms lag, auto-promoted on failover)",
+        text: "(A) Aurora Backtrack → (B) Aurora Fast Clone → (C) Aurora Replica from the reader endpoint",
         isCorrect: true,
         explanation: "Correct — All three operations matched correctly: (A) Aurora Backtrack rewinds the EXISTING cluster in place to a timestamp before the DELETE — no new cluster created, completes in minutes, within the 72-hour window. MySQL only. (B) Aurora Fast Clone creates a copy-on-write clone sharing physical storage pages with the source — provisions in seconds to minutes, near-zero initial storage cost, fully isolated (clone writes don't affect source). (C) Aurora Replicas are up to 15 read-only replicas attached to the same Aurora shared storage — replica lag ~10–20 ms, serve read traffic via the reader endpoint, and are automatically promoted on primary failure."
       },

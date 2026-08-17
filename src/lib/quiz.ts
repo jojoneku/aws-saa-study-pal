@@ -1,6 +1,30 @@
 import { Question, Domain, QuizSession, DomainStats } from "./types"
 import { ALL_QUESTIONS } from "../data/questions"
 
+const OPTION_IDS = ["A", "B", "C", "D"] as const
+
+/**
+ * Returns a copy of the question with its options in random order and their
+ * ids reassigned A–D by new position.
+ *
+ * The authored question bank places the correct answer in slot B for ~78% of
+ * single-answer questions, so without this the letter alone gives the answer
+ * away. Callers must use the returned question (not the source) for scoring,
+ * since the ids no longer match the authored order.
+ */
+export function shuffleQuestionOptions(question: Question): Question {
+  const options = [...question.options]
+  for (let i = options.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[options[i], options[j]] = [options[j], options[i]]
+  }
+
+  return {
+    ...question,
+    options: options.map((option, i) => ({ ...option, id: OPTION_IDS[i] })),
+  }
+}
+
 /**
  * Returns all questions for a specific domain.
  */
@@ -25,7 +49,7 @@ export function getRandomQuestions(domain: Domain | "all", count: number): Quest
     ;[pool[i], pool[j]] = [pool[j], pool[i]]
   }
 
-  return pool.slice(0, Math.min(count, pool.length))
+  return pool.slice(0, Math.min(count, pool.length)).map(shuffleQuestionOptions)
 }
 
 /**
