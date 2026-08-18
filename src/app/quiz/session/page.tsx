@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { OptionButton } from "@/components/OptionButton"
 import type { Question, Domain } from "@/lib/types"
+import { shuffled, shuffleQuestionOptions } from "@/lib/shuffle"
 import { cn } from "@/lib/utils"
 import {
   ShieldCheck,
@@ -549,8 +550,10 @@ function QuizSessionContent() {
   const basePool = diffFiltered.length > 0 ? diffFiltered : MOCK_QUESTIONS
 
   // ── State ─────────────────────────────────────────────────────────────────
+  // Options are shuffled per question too — the authored bank puts the correct
+  // answer in slot B most of the time, which is a giveaway on its own.
   const [questions] = useState<Question[]>(() =>
-    [...basePool].sort(() => Math.random() - 0.5).slice(0, questionCount)
+    shuffled(basePool).slice(0, questionCount).map(shuffleQuestionOptions)
   )
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)

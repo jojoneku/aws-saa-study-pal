@@ -52,25 +52,25 @@ export const domain1NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Security groups use numbered rules evaluated in order, so a low-numbered deny can block return traffic.",
+        text: "Security groups use numbered rules evaluated in order, so a low-numbered deny rule can block the return traffic.",
         isCorrect: false,
         explanation: "This describes NACL behavior, not security group behavior. Security groups evaluate all rules together and do not use rule numbering. NACLs use numbered rules with first-match evaluation."
       },
       {
         id: "B",
-        text: "NACLs are stateless — each direction of a flow is evaluated independently, so return traffic requires its own explicit allow rule. Security groups are stateful — they automatically allow return traffic for established connections.",
+        text: "NACLs are stateless, so each direction needs its own allow rule; security groups are stateful and allow return traffic.",
         isCorrect: true,
         explanation: "NACLs are stateless: both inbound and outbound rules must explicitly permit each direction of traffic. When a client sends a TCP SYN to the ALB on port 443, the server's response travels on a random ephemeral port (1024–65535) in the outbound direction — the NACL must explicitly allow this. Security groups track connection state and automatically permit return traffic for any connection the SG already allowed inbound."
       },
       {
         id: "C",
-        text: "Security groups do not apply to subnets, so they cannot block traffic between the ALB and EC2 instances in the same subnet.",
+        text: "Security groups do not apply to subnets, so they cannot block traffic between the ALB and instances in the same subnet.",
         isCorrect: false,
         explanation: "Security groups apply to individual ENIs (instances), not subnets. However, this does not explain the stateful vs stateless distinction that is the actual reason the outbound rule is required on NACLs but not security groups."
       },
       {
         id: "D",
-        text: "NACLs only evaluate inbound traffic; outbound rules are ignored.",
+        text: "NACLs evaluate only inbound traffic; their outbound rules are ignored entirely.",
         isCorrect: false,
         explanation: "NACLs evaluate both inbound AND outbound traffic independently. That is precisely why both sets of rules must explicitly allow traffic in each direction — the stateless nature means neither direction is automatically permitted based on the other."
       }
@@ -136,7 +136,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Share the specific subnets from the networking account to application accounts using AWS Resource Access Manager (RAM), scoped to the Organization or specific OUs.",
+        text: "Share the specific subnets with the application accounts using AWS Resource Access Manager, scoped to the OU.",
         isCorrect: true,
         explanation: "AWS RAM subnet sharing (VPC sharing) allows application accounts to launch resources into centrally-managed subnets without creating their own VPCs or peering connections. The networking account retains full ownership and control of the VPC, route tables, NACLs, and internet/NAT gateways. Application accounts manage only the resources (EC2, Lambda, RDS) they launch into the shared subnets. No peering or Transit Gateway required."
       },
@@ -174,7 +174,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Enable AWS WAF Bot Control (Targeted Protection level) on the CloudFront Web ACL.",
+        text: "Enable AWS WAF Bot Control at the Targeted Protection level on the CloudFront distribution's Web ACL.",
         isCorrect: true,
         explanation: "AWS WAF Bot Control's Targeted Protection level uses advanced browser interrogation, fingerprinting, and behavioral analysis (including mouse movements and interaction patterns) to distinguish bots from humans — without custom rule writing. Common bots are categorized (scrapers, crawlers) and blocked or challenged. Targeted Protection runs JavaScript challenges and verifies browser legitimacy. This is the zero-configuration path to behavioral bot detection."
       },
@@ -212,19 +212,19 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Enable AWS Security Hub with the CIS AWS Foundations Benchmark v1.4 standard enabled. Ensure AWS Config is enabled in all regions. Review the Security Hub Findings dashboard for the compliance posture and use Security Hub Insights for remediation tracking.",
+        text: "Enable AWS Security Hub with the CIS AWS Foundations Benchmark standard and AWS Config in all regions.",
         isCorrect: true,
         explanation: "Security Hub's CIS AWS Foundations Benchmark standard continuously evaluates 50+ controls using AWS Config as the data source. Each control check runs automatically and produces pass/fail findings with timestamps. The 12-month findings history and Insights queries can demonstrate continuous compliance and remediation timelines to auditors. AWS Config's configuration history provides point-in-time configuration evidence. This requires zero custom development — enabling Security Hub and Config is sufficient."
       },
       {
         id: "C",
-        text: "Deploy AWS Audit Manager with the CIS framework and manually collect evidence from CloudTrail logs, Config snapshots, and manual attestations.",
+        text: "Deploy AWS Audit Manager with the CIS framework and manually collect evidence from CloudTrail and Config.",
         isCorrect: false,
         explanation: "Audit Manager automates evidence collection for compliance frameworks including CIS, but it requires creating assessment frameworks, defining controls, and reviewing evidence reports — more setup and review overhead than Security Hub's automatic continuous posture checks. Audit Manager is appropriate for formal audit preparation; Security Hub is better for continuous automated compliance monitoring."
       },
       {
         id: "D",
-        text: "Use AWS Trusted Advisor to run weekly security checks against CIS Benchmark controls.",
+        text: "Use AWS Trusted Advisor to run weekly security checks against the CIS Benchmark controls.",
         isCorrect: false,
         explanation: "Trusted Advisor's security checks cover only 7 core checks on Basic/Developer support plans and do not map to the full CIS Benchmark v1.4 control set. It also runs on a schedule rather than continuously, and cannot provide 12-month historical compliance evidence."
       }
@@ -326,7 +326,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Deploy AWS IAM Roles Anywhere on the backup server. Issue an X.509 certificate from the company's on-premises CA, register it as a trust anchor, and configure a profile with an S3 upload role. Use the AWS Signing Helper as a credential provider for the AWS CLI/SDK.",
+        text: "Deploy AWS IAM Roles Anywhere on the backup server, registering the company CA as a trust anchor and using the signing helper.",
         isCorrect: true,
         explanation: "IAM Roles Anywhere allows on-premises workloads to obtain temporary IAM credentials by presenting X.509 certificates — no long-lived IAM keys are stored. The AWS Signing Helper acts as a credential process provider that the AWS CLI and SDKs transparently call, so backup scripts using the AWS CLI do not require any code changes. The temporary credentials (STS) are obtained at runtime and expire after the session duration."
       },
@@ -364,7 +364,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Configure the application tier's security group inbound rules to allow traffic from the web tier's security group ID, rather than a CIDR range.",
+        text: "Configure the application tier's security group to allow inbound traffic from the web tier's security group ID.",
         isCorrect: true,
         explanation: "Security groups can reference other security groups as sources, not just CIDR blocks. An inbound rule allowing traffic from 'sg-webtierId' means only instances belonging to that security group can reach the application tier. When Auto Scaling launches new web-tier instances, they automatically inherit the web-tier security group, so the application tier's inbound rule automatically allows them — no rule updates needed. This is the canonical approach for tier-to-tier access control."
       },
@@ -402,7 +402,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "SSM Parameter Store Advanced tier with parameter policies to set expiration (Time-to-Live) of 90 days, supporting up to 100,000 parameters and 8 KB values.",
+        text: "SSM Parameter Store Advanced tier with parameter policies that set a 90-day expiration (TTL) on each parameter.",
         isCorrect: true,
         explanation: "The Advanced tier supports: up to 100,000 parameters per Region, up to 8 KB per parameter value (accommodating 6 KB files), and parameter policies — which include Expiration policies that automatically delete or notify when a parameter reaches its TTL. A 90-day Expiration policy natively handles the automatic expiration requirement without custom code. Advanced tier is $0.05/parameter/month."
       },
@@ -440,7 +440,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Enable GuardDuty in a delegated administrator account for the Organization, which aggregates all member account findings. Configure an Amazon EventBridge rule in the delegated admin account to trigger a Lambda isolation function on findings with severity ≥ 8.0.",
+        text: "Enable GuardDuty in a delegated administrator account and use an EventBridge rule to trigger a Lambda isolation function on high-severity findings.",
         isCorrect: true,
         explanation: "GuardDuty Organizations integration with a delegated administrator automatically aggregates all member account findings into the admin account with no custom code. EventBridge in the admin account receives all GuardDuty findings as events — a single EventBridge rule with a severity filter (detail.severity >= 8.0) triggers the Lambda. The Lambda uses cross-account role assumption to isolate the EC2 instance in the source member account. This requires minimal code: one EventBridge rule and one Lambda function."
       },
@@ -478,7 +478,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Enable SSE-KMS (server-side encryption with AWS KMS-managed keys) using an AWS managed key (aws/s3). Ensure CloudTrail is logging AWS KMS API calls.",
+        text: "Enable SSE-KMS using the AWS managed key (aws/s3), and ensure CloudTrail is logging KMS API calls for the bucket.",
         isCorrect: true,
         explanation: "AWS managed keys in KMS rotate automatically every year — no configuration needed. Every S3 object encryption/decryption generates a CloudTrail event with the key ARN, key ID, and requester identity — meeting both the rotation and immutable audit trail requirements. AWS managed keys have zero management overhead."
       },
@@ -556,7 +556,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Configure Amazon VPC Traffic Mirroring on the suspicious instance's ENI, mirroring traffic to a network monitoring tool on another EC2 instance or to a Network Load Balancer with packet capture capability.",
+        text: "Configure VPC Traffic Mirroring on the instance's ENI, sending mirrored packets to a monitoring appliance on another instance.",
         isCorrect: true,
         explanation: "VPC Traffic Mirroring replicates the actual network packets (including payload) from a source ENI to a target ENI or NLB. A packet capture tool (tcpdump, Wireshark, IDS appliance) on the mirror target receives full packet contents. This is the only AWS-native mechanism to inspect packet payloads within a VPC without replacing the instance or routing traffic through a new VPC. Traffic Mirroring is available on Nitro-based instances."
       },
@@ -588,19 +588,19 @@ export const domain1NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Create one IAM role per tenant (500 roles) with an S3 policy restricting access to their prefix. Users assume the tenant's role via Cognito Identity Pool role mapping based on their Cognito group.",
+        text: "Create one IAM role per tenant (500 roles) with a prefix-scoped S3 policy, assumed via Cognito Identity Pool role mapping.",
         isCorrect: false,
         explanation: "500 IAM roles is feasible technically but violates the spirit of 'no roles per tenant' at scale. If the company grows to 10,000 tenants, 10,000 IAM roles creates a management and quota challenge. There is also no per-user isolation within a tenant — all users of a tenant share the same role and could access any document in the tenant prefix."
       },
       {
         id: "B",
-        text: "Configure a Cognito Identity Pool with a single IAM role for all authenticated users. Use IAM policy variables — ${cognito-identity.amazonaws.com:sub} for user ID and a custom attribute for tenant ID — to scope the S3 prefix in the role policy. Pass session tags for the tenant ID via AssumeRoleWithWebIdentity.",
+        text: "Use a Cognito Identity Pool with a single IAM role, scoping the S3 prefix via IAM policy variables and tenant session tags.",
         isCorrect: true,
         explanation: "A single IAM role with policy variables dynamically scopes the S3 policy to the authenticated user's identity. The role policy can use ${aws:PrincipalTag/tenantId} (passed as a session tag) to restrict access to s3://docs-bucket/tenant-${aws:PrincipalTag/tenantId}/. With Cognito Identity Pool, the ID token claims map to session tags via the role's AssumeRoleWithWebIdentity condition. Zero IAM roles per tenant — one role serves all 200,000 users with per-tenant isolation enforced by STS session tags."
       },
       {
         id: "C",
-        text: "Use S3 Object Lock with tenant-specific retention policies to prevent cross-tenant access.",
+        text: "Use S3 Object Lock with tenant-specific retention policies to prevent any cross-tenant object access.",
         isCorrect: false,
         explanation: "S3 Object Lock is a compliance feature for WORM immutability (preventing deletion/overwrite). It has nothing to do with access control or tenant isolation. Any principal with the correct S3 GetObject permission could still read any document regardless of Object Lock status."
       },
@@ -626,13 +626,13 @@ export const domain1NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "In Account A, make the EBS snapshot public so that Account B can access it.",
+        text: "In Account A, modify the snapshot permissions to make it public so that Account B can copy it.",
         isCorrect: false,
         explanation: "Encrypted EBS snapshots CANNOT be made public — AWS prevents sharing encrypted snapshots publicly as a security guardrail. Attempting to make an encrypted snapshot public results in an error."
       },
       {
         id: "B",
-        text: "In Account A, copy the snapshot specifying a customer-managed KMS key (CMK), update the CMK key policy to allow Account B's principal to use the key, then share the new snapshot with Account B.",
+        text: "In Account A, copy the snapshot with a customer-managed KMS key, grant Account B use of the key, then share the snapshot.",
         isCorrect: true,
         explanation: "AWS-managed KMS keys (like aws/ebs) cannot be shared across accounts — their key policies cannot be modified. The only supported path for cross-account encrypted snapshot sharing is: (1) copy the snapshot to a new snapshot re-encrypted with a customer-managed CMK, (2) add Account B as a principal in the CMK's key policy with kms:Decrypt and kms:CreateGrant permissions, (3) share the new snapshot with Account B. Account B can then create volumes using the shared snapshot, leveraging the cross-account KMS key grant."
       },
@@ -670,7 +670,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Associate an AWS WAF Web ACL with the CloudFront distribution using AWS Managed Rules (SQL Database rule group and Known Bad Inputs rule group), add a rate-based rule set to 500 requests per 5-minute window per IP, and enable WAF logging to Amazon S3 via Kinesis Firehose.",
+        text: "Associate an AWS WAF Web ACL with the CloudFront distribution using AWS Managed Rules and a rate-based rule of 500 requests per 5 minutes.",
         isCorrect: true,
         explanation: "AWS Managed Rules are maintained by AWS and updated automatically as new SQLi patterns are discovered — zero maintenance. The SQL Database managed rule group detects SQL injection in query strings, headers, and body. The Known Bad Inputs group adds additional attack pattern detection. Rate-based rules natively support a time window and per-IP tracking. WAF logging to Kinesis Firehose → S3 provides immutable, queryable PCI DSS audit evidence."
       },
@@ -708,13 +708,13 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Configure an IAM Permissions Boundary that developers must attach to all roles they create. The boundary includes a Deny on sts:AssumeRole targeting the production account, preventing created roles from being able to assume roles there.",
+        text: "Configure an IAM permissions boundary that developers must attach to created roles, with a Deny on sts:AssumeRole targeting the production account.",
         isCorrect: false,
         explanation: "Permissions boundaries restrict what the principal (the role being created) can do, but they don't prevent the role from being created WITH a trust policy that allows assumption from production. The boundary limits outbound actions of the created role, but the question is about preventing the trust policy itself from referencing the production account."
       },
       {
         id: "C",
-        text: "Apply an SCP that denies iam:CreateRole for any developer-run principal and require developers to submit role creation requests via a Service Catalog product that validates the trust policy before calling iam:CreateRole in the automation pipeline.",
+        text: "Apply an SCP denying iam:CreateRole for developer principals and route role creation through a Service Catalog product that validates the trust policy.",
         isCorrect: true,
         explanation: "Since SCPs cannot inspect trust policy document content at the API evaluation layer, a Service Catalog product (with automation via Lambda or CodePipeline) is the correct approach to validate trust policy content before role creation. The Lambda validates that the Principal element does not contain the production account ID, then creates the role if valid. The SCP denies direct iam:CreateRole calls from developer principals, ensuring all role creation goes through the validated pipeline. This adds one approval layer but prevents the unsafe trust policy pattern."
       },
@@ -746,7 +746,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Enable Secrets Manager cross-region replication to all 3 regions. Configure each service to use the Secrets Manager Caching Client SDK with a TTL of 30 seconds and a refresh-on-rotation hook using Secrets Manager rotation notifications via SNS.",
+        text: "Enable Secrets Manager cross-region replication to all 3 regions and use the Secrets Manager caching client with a 30-second TTL.",
         isCorrect: true,
         explanation: "Secrets Manager cross-region replication automatically propagates the primary secret's value to replica secrets in each region within seconds of rotation. The AWS Secrets Manager Caching Client SDK (available for Java, Python, Go, .NET, JavaScript) caches secrets in memory with a configurable TTL. Setting TTL to 30 seconds ensures services refresh the secret from the local regional Secrets Manager replica within 30 seconds. Combined, all services across all 3 regions pick up the rotated credential within 30–60 seconds with no restarts."
       },
@@ -778,13 +778,13 @@ export const domain1NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "The security group on the EC2 instance is blocking return traffic. Add an outbound rule allowing port 443.",
+        text: "The security group on the EC2 instance is blocking return traffic, so an outbound rule allowing port 443 is required.",
         isCorrect: false,
         explanation: "Security groups are stateful — once an inbound connection is permitted, return traffic is automatically allowed regardless of outbound rules. Security group outbound rules do not need to explicitly permit return traffic for established connections. This is not the cause."
       },
       {
         id: "B",
-        text: "The NACL is stateless and the outbound ephemeral port range (1024–65535) has no NACL outbound allow rule. TCP return segments from the EC2 instance to the client are being dropped.",
+        text: "The NACL is stateless and has no outbound allow rule for the ephemeral port range (1024–65535), so return segments are dropped.",
         isCorrect: true,
         explanation: "NACLs are stateless — they evaluate each packet independently regardless of session state. When a client connects on port 443, the server's TCP response segments travel back on a random ephemeral client port (1024–65535) in the OUTBOUND direction from the EC2 perspective. Without an outbound NACL rule permitting 0.0.0.0/0 on TCP 1024–65535, the NACL drops the return packets. The TCP session partially succeeds (SYN/SYN-ACK reaches client) but subsequent data packets fail, causing intermittent connection issues."
       },
@@ -822,7 +822,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Configure Macie to run sensitive data discovery jobs only on buckets tagged as 'sensitivity: high' and schedule other buckets for weekly instead of daily discovery. Use S3 bucket-level sensitivity thresholds in the Macie console to de-prioritize known-clean buckets.",
+        text: "Configure Macie to run discovery jobs only on buckets tagged 'sensitivity: high' and scan the remaining buckets weekly.",
         isCorrect: true,
         explanation: "Macie's automated sensitive data discovery cost is proportional to data scanned. By targeting daily discovery to buckets tagged as high-sensitivity (a subset of the 500), reducing scan frequency for low-risk buckets to weekly or monthly, and using Macie's bucket sensitivity score to skip buckets with no prior findings, the team reduces the daily scanned data volume by 80%+ while maintaining 24-hour detection on high-risk buckets. Macie's per-GB pricing means scanning fewer bytes = directly proportional cost reduction."
       },
@@ -834,7 +834,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "Migrate all PHI to Amazon RDS with encryption and disable Macie, since Macie only scans S3.",
+        text: "Migrate all PHI to Amazon RDS with encryption enabled and disable Macie, since Macie only scans S3.",
         isCorrect: false,
         explanation: "Macie does indeed only scan S3 — not RDS. Moving PHI to RDS would remove it from Macie's scope, but this is a significant architectural change and introduces new RDS security/compliance requirements. It does not address the need to maintain compliance for data that remains in S3 during or after migration."
       }
@@ -854,13 +854,13 @@ export const domain1NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Configure the Cognito User Pool to add the department attribute to the ID token. The EC2 application reads the department from the token and performs client-side filtering on DynamoDB GetItem results to return only department-matching items.",
+        text: "Add the department attribute to the Cognito ID token and have the EC2 application filter DynamoDB results client-side by department.",
         isCorrect: false,
         explanation: "Client-side filtering does NOT prevent the application or a compromised EC2 instance from accessing other departments' data — the IAM permissions still allow GetItem on any item. Client-side filtering is a display control, not a security control. A privileged attacker could bypass the filtering."
       },
       {
         id: "B",
-        text: "Use a Cognito Identity Pool to exchange the ID token for temporary credentials via AssumeRoleWithWebIdentity. Configure the IAM role's trust policy to require a condition matching the Cognito custom attribute for department. Use the aws:PrincipalTag/department session tag in the DynamoDB IAM policy to enforce partition key access.",
+        text: "Exchange the ID token for credentials via a Cognito Identity Pool and enforce the department session tag with aws:PrincipalTag in the DynamoDB policy.",
         isCorrect: true,
         explanation: "Cognito Identity Pool maps claims from the User Pool ID token to session tags when calling AssumeRoleWithWebIdentity. The IAM role policy uses the condition 'dynamodb:LeadingKeys': ['${aws:PrincipalTag/department}'], which enforces that the DynamoDB partition key in every request must match the authenticated user's department session tag. AWS enforces this condition server-side — it is a cryptographic IAM control, not client-side filtering. No per-user or per-department roles required."
       },
@@ -898,19 +898,19 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Enable Amazon Inspector v2 across all 5 accounts using AWS Organizations integration with a delegated administrator. EC2 scanning uses the SSM Agent (pre-installed on Amazon Linux/Windows) — no additional agents needed. Inspector v2 provides a 'Inspector risk score' combining CVSS, network reachability, and exploit availability for prioritization.",
+        text: "Enable Amazon Inspector v2 across all 5 accounts via AWS Organizations; EC2 scanning uses the existing SSM Agent.",
         isCorrect: true,
         explanation: "Inspector v2 EC2 scanning requires only the SSM Agent (which is pre-installed on Amazon Linux 2, AL2023, and Windows Server by default — not a third-party agent). The Inspector risk score (0–100) combines CVSS severity, network path reachability, and Exploit Prediction Scoring System (EPSS) / CISA Known Exploited Vulnerabilities data for context-aware prioritization. Organizations integration with a delegated administrator provides a central cross-account findings dashboard."
       },
       {
         id: "C",
-        text: "Use AWS Security Hub with the AWS Foundational Security Best Practices standard to scan all EC2 instances for vulnerabilities using AWS Config.",
+        text: "Use AWS Security Hub with the AWS Foundational Security Best Practices standard to scan all EC2 instances via AWS Config rules.",
         isCorrect: false,
         explanation: "Security Hub with FSBP evaluates configuration compliance (e.g., 'EC2 instances should not have unrestricted SSH') — it does not perform CVE scanning or report specific CVE findings with CVSS scores. Config rules check configuration state, not OS package vulnerability status."
       },
       {
         id: "D",
-        text: "Enable AWS GuardDuty Malware Protection for EC2, which scans EBS volumes for CVEs and malware across all accounts.",
+        text: "Enable AWS GuardDuty Malware Protection for EC2 to scan EBS volumes for CVEs and malware across all 5 accounts.",
         isCorrect: false,
         explanation: "GuardDuty Malware Protection for EC2 scans EBS volumes for malware signatures (viruses, trojans, ransomware, cryptominers) using agentless EBS snapshot analysis. It does NOT scan for CVE vulnerabilities or OS package versions. CVE/vulnerability scanning is Inspector's function."
       }
@@ -936,19 +936,19 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Create a KMS key with imported key material: generate the key material offline, import it into KMS, store the offline copy in the classified facility. The KMS service uses FIPS 140-3 Level 3 HSMs to protect the imported key material during use.",
+        text: "Create a KMS key with imported key material generated offline, keeping the offline copy in the classified facility.",
         isCorrect: false,
         explanation: "KMS imported key material allows bringing your own key material (BYOK) into KMS, and KMS uses FIPS 140-3 Level 3 HSMs to protect it during use — satisfying the first requirement. However, once imported into KMS, the key material CANNOT be re-exported from KMS. The offline copy stored during import creation satisfies the 'offline copy' need, but this relies on keeping the original pre-import copy rather than exporting from KMS. This partially satisfies the intent but the key within KMS remains non-exportable."
       },
       {
         id: "C",
-        text: "Use AWS CloudHSM with a KMS custom key store. The CloudHSM cluster (FIPS 140-3 Level 3 certified) stores the key material in customer-owned HSMs. CloudHSM supports key export via PKCS#12 or raw wrapping for offline backup.",
+        text: "Use AWS CloudHSM with a KMS custom key store so key material stays in customer-owned HSMs and can be exported for backup.",
         isCorrect: true,
         explanation: "CloudHSM (hsm2m.medium, GA August 2024) uses dedicated single-tenant FIPS 140-3 Level 3 certified HSMs that the customer owns and controls. As a KMS custom key store, KMS operations use CloudHSM to perform cryptographic operations — the key material never leaves the customer-owned HSMs. CloudHSM supports key export via PKCS#11/JCE APIs and key wrapping (exporting encrypted key material), enabling the offline copy for the classified facility. This is the only configuration satisfying both requirements simultaneously."
       },
       {
         id: "D",
-        text: "Enable AWS KMS Multi-Region keys (MRK) with key material replication to a second region. Store the primary key material ARN in the classified facility as the exportable offline reference.",
+        text: "Enable AWS KMS Multi-Region keys with key material replicated to a second region as the offline reference.",
         isCorrect: false,
         explanation: "Multi-Region keys share key material across regions under the same key ID (mrk-prefix), but the key material is still managed by AWS KMS — it is not exportable. Storing an ARN 'offline' is not the same as storing actual key material. MRK is for cross-region decryption, not offline key material export."
       }
@@ -976,7 +976,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "The junior engineer is correct. An SCP Allow does NOT grant permissions — it only establishes the maximum boundary. Principals in the OU still need an explicit Allow in their IAM identity-based or resource-based policy to start EC2 instances.",
+        text: "The junior engineer is correct. An SCP Allow does not grant permissions — principals still need an explicit Allow in an IAM policy.",
         isCorrect: true,
         explanation: "SCPs are guardrails that constrain the maximum permissions available to principals in member accounts. An SCP Allow means the action is 'permitted to be allowed' by IAM policies — but the SCP itself grants nothing. If no IAM policy in the member account explicitly allows ec2:StartInstances for the principal, they cannot start instances even with the SCP Allow. Both the SCP Allow AND an IAM Allow must exist for the effective permission to be granted. SCPs = ceiling, not floor."
       },
@@ -1014,7 +1014,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "The claim is inaccurate. KMS automatic rotation only rotates the CMK's backing key material (the AES-256 key). KMS retains ALL previous key versions and can still decrypt data encrypted by any previous version using the same CMK ARN/ID. Existing ciphertext is NOT re-encrypted.",
+        text: "The claim is inaccurate. KMS rotation replaces only the backing key material; KMS retains all previous versions and existing ciphertext is not re-encrypted.",
         isCorrect: true,
         explanation: "KMS automatic key rotation replaces the CMK's backing key material but retains all previous key versions behind the same CMK ARN and key ID. AWS automatically tracks which key version encrypted which ciphertext in the encrypted data blob's metadata, so decryption works transparently. Existing data is NEVER automatically re-encrypted during rotation. To re-encrypt existing data, you must explicitly call the KMS ReEncrypt API or use a data migration job — this is a separate, explicit operation."
       },
@@ -1052,7 +1052,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "The claim is incorrect. An EC2 instance without any security group attached falls back to the default VPC security group, which allows all outbound traffic but denies all inbound traffic by default. HTTP traffic to port 80 would be blocked even though the NACL permits it.",
+        text: "The claim is incorrect. With no security group attached the instance falls back to the default VPC security group, which denies all inbound traffic.",
         isCorrect: true,
         explanation: "If you remove all security groups from an ENI, AWS automatically attaches the VPC's default security group. The default security group denies all inbound traffic from external sources (it only allows inbound from other members of the same default security group). Without an inbound Allow rule for TCP port 80, HTTP traffic to the instance would be dropped at the security group layer — even though the NACL allows it. NACLs and security groups are evaluated independently; both must permit traffic."
       },
@@ -1090,7 +1090,7 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "The claim is mostly accurate with one important caveat: GuardDuty uses its own independent data streams for CloudTrail and VPC Flow Logs — separate from any customer-configured trails or flow logs. However, the customer should still enable CloudTrail and VPC Flow Logs separately for their own audit, investigation, and compliance needs. GuardDuty findings cannot be used as CloudTrail audit records or for forensic log analysis.",
+        text: "The claim is mostly accurate, but GuardDuty reads its own independent data streams — CloudTrail and VPC Flow Logs are still needed for audit and forensics.",
         isCorrect: true,
         explanation: "GuardDuty ingests duplicate independent copies of VPC Flow Logs, CloudTrail management events, DNS query logs, and optional protection plan logs — these are separate from any customer-configured CloudTrail trail or VPC Flow Log. GuardDuty works even if the customer has no CloudTrail trail or Flow Logs enabled. However, customer-enabled CloudTrail trails (for audit retention, compliance, and forensics) and VPC Flow Logs (for network troubleshooting and security investigation) serve different, complementary purposes that GuardDuty does not replace."
       },
@@ -1128,13 +1128,13 @@ export const domain1NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "The developer is partially incorrect. AWS managed keys have an AWS-managed key policy that grants account-level access via IAM. A principal needs BOTH s3:GetObject (in their IAM policy) AND kms:Decrypt permission on the aws/s3 key (either explicitly in their IAM policy or implicitly via the key policy delegation). However, the aws/s3 key policy automatically delegates to account IAM, so any principal with an IAM policy that allows both s3:GetObject and implicitly kms:Decrypt (or kms:* or *) can decrypt.",
+        text: "The developer is partially incorrect. A principal needs both s3:GetObject and kms:Decrypt on the aws/s3 key, which the key policy delegates to account IAM.",
         isCorrect: true,
         explanation: "AWS managed key policies contain a statement that grants the owning account root full access to the key, and delegates further access to IAM. This means IAM policies control access to AWS managed keys for same-account principals — unlike customer-managed CMKs where the key policy must also explicitly allow the principal. In practice, for same-account access, a principal with s3:GetObject AND kms:Decrypt (on aws/s3) can read SSE-KMS objects. The kms:Decrypt permission may be implicitly granted via AWS managed wildcard policies, which is where the confusion arises."
       },
       {
         id: "C",
-        text: "The developer is fully incorrect. AWS managed keys have an immutable key policy that ONLY allows AWS services to use the key. IAM users and roles can never directly call kms:Decrypt on an AWS managed key — only the S3 service can decrypt on their behalf.",
+        text: "The developer is fully incorrect. The aws/s3 key policy allows only AWS services to use the key, so IAM principals can never call kms:Decrypt directly.",
         isCorrect: false,
         explanation: "This overstates the restriction. The AWS managed key policy delegates access to the account's IAM system. Account principals with appropriate IAM permissions CAN make direct KMS API calls (kms:Decrypt, kms:GenerateDataKey) on AWS managed keys — they are not limited to service-level access only. The S3 service does call KMS on the principal's behalf during GetObject, but the authorization check uses the requesting principal's permissions."
       },

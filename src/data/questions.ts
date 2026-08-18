@@ -26,19 +26,19 @@ const domain1Questions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Create an IAM user in the Production account and share its access key with developers.",
+        text: "Create an IAM user in the Production account with S3 read permissions and share its access key with the development team.",
         isCorrect: false,
         explanation: "Wrong — this uses long-lived access keys shared across accounts, which the question explicitly prohibits and is an IAM anti-pattern."
       },
       {
         id: "B",
-        text: "Create an IAM role in the Production account with an S3 read policy and a trust policy that allows the Development account's IAM principals to assume it via AssumeRole.",
+        text: "Create an IAM role in the Production account with an S3 read policy and a trust policy allowing the Development account to assume it.",
         isCorrect: true,
         explanation: "Correct — cross-account role assumption via STS AssumeRole is the standard AWS pattern. Developers receive temporary credentials (no long-lived keys) and the trust policy controls exactly who can assume the role."
       },
       {
         id: "C",
-        text: "Enable S3 ACLs on the Production bucket and add the Development account's canonical user ID to the ACL.",
+        text: "Enable S3 ACLs on the Production bucket and grant object read access to the Development account's canonical user ID.",
         isCorrect: false,
         explanation: "Wrong — S3 ACLs are a legacy mechanism that provide coarse-grained access and don't eliminate long-lived keys for the calling principals. AWS recommends disabling ACLs in favor of bucket policies."
       },
@@ -102,7 +102,7 @@ const domain1Questions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Add an inbound deny rule to the Network ACL (NACL) on the public subnet, explicitly denying traffic from the attacker's IP address.",
+        text: "Add an inbound deny rule to the Network ACL on the public subnet that blocks the attacker's IP address.",
         isCorrect: true,
         explanation: "Correct — NACLs support explicit Deny rules and apply at the subnet level. A NACL rule with a lower rule number than any Allow rule that denies the specific IP will block all traffic from that address. Security Groups only support Allow rules, making them unable to explicitly block a specific IP."
       },
@@ -140,7 +140,7 @@ const domain1Questions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Amazon Cognito User Pool to authenticate users, then Amazon Cognito Identity Pool to exchange the Google ID token for temporary AWS credentials scoped to that user's S3 prefix using IAM policy variables.",
+        text: "Amazon Cognito User Pool to authenticate users, then a Cognito Identity Pool to exchange the token for credentials scoped to the user's prefix.",
         isCorrect: true,
         explanation: "Correct — The Cognito User Pool handles authentication (sign-in with Google via federation). The Cognito Identity Pool exchanges the resulting JWT for temporary IAM credentials via STS. The IAM role can use the policy variable ${cognito-identity.amazonaws.com:sub} to scope S3 access to the user's own prefix. No IAM users are created."
       },
@@ -178,25 +178,25 @@ const domain1Questions: Question[] = [
     options: [
       {
         id: "A",
-        text: "SSE-S3 (default server-side encryption with S3-managed keys).",
+        text: "SSE-S3 — server-side encryption using keys that Amazon S3 manages.",
         isCorrect: false,
         explanation: "Wrong — With SSE-S3, AWS owns and manages the keys internally. The customer has no control over key policies, no visibility into key usage via CloudTrail, and no ability to set a custom rotation schedule."
       },
       {
         id: "B",
-        text: "SSE-KMS with a customer-managed KMS key (CMK).",
+        text: "SSE-KMS — server-side encryption using a customer-managed AWS KMS key.",
         isCorrect: true,
         explanation: "Correct — Customer-managed KMS keys give the company full control of the key policy, produce CloudTrail entries for every Decrypt/GenerateDataKey API call (providing the audit trail), and allow configuring automatic rotation from 90 to 2,560 days (or manual rotation)."
       },
       {
         id: "C",
-        text: "SSE-C (server-side encryption with customer-provided keys).",
+        text: "SSE-C — server-side encryption using keys the client supplies per request.",
         isCorrect: false,
         explanation: "Wrong — With SSE-C, the customer provides the key with every request. AWS never stores the key, so there is no KMS-integrated audit trail. Key management and rotation are entirely the customer's responsibility outside AWS, with no CloudTrail integration for key usage."
       },
       {
         id: "D",
-        text: "Client-side encryption using the AWS Encryption SDK before uploading objects to S3.",
+        text: "Client-side encryption with the AWS Encryption SDK before upload to S3.",
         isCorrect: false,
         explanation: "Wrong — While CSE gives key control, the decryption happens on the client side, so there is no server-side audit trail in CloudTrail for every decrypt operation. This adds significant application complexity and does not centrally log key usage through AWS."
       }
@@ -222,7 +222,7 @@ const domain1Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Deploy AWS Systems Manager Session Manager. Attach the AmazonSSMManagedInstanceCore IAM role to EC2 instances. Users start sessions via the AWS console or CLI using ssm:StartSession.",
+        text: "Deploy AWS Systems Manager Session Manager and attach the AmazonSSMManagedInstanceCore role to each EC2 instance.",
         isCorrect: true,
         explanation: "Correct — Session Manager provides browser and CLI-based shell access to EC2 instances with no SSH keys, no bastion hosts, and no inbound security group rules. Sessions are fully audited and can be logged to S3 and CloudWatch Logs with optional KMS encryption. It requires SSM Agent (pre-installed on Amazon Linux 2/AL2023/Windows Server) and IAM permissions."
       },
@@ -254,13 +254,13 @@ const domain1Questions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Store the password in AWS Systems Manager Parameter Store as a SecureString and update the Lambda environment variable on rotation day via a maintenance script.",
+        text: "Store the password in Systems Manager Parameter Store as a SecureString and update the Lambda environment variable on rotation day.",
         isCorrect: false,
         explanation: "Wrong — Parameter Store SecureString does not support automatic rotation. Manually updating the environment variable adds operational overhead and code changes. This does not meet 'automatic rotation' or 'least custom development.'"
       },
       {
         id: "B",
-        text: "Store the database credentials in AWS Secrets Manager with the managed rotation enabled for the RDS engine. Update the Lambda function to call secretsmanager:GetSecretValue at runtime.",
+        text: "Store the credentials in AWS Secrets Manager with managed RDS rotation enabled and call GetSecretValue from the function at runtime.",
         isCorrect: true,
         explanation: "Correct — Secrets Manager natively supports automatic rotation for RDS (all engines) via Lambda-based rotation functions that AWS provides. The application calls GetSecretValue at runtime, always receiving the current credential. No manual rotation or code changes to rotation logic are needed."
       },
@@ -298,13 +298,13 @@ const domain1Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Subscribe to AWS Shield Advanced for the organization and associate the CloudFront distribution and ALB as protected resources. Enable WAF on CloudFront for L7 protection.",
+        text: "Subscribe to AWS Shield Advanced and add the CloudFront distribution and ALB as protected resources, with WAF on CloudFront.",
         isCorrect: true,
         explanation: "Correct — Shield Advanced provides L3/L4 volumetric protection plus L7 protection via WAF integration, 24/7 Shield Response Team (SRT) access during attacks, DDoS cost protection (credits for scaling costs on protected resources), and advanced reporting. A $3,000/month subscription with a 1-year commitment covers all protected resources in the organization."
       },
       {
         id: "C",
-        text: "Deploy AWS Network Firewall at the VPC perimeter and enable Suricata-based rules for DDoS detection.",
+        text: "Deploy AWS Network Firewall at the VPC perimeter with Suricata-compatible rules to detect and drop DDoS traffic.",
         isCorrect: false,
         explanation: "Wrong — Network Firewall operates at the VPC perimeter and cannot absorb volumetric internet-scale DDoS attacks. It also does not provide expert SRT access or cost protection credits."
       },
@@ -312,7 +312,7 @@ const domain1Questions: Question[] = [
         id: "D",
         text: "Use AWS Shield Standard on CloudFront and add an AWS WAF Web ACL with AWS Managed Rules for Known Bad Inputs and Core Rule Set.",
         isCorrect: false,
-        explanation: "Wrong — Same as option A with different WAF rules. Still lacks SRT access and cost protection reimbursement which are explicitly required."
+        explanation: "Wrong — This is still Shield Standard, just with a different WAF rule set. It lacks SRT access and cost protection reimbursement, which are explicitly required."
       }
     ],
     explanation: "AWS Shield Advanced is the answer when all three requirements appear together: L7 protection, 24/7 DRT/SRT access, and DDoS cost protection credits. Shield Standard is free and automatic but provides only L3/L4 protection with no expert access or cost reimbursement. Shield Advanced costs $3,000/month with a 1-year commitment per organization (not per resource), and the cost protection benefit alone can justify the cost during sustained attacks.",
@@ -336,19 +336,19 @@ const domain1Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Stop the instance, create a snapshot of the unencrypted volume, copy the snapshot specifying the customer-managed KMS key to encrypt it, restore a new encrypted volume from the encrypted snapshot, detach the old volume, attach the new volume, and start the instance.",
+        text: "Stop the instance, snapshot the volume, copy the snapshot with the customer-managed KMS key, and attach a volume restored from it.",
         isCorrect: true,
         explanation: "Correct — This is the only supported path to encrypt an existing unencrypted EBS volume. The steps are: (1) Stop instance, (2) Create snapshot, (3) Copy snapshot with --encrypted and --kms-key-id, (4) Create volume from encrypted snapshot, (5) Detach original root volume, (6) Attach new encrypted volume as /dev/xvda (root), (7) Start instance."
       },
       {
         id: "C",
-        text: "Use the AWS console to modify the existing EBS volume and enable encryption in-place using KMS.",
+        text: "Modify the existing EBS volume in the console and enable KMS encryption in place on the attached volume.",
         isCorrect: false,
         explanation: "Wrong — There is no in-place encryption conversion for existing EBS volumes. The EBS console allows changing volume type and size, but not enabling encryption on an existing unencrypted volume."
       },
       {
         id: "D",
-        text: "Use AWS DataSync to copy the volume data to an encrypted EBS volume while the instance is running.",
+        text: "Use AWS DataSync to copy the volume's data onto a new encrypted EBS volume while the instance keeps running.",
         isCorrect: false,
         explanation: "Wrong — DataSync transfers data between file systems and S3, not between EBS volumes. It cannot directly copy a running EBS volume to an encrypted one while maintaining data consistency for a root volume."
       }
@@ -418,7 +418,7 @@ const domain2Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Add an SQS Standard queue as a subscriber to the SNS topic (SNS → SQS fan-out). Configure the SQS queue as the Lambda event source with a Dead Letter Queue (DLQ) set to a separate SQS queue after maxReceiveCount attempts.",
+        text: "Subscribe an SQS standard queue to the SNS topic, use the queue as the Lambda event source, and attach a dead-letter queue.",
         isCorrect: true,
         explanation: "Correct — The SNS → SQS → Lambda pattern (fan-out with queuing) provides message durability and retry semantics. SQS retains the message (up to 14 days) between Lambda invocations. After maxReceiveCount failed attempts the message is moved to the DLQ for investigation. This decouples the SNS push from Lambda processing."
       },
@@ -430,7 +430,7 @@ const domain2Questions: Question[] = [
       },
       {
         id: "D",
-        text: "Switch the SNS subscription to a FIFO SNS topic and enable content-based deduplication.",
+        text: "Switch the SNS subscription to a FIFO SNS topic and enable content-based deduplication for the retries.",
         isCorrect: false,
         explanation: "Wrong — SNS FIFO topics can only deliver to SQS FIFO queues — they do not add retry, durability, or failure isolation on their own. Content-based deduplication prevents duplicate deliveries but does not address processing failures."
       }
@@ -450,19 +450,19 @@ const domain2Questions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Increase the max_connections parameter in the RDS Parameter Group to a higher value.",
+        text: "Increase the max_connections parameter in the RDS parameter group and reboot the instance.",
         isCorrect: false,
         explanation: "Wrong — max_connections is bounded by instance memory (typically memory_GB × ~100 for PostgreSQL). A db.r5.large supports ~3,750 connections maximum. Increasing the parameter may help slightly but does not address the fundamental problem of Lambda's connection-per-execution model."
       },
       {
         id: "B",
-        text: "Add Amazon RDS Proxy in front of the RDS instance and update the Lambda connection string to point to the Proxy endpoint.",
+        text: "Add Amazon RDS Proxy in front of the instance and point the Lambda connection string at the proxy endpoint.",
         isCorrect: true,
         explanation: "Correct — RDS Proxy maintains a persistent connection pool to the RDS instance and multiplexes thousands of Lambda connections into a much smaller pool of real database connections. It also supports IAM authentication and Secrets Manager integration. The only code change needed is updating the connection endpoint — no logic changes."
       },
       {
         id: "C",
-        text: "Implement connection pooling in the Lambda function code using a PgBouncer layer.",
+        text: "Implement connection pooling inside the Lambda function using a bundled PgBouncer layer.",
         isCorrect: false,
         explanation: "Wrong — Lambda functions are stateless and ephemeral. A PgBouncer layer within Lambda cannot maintain a persistent connection pool across invocations because each Lambda execution environment is independent. Connections are opened and closed with each invocation."
       },
@@ -576,7 +576,7 @@ const domain2Questions: Question[] = [
       },
       {
         id: "C",
-        text: "Pilot Light: Keep only the data layer (RDS read replica) running in a DR region. Use CloudFormation and AMIs to spin up application servers on failover, with Route 53 failover routing.",
+        text: "Pilot Light: keep only the RDS read replica running in the DR region and launch app servers from AMIs via CloudFormation on failover.",
         isCorrect: true,
         explanation: "Correct — Pilot Light keeps only the critical data core (database replica) running at minimal cost. On failover, CloudFormation or EC2 Auto Scaling launches pre-baked AMIs within ~10–15 minutes, meeting the 15-minute RTO. RDS replication provides sub-hourly RPO. Cost is minimal as compute is off in the DR region."
       },
@@ -646,7 +646,7 @@ const domain2Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Publish order events to an SNS Standard topic with three SQS Standard queue subscriptions, one per downstream service.",
+        text: "Publish order events to an SNS standard topic with three SQS standard queue subscriptions.",
         isCorrect: true,
         explanation: "Correct — This is the canonical SNS fan-out pattern. The producer publishes once to SNS; SNS fans out to all three SQS queues. Each queue independently buffers messages for its consuming service. If billing is down, its SQS queue retains messages for up to 14 days (message retention is configurable). New consumers can be added without modifying the producer."
       },
@@ -678,19 +678,19 @@ const domain2Questions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Amazon SQS with the JMS compliance library for AWS.",
+        text: "Amazon SQS with the AWS JMS compliance library for the existing clients.",
         isCorrect: false,
         explanation: "Wrong — While Amazon SQS provides a JMS 1.1-compatible library, it does not support the full JMS 2.0 specification, ActiveMQ protocol features (OpenWire, STOMP, MQTT, AMQP), or the exact ActiveMQ behavior. Applications with ActiveMQ-specific features would require code changes."
       },
       {
         id: "B",
-        text: "Amazon MQ with the Apache ActiveMQ broker engine in Active/Standby Multi-AZ deployment.",
+        text: "Amazon MQ with an Apache ActiveMQ broker in an Active/Standby Multi-AZ deployment.",
         isCorrect: true,
         explanation: "Correct — Amazon MQ is a managed message broker service for Apache ActiveMQ and RabbitMQ. It supports JMS, AMQP, STOMP, MQTT, and OpenWire natively, requiring zero code changes. The Active/Standby Multi-AZ deployment provides HA with automatic failover for production workloads."
       },
       {
         id: "C",
-        text: "Amazon Kinesis Data Streams with a JMS-to-Kinesis adapter.",
+        text: "Amazon Kinesis Data Streams with a custom JMS-to-Kinesis adapter layer.",
         isCorrect: false,
         explanation: "Wrong — Kinesis is a streaming platform for high-throughput event streams, not a JMS-compatible message broker. An adapter would require significant code changes and does not support ActiveMQ protocols."
       },
@@ -716,13 +716,13 @@ const domain2Questions: Question[] = [
     options: [
       {
         id: "A",
-        text: "DynamoDB with cross-region read replicas.",
+        text: "DynamoDB with cross-region read replicas enabled on the table.",
         isCorrect: false,
         explanation: "Wrong — DynamoDB does not have a 'read replica' concept like RDS. DynamoDB tables are single-region by default. Cross-region replication is provided through Global Tables."
       },
       {
         id: "B",
-        text: "DynamoDB Global Tables with the default multi-region eventual consistency (MREC) mode.",
+        text: "DynamoDB Global Tables using the default multi-region eventual consistency mode.",
         isCorrect: true,
         explanation: "Correct — DynamoDB Global Tables provides multi-region, multi-active replication with approximately 1 second typical replication latency and last-writer-wins (LWW) conflict resolution by update timestamp. MREC (the default) is appropriate when sub-second cross-region consistency is not required and LWW conflicts are acceptable. All regions can accept writes simultaneously."
       },
@@ -760,7 +760,7 @@ const domain2Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Use EC2 Auto Scaling Instance Refresh with a maximum 10% healthy percentage threshold and configure CloudWatch alarms as rollback triggers.",
+        text: "Use EC2 Auto Scaling Instance Refresh with a 10% healthy percentage threshold and CloudWatch alarms as rollback triggers.",
         isCorrect: true,
         explanation: "Correct — Instance Refresh performs a rolling update of instances in the ASG. Setting MinHealthyPercentage to 90% limits rollout to 10% of capacity at a time. Enabling auto-rollback with a CloudWatch alarm as the rollback trigger will automatically revert to the previous launch template if the alarm fires during the refresh. This is the native, lowest-overhead canary approach for EC2 ASGs."
       },
@@ -842,7 +842,7 @@ const domain3Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Enable Lambda SnapStart for the Java 11 function.",
+        text: "Enable Lambda SnapStart for the Java 11 function to reuse a pre-initialized execution snapshot.",
         isCorrect: true,
         explanation: "Correct — Lambda SnapStart (free for Java) takes a snapshot of the initialized execution environment after the init phase. Subsequent cold starts restore from the snapshot instead of re-executing the init code, reducing cold start latency from 6–8 seconds to under 1 second. SnapStart is FREE for Java, unlike Provisioned Concurrency which is billed per GB-second."
       },
@@ -886,7 +886,7 @@ const domain3Questions: Question[] = [
       },
       {
         id: "C",
-        text: "Use DynamoDB Accelerator (DAX) and accept that strongly consistent reads bypass the cache and go to DynamoDB directly.",
+        text: "Use DynamoDB Accelerator (DAX), accepting that strongly consistent reads bypass the cache.",
         isCorrect: true,
         explanation: "Correct — DAX is the purpose-built, API-compatible in-memory cache for DynamoDB providing microsecond reads. Strongly consistent reads are NOT cached by DAX and go directly to DynamoDB (still within milliseconds), while the vast majority of eventually consistent product catalog reads are served from DAX at microsecond latency. For a product catalog, eventual consistency is typically acceptable for most reads."
       },
@@ -897,7 +897,7 @@ const domain3Questions: Question[] = [
         explanation: "Wrong — Increasing DynamoDB capacity improves throughput and reduces throttling, but does not change the underlying DynamoDB single-digit millisecond latency. Only a caching layer provides microsecond latency."
       }
     ],
-    explanation: "DAX is the only DynamoDB-native caching solution that provides microsecond read latency without application code changes (it is API-compatible). The critical caveat: strongly consistent reads bypass DAX. For a product catalog where eventual consistency is acceptable for most reads, DAX's item cache and query cache deliver microsecond performance. Strongly consistent reads (e.g., inventory counts) still work but go to DynamoDB (millisecond latency). The question must be read carefully — option C is the most accurate framing.",
+    explanation: "DAX is the only DynamoDB-native caching solution that provides microsecond read latency without application code changes (it is API-compatible). The critical caveat: strongly consistent reads bypass DAX. For a product catalog where eventual consistency is acceptable for most reads, DAX's item cache and query cache deliver microsecond performance. Strongly consistent reads (e.g., inventory counts) still work but go to DynamoDB (millisecond latency). The question must be read carefully — the accurate framing is the one that pairs DAX with the strongly-consistent-read caveat.",
     keywords: ["microsecond", "DynamoDB cache", "no code changes", "strongly consistent reads bypass"]
   },
   {
@@ -912,25 +912,25 @@ const domain3Questions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Create VPC peering connections between every pair of VPCs (35×34/2 = 595 peering connections).",
+        text: "Create VPC peering connections between every pair of VPCs (595 connections) and attach a VPN to each.",
         isCorrect: false,
         explanation: "Wrong — Full-mesh VPC peering scales as O(n²) — 595 connections for 35 VPCs. VPC peering also does not allow transitive routing and each VPC pair must have non-overlapping CIDRs. With overlapping CIDRs, peering is not possible at all for affected VPCs."
       },
       {
         id: "B",
-        text: "Deploy an AWS Transit Gateway, attach all 35 VPCs, and connect the TGW to Direct Connect via a Transit VIF on a Direct Connect Gateway.",
+        text: "Deploy an AWS Transit Gateway, attach all 35 VPCs, and connect it to Direct Connect via a Direct Connect Gateway.",
         isCorrect: true,
         explanation: "Correct — Transit Gateway acts as a regional hub supporting up to 5,000 VPC attachments with transitive routing. It connects to Direct Connect via a Transit VIF (TGW attachment type). Note: Transit Gateway does NOT support overlapping CIDR blocks for VPC attachments — overlapping VPCs would need PrivateLink for service exposure. However, TGW is still the correct scalable answer for the majority of the 35 VPCs and DX connectivity."
       },
       {
         id: "C",
-        text: "Use AWS PrivateLink to expose services between each VPC pair and connect on-premises via a VPN.",
+        text: "Use AWS PrivateLink to expose services between each VPC pair and connect on-premises over a VPN tunnel.",
         isCorrect: false,
         explanation: "Wrong — PrivateLink enables one-directional service-to-consumer connectivity and does not provide full bidirectional network reachability between VPCs. It is appropriate for exposing specific services, not replacing a full network fabric. It also does not provide hub-and-spoke DX connectivity."
       },
       {
         id: "D",
-        text: "Enable VPC sharing via AWS RAM so all workloads use subnets in a single shared VPC.",
+        text: "Enable VPC sharing via AWS Resource Access Manager so all workloads use subnets in a single shared VPC.",
         isCorrect: false,
         explanation: "Wrong — VPC sharing via RAM allows multiple accounts to use subnets in a shared VPC, but the VPCs already exist and cannot be retroactively merged. This addresses multi-account subnet sharing for new architectures, not routing between existing VPCs."
       }
@@ -994,7 +994,7 @@ const domain3Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Implement a write-through caching strategy using Amazon ElastiCache for Valkey (Redis-compatible). Cache trending posts on every write and serve reads from cache.",
+        text: "Implement a write-through cache with Amazon ElastiCache for Valkey, caching trending posts on every write.",
         isCorrect: true,
         explanation: "Correct — ElastiCache for Valkey provides sub-millisecond read latency and can store the trending posts result (refreshed every 5 minutes with a TTL). Write-through caching keeps the cache current on every update. This offloads 95% of read traffic from RDS, reducing load significantly. Valkey is ~20% cheaper than Redis OSS and is drop-in compatible."
       },
@@ -1026,13 +1026,13 @@ const domain3Questions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Amazon CloudFront with a custom origin pointing to UDP game servers.",
+        text: "Amazon CloudFront with a custom origin pointing to the regional UDP game servers.",
         isCorrect: false,
         explanation: "Wrong — CloudFront is an HTTP/HTTPS CDN only. It does not support UDP traffic. It also provides dynamic IPs for its endpoints, not static IPs for client firewall whitelisting."
       },
       {
         id: "B",
-        text: "AWS Global Accelerator with endpoint groups in each region pointing to Network Load Balancers fronting the game servers.",
+        text: "AWS Global Accelerator with endpoint groups in each region fronted by Network Load Balancers.",
         isCorrect: true,
         explanation: "Correct — Global Accelerator provides 2 static anycast IPv4 addresses (whitelistable), routes traffic over the AWS global backbone (improving latency significantly vs public internet), supports TCP and UDP (Layer 4), performs health checks, and automatically routes to the nearest healthy endpoint group. NLB supports UDP listeners. This is the canonical solution for UDP gaming with static IPs."
       },
@@ -1070,7 +1070,7 @@ const domain3Questions: Question[] = [
       },
       {
         id: "B",
-        text: "EBS io2 Block Express volumes with Multi-Attach enabled.",
+        text: "EBS io2 Block Express volumes with Multi-Attach enabled on the cluster.",
         isCorrect: true,
         explanation: "Correct — io2 Block Express supports up to 256,000 IOPS, 4,000 MiB/s throughput, sub-500 microsecond latency, and Multi-Attach (up to 16 Nitro-based instances in the same AZ). All io2 volumes are automatically Block Express as of April 30, 2025. This is the only EBS type that satisfies all four requirements simultaneously."
       },
@@ -1082,7 +1082,7 @@ const domain3Questions: Question[] = [
       },
       {
         id: "D",
-        text: "EFS General Purpose with Elastic throughput mode.",
+        text: "Amazon EFS General Purpose mode with Elastic throughput enabled.",
         isCorrect: false,
         explanation: "Wrong — EFS is a file system, not a block device. Oracle RAC requires block storage (iSCSI or NVMe) with cluster-aware filesystem features. EFS does not meet the IOPS or latency requirements for Oracle RAC."
       }
@@ -1108,7 +1108,7 @@ const domain3Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Convert the CSV data to Apache Parquet format and add sub-partitions by month and day using AWS Glue ETL.",
+        text: "Convert the CSV data to Apache Parquet and sub-partition by month and day using AWS Glue ETL.",
         isCorrect: true,
         explanation: "Correct — Parquet is a columnar format that typically reduces bytes scanned by 60–90% vs CSV because Athena reads only the columns queried (not entire rows) and exploits min/max statistics to skip row groups. Adding finer partitions (month/day) means Athena only scans partitions matching the WHERE clause. Combined, this typically achieves >90% cost reduction. Athena is billed on bytes scanned at $5/TB."
       },
@@ -1234,7 +1234,7 @@ const domain4Questions: Question[] = [
       },
       {
         id: "C",
-        text: "3-year Compute Savings Plans.",
+        text: "3-year Compute Savings Plans with an hourly spend commitment.",
         isCorrect: true,
         explanation: "Correct — Compute Savings Plans provide up to 66% discount and cover EC2 (any family, size, OS, region), Fargate, AND Lambda. As the team migrates from m5 to m7g to Fargate to Lambda, the Savings Plan automatically applies to all usage. This is the most flexible plan — the slight reduction in max discount (66% vs 72%) is the trade-off for flexibility."
       },
@@ -1260,25 +1260,25 @@ const domain4Questions: Question[] = [
     options: [
       {
         id: "A",
-        text: "On-Demand Instances in an EC2 Auto Scaling group with target tracking.",
+        text: "On-Demand Instances in an EC2 Auto Scaling group with target tracking scaling.",
         isCorrect: false,
         explanation: "Wrong — On-Demand provides no discount (base price). For a fault-tolerant, batch workload, this is the most expensive option."
       },
       {
         id: "B",
-        text: "Spot Instances via an EC2 Spot Fleet with capacity-optimized allocation strategy across multiple instance families and AZs.",
+        text: "Spot Instances in an EC2 Spot Fleet with the capacity-optimized strategy.",
         isCorrect: true,
         explanation: "Correct — Spot Instances provide up to 90% discount vs On-Demand. The capacity-optimized strategy picks the Spot pools with the most available capacity, minimizing interruption probability. Diversifying across instance families and AZs further reduces interruption risk. The 2-minute interruption warning allows checkpointing. For fault-tolerant batch jobs, Spot is the optimal choice."
       },
       {
         id: "C",
-        text: "3-year Standard Reserved Instances for 500 instances.",
+        text: "3-year Standard Reserved Instances purchased upfront for all 500 instances.",
         isCorrect: false,
         explanation: "Wrong — Reserved Instances commit to 24/7 usage for 3 years. If the genomics jobs only run intermittently (not 24/7), unused RI hours are wasted. RIs provide up to 72% discount but for intermittent workloads, Spot (90% off) on actual usage is cheaper."
       },
       {
         id: "D",
-        text: "Dedicated Hosts reserved for 3 years.",
+        text: "Dedicated Hosts with a 3-year reservation covering the whole fleet.",
         isCorrect: false,
         explanation: "Wrong — Dedicated Hosts are for BYOL licensing requirements (Windows, Oracle, SQL Server per-socket/core). They have no cost advantage for standard Linux workloads — they are actually more expensive than Spot or even On-Demand for general compute."
       }
@@ -1298,25 +1298,25 @@ const domain4Questions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Replace the NAT Gateway with a NAT Instance in each Availability Zone.",
+        text: "Replace the NAT Gateway with a self-managed NAT Instance in each Availability Zone.",
         isCorrect: false,
         explanation: "Wrong — NAT Instances eliminate the per-GB NAT processing fee but still route traffic over the internet (or intra-VPC paths), incurring EC2 instance-hour costs and still applying standard data transfer charges. NAT Instances are not free."
       },
       {
         id: "B",
-        text: "Create an S3 Gateway VPC Endpoint and update the route table to direct S3 traffic to the endpoint.",
+        text: "Create an S3 Gateway VPC Endpoint and update the route table to send S3 traffic to it.",
         isCorrect: true,
         explanation: "Correct — S3 Gateway VPC Endpoints are completely FREE (no hourly charge, no per-GB charge). They route S3 traffic from private subnets directly to S3 without passing through the NAT Gateway, eliminating the $0.045/GB NAT processing fee. For 188 TB/month, this saves the full $8,500/month. The only change is adding the endpoint and updating route tables."
       },
       {
         id: "C",
-        text: "Create an S3 Interface VPC Endpoint (PrivateLink) instead of a Gateway Endpoint.",
+        text: "Create an S3 Interface VPC Endpoint (AWS PrivateLink) instead of a Gateway Endpoint.",
         isCorrect: false,
         explanation: "Wrong — S3 Interface Endpoints charge $0.01/hour per AZ + $0.01/GB processed. For a 3-AZ deployment processing 188 TB, the Interface Endpoint would cost ~$21.90/mo hourly + ~$1,880/mo per-GB = ~$1,900/mo. This is much cheaper than the NAT Gateway but still not free like the Gateway Endpoint."
       },
       {
         id: "D",
-        text: "Enable S3 Transfer Acceleration on the bucket to use AWS backbone instead of NAT.",
+        text: "Enable S3 Transfer Acceleration on the bucket to use the AWS backbone instead of NAT.",
         isCorrect: false,
         explanation: "Wrong — S3 Transfer Acceleration adds a premium charge ($0.04/GB on top of standard transfer) for globally-distributed clients uploading to a single region. It does not reduce or eliminate NAT Gateway costs — it is a performance feature, not a cost optimization."
       }
@@ -1342,7 +1342,7 @@ const domain4Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Migrate all 20 developer databases to Aurora Serverless v2 with minimum capacity set to 0 ACUs and a 5-minute auto-pause threshold.",
+        text: "Migrate the 20 developer databases to Aurora Serverless v2 with a 0-ACU minimum and auto-pause.",
         isCorrect: true,
         explanation: "Correct — Aurora Serverless v2 with minimum 0 ACUs (scale-to-zero, GA November 2024) auto-pauses the database after 5 minutes of inactivity. When a developer connects, the database resumes in approximately 15 seconds. Compute cost is $0 when paused — only storage is billed. For databases active 2–3 hours/day, this reduces compute costs by ~87.5% vs 24/7 provisioned."
       },
@@ -1354,7 +1354,7 @@ const domain4Questions: Question[] = [
       },
       {
         id: "D",
-        text: "Apply 1-year Reserved Instance discounts to all 20 Aurora instances.",
+        text: "Apply 1-year Reserved Instance discounts to all 20 Aurora provisioned instances.",
         isCorrect: false,
         explanation: "Wrong — RIs provide discounts on 24/7 running instances. If the databases are only used 2–3 hours per day (~10–12%), paying for 24/7 capacity (even at a discount) is far more expensive than scale-to-zero. RI discounts optimize running costs; they don't eliminate idle costs."
       }
@@ -1386,7 +1386,7 @@ const domain4Questions: Question[] = [
       },
       {
         id: "C",
-        text: "Run Oracle SE2 BYOL on a Dedicated Host using an instance type with 2 sockets to maximize SE2's 2-socket license scope while bringing the existing license.",
+        text: "Run Oracle SE2 BYOL on a Dedicated Host with a 2-socket instance type to fit SE2's license scope.",
         isCorrect: true,
         explanation: "Correct — Oracle SE2 is licensed per physical socket (max 2). A Dedicated Host provides visibility into the physical socket count and supports BYOL per-socket/per-core licensing. Running SE2 on a 2-socket Dedicated Host BYOL maximizes the existing license and avoids Oracle licensing fees. This is the cost-optimal AWS approach for Oracle SE2 BYOL."
       },
@@ -1418,7 +1418,7 @@ const domain4Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Place a CloudFront distribution in front of the S3 bucket.",
+        text: "Place an Amazon CloudFront distribution in front of the S3 bucket origin.",
         isCorrect: true,
         explanation: "Correct — Data transfer from S3 to CloudFront (origin fetch) is FREE. CloudFront-to-internet egress is $0.085/GB for the first 10 TB (vs $0.09/GB direct from S3) and decreases with volume. CloudFront also includes a free tier of 1 TB/month egress. With caching, cache hit rate reduces origin fetches, further reducing S3 request costs. The combined savings easily exceed 15–20% and often much more with high cache hit rates."
       },
@@ -1456,7 +1456,7 @@ const domain4Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Graviton instances provide up to 40% better price-performance than comparable x86 instances, reducing compute costs for the same workload.",
+        text: "Graviton instances deliver up to 40% better price-performance than comparable x86 instances for the same workload.",
         isCorrect: true,
         explanation: "Correct — AWS Graviton3 (m7g) delivers up to 40% better price-performance vs comparable x86 instances (m5) for the same workload type. The m7g.4xlarge has similar vCPU/RAM to m5.4xlarge but at a lower hourly price. For stateless containerized applications built with multi-arch images, Graviton migration requires no application changes."
       },
@@ -1532,19 +1532,19 @@ const domain4Questions: Question[] = [
       },
       {
         id: "B",
-        text: "Enable DynamoDB Streams on the table to process writes asynchronously.",
+        text: "Enable DynamoDB Streams on the table so writes are processed asynchronously.",
         isCorrect: false,
         explanation: "Wrong — Enabling Streams does not reduce the cost of write operations on the base table. Streams may add a small read cost for stream readers. This is not a cost reduction strategy."
       },
       {
         id: "C",
-        text: "Switch to DynamoDB Provisioned capacity mode with Auto Scaling configured for 100% of the observed peak, and purchase 1-year Reserved Capacity.",
+        text: "Switch to Provisioned capacity mode with Auto Scaling and purchase 1-year Reserved Capacity.",
         isCorrect: true,
         explanation: "Correct — The traffic is perfectly steady at 800K writes/hr = ~222 WCU/s and 400K reads/hr = ~111 RCU/s. Provisioned capacity with Reserved Capacity (1-year: up to 53% off provisioned cost, 3-year: up to 77% off) reduces per-WCU/RCU cost significantly. Post-2024, the break-even between on-demand and provisioned is ~40% sustained utilization. At 100% steady utilization, provisioned + Reserved Capacity is dramatically cheaper."
       },
       {
         id: "D",
-        text: "Add a DynamoDB DAX cluster to cache all read operations.",
+        text: "Add a DynamoDB DAX cluster in front of the table to cache all read operations.",
         isCorrect: false,
         explanation: "Wrong — DAX caches reads and can reduce DynamoDB read costs. However, DAX has a 3-node minimum for production (~$86+/month) and does not reduce write costs. Since writes dominate ($876/month), DAX only addresses the $88 read cost. Switching to provisioned with Reserved Capacity addresses both read and write costs."
       }

@@ -1,5 +1,6 @@
 import { Question, Domain, QuizSession, DomainStats } from "./types"
 import { ALL_QUESTIONS } from "../data/questions"
+import { shuffled, shuffleQuestionOptions } from "./shuffle"
 
 /**
  * Returns all questions for a specific domain.
@@ -19,13 +20,9 @@ export function getRandomQuestions(domain: Domain | "all", count: number): Quest
       ? [...ALL_QUESTIONS]
       : [...getQuestionsByDomain(domain as Domain)]
 
-  // Fisher-Yates shuffle
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[pool[i], pool[j]] = [pool[j], pool[i]]
-  }
-
-  return pool.slice(0, Math.min(count, pool.length))
+  return shuffled(pool)
+    .slice(0, Math.min(count, pool.length))
+    .map(shuffleQuestionOptions)
 }
 
 /**

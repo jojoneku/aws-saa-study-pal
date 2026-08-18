@@ -20,7 +20,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Use Amazon EventBridge Pipes with the SQS queue as the source, the Lambda function as the enrichment step, and the Step Functions state machine as the target.",
+        text: "Use Amazon EventBridge Pipes with the SQS queue as source, the Lambda function as enrichment, and Step Functions as the target.",
         isCorrect: true,
         explanation: "Correct — EventBridge Pipes (GA December 2022) provides a managed point-to-point integration from a supported source (SQS, Kinesis, DynamoDB Streams, MSK, MQ) through an optional filter, optional enrichment (Lambda, Step Functions, API Gateway, or API destination), to a target. No polling Lambda or glue code is required. EventBridge Pipes handles SQS polling, filtering, enrichment invocation, and target delivery natively."
       },
@@ -60,7 +60,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon EventBridge Scheduler with timezone-aware cron expressions, one schedule per task.",
+        text: "Amazon EventBridge Scheduler with timezone-aware cron expressions, one schedule created per task.",
         isCorrect: true,
         explanation: "Correct — EventBridge Scheduler (GA November 2022) is the AWS-recommended service for new scheduling needs. It supports: named timezones (America/New_York, etc.), one-time and recurring cron/rate schedules, up to 10 million schedules per account by default, 270+ AWS service targets and 6,000+ API actions, flexible time windows, and DLQs for failed deliveries. It replaced scheduled EventBridge rules as the preferred path."
       },
@@ -100,7 +100,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon API Gateway REST API — it supports response caching, API keys with usage plans, and Lambda authorizers for JWT validation.",
+        text: "Amazon API Gateway REST API — it supports response caching, usage plans with API keys, and Lambda authorizers.",
         isCorrect: true,
         explanation: "Correct — REST API is the only API Gateway type that supports all three requirements: (1) API response caching (TTL 0–3600s, 0.5–237 GB cache size), (2) API keys with usage plans for per-client rate limiting and throttling, and (3) JWT/OIDC authentication via a Lambda authorizer. HTTP API has neither caching nor usage plans."
       },
@@ -112,7 +112,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "Amazon API Gateway HTTP API with Amazon CloudFront as a caching layer in front of it.",
+        text: "Amazon API Gateway HTTP API with Amazon CloudFront in front of it as a caching layer.",
         isCorrect: false,
         explanation: "Wrong — Adding CloudFront provides caching but does not provide API keys with usage plans for per-client rate limiting, which is a hard requirement. CloudFront caching also behaves differently from API Gateway's built-in cache (no cache invalidation API, different TTL semantics)."
       }
@@ -140,19 +140,19 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon ECS with AWS Fargate launch type, one ECS service per microservice, Application Auto Scaling on CPU, and an ALB with path-based listener rules.",
+        text: "Amazon ECS with AWS Fargate, one service per microservice, Application Auto Scaling, and a path-routing ALB.",
         isCorrect: true,
         explanation: "Correct — Fargate is the serverless compute option for ECS: no EC2 to provision, patch, or scale. Each Fargate task runs in its own Firecracker microVM. Application Auto Scaling (target tracking on ECSServiceAverageCPUUtilization) scales each service independently. An ALB with path-based routing (/service1, /service2) directs traffic to each service's target group."
       },
       {
         id: "C",
-        text: "Amazon EKS with managed node groups and the AWS Load Balancer Controller for ALB Ingress.",
+        text: "Amazon EKS with managed node groups and the AWS Load Balancer Controller for ALB ingress routing.",
         isCorrect: false,
         explanation: "Wrong — EKS with managed node groups still requires managing the EC2 worker nodes (patching, upgrade lifecycle via node group updates). EKS adds Kubernetes control-plane complexity. The question explicitly asks for 'no EC2 instance management.'"
       },
       {
         id: "D",
-        text: "Amazon ECS on EC2 with Capacity Providers using FARGATE_SPOT for all 12 services.",
+        text: "Amazon ECS on EC2 with capacity providers using FARGATE_SPOT for all 12 of the services.",
         isCorrect: false,
         explanation: "Wrong — FARGATE_SPOT is correct for fault-tolerant workloads but introduces 2-minute interruption risk unsuitable for production services without designing for interruption (checkpointing, graceful drain). The question does not specify fault-tolerance or cost optimization — it asks for 'least operational overhead.'"
       }
@@ -194,7 +194,7 @@ export const domain2NewQuestions: Question[] = [
         id: "D",
         text: "Amazon ECS with EC2 launch type and Service Connect for service mesh capabilities.",
         isCorrect: false,
-        explanation: "Wrong — Same as option A. ECS Service Connect is an ECS-native service mesh that uses Envoy, but it is not compatible with Istio configurations or Kubernetes RBAC/CRD abstractions. Existing Kubernetes YAML manifests cannot be applied to ECS."
+        explanation: "Wrong — Like the ECS/Fargate choice, this is still ECS. Service Connect is an ECS-native service mesh that uses Envoy, but it is not compatible with Istio configurations or Kubernetes RBAC/CRD abstractions. Existing Kubernetes YAML manifests cannot be applied to ECS."
       }
     ],
     explanation: "The key differentiator between ECS and EKS is portability and Kubernetes compatibility. ECS is an AWS-proprietary orchestrator with its own task definition format and no Kubernetes API compatibility. EKS runs standard upstream Kubernetes (CNCF conformant), which means any Kubernetes tooling (Helm, Kustomize, RBAC, CRDs, Istio, Prometheus, ArgoCD) works without modification. When a migration scenario specifies Kubernetes-specific tooling, manifests, or expertise, EKS is the only correct answer.",
@@ -220,7 +220,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Network Load Balancer (NLB) — because NLB provides static IP addresses per AZ and is the ONLY load balancer type that can back a VPC PrivateLink endpoint service.",
+        text: "Network Load Balancer (NLB) — it provides static IPs per AZ and is the only LB type that can back a PrivateLink endpoint service.",
         isCorrect: true,
         explanation: "Correct — AWS PrivateLink endpoint services require a Network Load Balancer as the backing load balancer. NLB operates at Layer 4 (TCP/UDP/TLS), assigns one static IP per AZ (or EIP/BYOIP), and is the only ELB type that supports the PrivateLink endpoint service model. ALB and GWLB cannot back PrivateLink endpoint services."
       },
@@ -380,7 +380,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Route 53 Geolocation routing for EU countries (mapped to eu-west-1) and Australia (mapped to ap-southeast-2); Route 53 Latency-based routing as the default for all other countries.",
+        text: "Route 53 Geolocation routing for EU countries and Australia, with Latency-based routing as the default for all other countries.",
         isCorrect: true,
         explanation: "Correct — Geolocation routing routes based on the user's DNS resolver location (country/continent/US state), enabling strict data-residency enforcement regardless of latency. EU countries route to eu-west-1 by rule; Australia routes to ap-southeast-2. For the remaining 'default' location (all other countries), a latency-based record set directs traffic to the lowest-latency region. Route 53 evaluates geolocation records first; the default record acts as a catch-all for unmatched locations."
       },
@@ -414,13 +414,13 @@ export const domain2NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "RDS Multi-AZ Single-Instance failover takes 60–120 seconds for DNS propagation and crash recovery on the standby. Migrate to Amazon RDS Multi-AZ DB Cluster (PostgreSQL).",
+        text: "RDS Multi-AZ single-instance failover takes 60–120 seconds; migrate to an Amazon RDS Multi-AZ DB Cluster for PostgreSQL.",
         isCorrect: true,
         explanation: "Correct — RDS Multi-AZ Single-Instance failover involves: (1) detecting the primary failure, (2) promoting the standby (which must replay the transaction log from the point of failure — 'crash recovery'), and (3) a DNS CNAME flip with propagation time. This typically takes 60–120 seconds. RDS Multi-AZ DB Cluster (1 writer + 2 readable standbys, semi-synchronous replication) eliminates crash recovery on standby and typically fails over in under 35 seconds because standbys are already in sync."
       },
       {
         id: "B",
-        text: "Add an Amazon RDS Read Replica in the same AZ as the primary and promote it during a failover. Read Replicas have faster promotion times than Multi-AZ standbys.",
+        text: "Add an RDS Read Replica in the same AZ as the primary and promote it during failover — replicas promote faster than standbys.",
         isCorrect: false,
         explanation: "Wrong — Read Replicas use asynchronous replication and are designed for read scaling, not HA. Promoting a Read Replica during a failure requires manual intervention and replication lag means data loss (RPO > 0). They do not provide automatic failover."
       },
@@ -460,19 +460,19 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Use Aurora Backtrack to rewind the EXISTING cluster in place to a timestamp before the DELETE statement, then re-apply any legitimate transactions from the 44-minute window.",
+        text: "Use Aurora Backtrack to rewind the existing cluster in place to a timestamp before the DELETE statement.",
         isCorrect: true,
         explanation: "Correct — Aurora Backtrack rewinds the cluster in place without creating a new instance. It completes in minutes (typically 2–5 minutes) and does not require provisioning new infrastructure. The cluster is rewound to a time before the accidental DELETE within the 72-hour window. This is the fastest, lowest-overhead recovery path. Any legitimate transactions from the 44-minute window must be re-applied manually or are accepted as lost within the RPO window."
       },
       {
         id: "C",
-        text: "Use Aurora Backtrack on an Aurora PostgreSQL cluster to rewind to before the DELETE.",
+        text: "Use Aurora Backtrack on the Aurora PostgreSQL cluster to rewind to just before the DELETE.",
         isCorrect: false,
         explanation: "Wrong — Aurora Backtrack is ONLY available for Aurora MySQL. Aurora PostgreSQL does NOT support Backtrack. The question states Aurora MySQL, so this distinction is being tested here as a trap for candidates who misremember the engine restriction."
       },
       {
         id: "D",
-        text: "Take an on-demand Aurora snapshot immediately and restore from it to recover data.",
+        text: "Take an on-demand Aurora snapshot immediately and restore from it to recover the rows.",
         isCorrect: false,
         explanation: "Wrong — An on-demand snapshot taken NOW captures the database AFTER the DELETE, meaning the deleted records are not in the snapshot. To recover data from a snapshot, you need a snapshot taken BEFORE the DELETE — and restoring from any historical snapshot creates a NEW cluster, which violates the requirement."
       }
@@ -500,7 +500,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "S3 Cross-Region Replication with S3 Replication Time Control (S3 RTC) — provides a 15-minute SLA with 99.99% of objects replicated, plus CloudWatch metrics for compliance reporting.",
+        text: "S3 Cross-Region Replication with S3 Replication Time Control (RTC) — a 15-minute SLA plus CloudWatch replication metrics.",
         isCorrect: true,
         explanation: "Correct — S3 Replication Time Control (RTC) is an add-on to CRR/SRR that provides a documented SLA: 99.99% of new objects replicated within 15 minutes. It publishes CloudWatch metrics (ReplicationLatency, BytesPendingReplication, OperationsPendingReplication) that serve as auditable compliance evidence. S3 RTC adds a per-GB replication premium on top of CRR costs."
       },
@@ -540,7 +540,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "S3 Object Lock with Compliance mode and a 10-year retention period, applied at upload time.",
+        text: "S3 Object Lock in Compliance mode with a 10-year retention period applied to every object at upload time.",
         isCorrect: true,
         explanation: "Correct — S3 Object Lock Compliance mode creates a WORM (Write Once Read Many) lock that NOBODY can override or shorten — not the bucket owner, not the root account, not AWS. Once set, the retention period cannot be reduced. Governance mode allows override with the s3:BypassGovernanceRetention permission, but Compliance mode has NO bypass path. Object Lock must be enabled at bucket creation and auto-enables versioning."
       },
@@ -552,7 +552,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "D",
-        text: "Enable S3 Cross-Region Replication to back up the data to a second region with versioning, making deletion of both copies effectively impossible.",
+        text: "Enable S3 Cross-Region Replication to a second region with versioning, making deletion of both copies impractical.",
         isCorrect: false,
         explanation: "Wrong — CRR replicates data, but the replicated copies can still be deleted from either bucket (source or destination) if there are no Object Lock restrictions. Replication alone does not provide WORM immutability."
       }
@@ -580,7 +580,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Backup and Restore: Take automated RDS snapshots every 4 hours, copy them to us-west-2, replicate the S3 bucket via CRR, and store CloudFormation templates in S3. Restore infrastructure from IaC on failover.",
+        text: "Backup and Restore: copy RDS snapshots to us-west-2 every 4 hours, replicate S3 via CRR, and rebuild from CloudFormation on failover.",
         isCorrect: true,
         explanation: "Correct — Backup and Restore costs only S3 snapshot storage and CRR data transfer — no running compute in the DR region. A 4-hour snapshot cadence achieves an 8-hour RPO (worst case: snapshot just before an 8-hour gap). Restoring from snapshots and launching infrastructure via CloudFormation takes ~1–4 hours (well within the 24-hour RTO). This is the cheapest DR strategy."
       },
@@ -626,7 +626,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "C",
-        text: "Warm Standby: Run a scaled-down full stack in the DR region continuously (e.g., 2 instances vs 20 in production). Configure Route 53 failover routing with health checks. On disaster, scale up to full capacity via Auto Scaling.",
+        text: "Warm Standby: run a scaled-down full stack in the DR region continuously with Route 53 failover health checks, scaling up on disaster.",
         isCorrect: true,
         explanation: "Correct — Warm Standby keeps a scaled-down but functional application stack running in the DR region 24/7 (satisfying the 'actively serving health-check traffic' requirement). With Route 53 failover, traffic switches to the DR region within ~30 seconds of primary health-check failure (Route 53 health checks every 30 seconds). At reduced capacity, the RTO is near-immediate (DR region is already running). Auto Scaling then brings the DR region to full capacity over the next few minutes. The RDS replica provides sub-30-second RPO with synchronous or near-synchronous replication."
       },
@@ -660,7 +660,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "The design misrepresents Global Tables. Global Tables is active-active (multi-master) — eu-west-1 can accept writes at any time without a 'promotion' step. The failover process requires only a Route 53 DNS update, not a database 'promotion.'",
+        text: "The design misrepresents Global Tables. It is active-active — eu-west-1 accepts writes at any time, so failover needs only a DNS update.",
         isCorrect: true,
         explanation: "Correct — DynamoDB Global Tables is multi-master (active-active). Every replica region can accept writes immediately — there is no 'promote to primary' step like with RDS. Failover is purely a traffic routing change (Route 53 health-check failover or application logic). The team member's assumption that eu-west-1 is 'passive' and needs promotion is a fundamental misunderstanding of Global Tables architecture."
       },
@@ -700,7 +700,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "The migration requires replacing the Lambda subscription and HTTP endpoint subscription because SNS FIFO topics can ONLY deliver to Amazon SQS queues. The team must add SQS queues as intermediaries for Lambda and the webhook.",
+        text: "The Lambda and HTTP endpoint subscriptions must be replaced, because SNS FIFO topics can only deliver to Amazon SQS queues.",
         isCorrect: true,
         explanation: "Correct — SNS FIFO topics have a strict subscriber constraint: they can ONLY deliver to SQS queues (Standard or FIFO). The existing Lambda and HTTP endpoint subscriptions cannot be migrated directly to SNS FIFO. Instead, the team must: add SQS Standard queues as SNS FIFO subscribers, then have Lambda poll the SQS queue and forward events to the HTTP endpoint. This adds architectural complexity vs the Standard topic approach."
       },
@@ -740,7 +740,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon ElastiCache for Valkey (Redis-compatible) with cluster mode disabled, one primary node, and one read replica in a different AZ, with Multi-AZ automatic failover enabled and AOF persistence.",
+        text: "Amazon ElastiCache for Valkey with cluster mode disabled, a replica in a second AZ, and Multi-AZ automatic failover enabled.",
         isCorrect: true,
         explanation: "Correct — ElastiCache Redis/Valkey with Multi-AZ + automatic failover replicates data synchronously to a replica in a different AZ. If the primary node fails, ElastiCache automatically promotes the replica to primary (typically within 1–3 minutes). AOF (Append-Only File) persistence ensures session data survives node reboots. Valkey is recommended over Redis OSS as it is ~20% cheaper with identical functionality."
       },
@@ -780,7 +780,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Enable Multi-AZ with Standby on the OpenSearch domain — OpenSearch distributes data shards and replicas across three AZs, with one replica shard per primary shard.",
+        text: "Enable Multi-AZ with Standby on the OpenSearch domain so shards and replicas are distributed across three AZs.",
         isCorrect: true,
         explanation: "Correct — Amazon OpenSearch Service Multi-AZ with Standby (GA 2023) provisions one standby node per data node in a separate AZ and requires an equal number of primary and replica shards across 3 AZs. This configuration is '99.99% availability SLA compliant.' If one AZ fails, replica shards in the remaining AZs ensure all data remains accessible and queries continue without downtime. The standby nodes replace failed nodes automatically."
       },
@@ -820,7 +820,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon CloudFront Functions triggered at viewer-request (URL normalization) and viewer-response (response header injection), written in JavaScript.",
+        text: "Amazon CloudFront Functions at viewer-request for URL normalization and viewer-response for header injection.",
         isCorrect: true,
         explanation: "Correct — CloudFront Functions run at ALL 600+ CloudFront PoPs (vs 13 for Lambda@Edge), execute in under 1 ms (sub-millisecond), and cost $0.10/million invocations (~6× cheaper than Lambda@Edge). They support both viewer-request (URL manipulation, cache-key normalization) and viewer-response (response header injection) events. URL case normalization and response header addition are classic CloudFront Functions use cases."
       },
@@ -860,7 +860,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "AWS Global Accelerator with two static anycast IP addresses, endpoint groups pointing to Network Load Balancers in us-east-1 and eu-west-1, with health checks and ~30-second failover.",
+        text: "AWS Global Accelerator with two static anycast IPs and endpoint groups pointing to the NLBs in each region, with health checks.",
         isCorrect: true,
         explanation: "Correct — Global Accelerator provides exactly 2 static anycast IPv4 addresses (whitelistable, never change) and routes Layer 4 (TCP/UDP) traffic over the AWS global backbone to the nearest healthy endpoint group. Health checks detect regional NLB failures within ~30 seconds and automatically route to the healthy region. This satisfies all four requirements: TCP protocol support, static IPs, nearest-region routing, and ~30-second failover."
       },
@@ -974,7 +974,7 @@ export const domain2NewQuestions: Question[] = [
     options: [
       {
         id: "A",
-        text: "Flaw 1: Read Replica promotion requires manual intervention — it is NOT automatic. Flaw 2: Asynchronous replication means the promoted replica may have replication lag, causing data loss (RPO > 0 seconds).",
+        text: "Flaw 1: read replica promotion requires manual intervention. Flaw 2: asynchronous replication means the promoted replica may lose data.",
         isCorrect: true,
         explanation: "Correct — Both flaws identified are real: (1) RDS Read Replica promotion is a MANUAL operation triggered via the console, CLI, or API (or scripted automation). Unlike Multi-AZ automatic failover, there is no automatic detection and promotion. The RTO depends on how quickly an operator notices the failure and runs the promotion (minutes to hours of downtime). (2) Read Replicas use ASYNCHRONOUS replication. When the primary fails, the replica may be seconds or minutes behind — all transactions not yet replicated are lost. Multi-AZ standbys use SYNCHRONOUS replication (RPO = 0 for committed transactions)."
       },
@@ -1020,7 +1020,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Amazon Aurora Serverless v2 with minimum capacity of 0 ACUs (scale-to-zero) and an auto-pause threshold configured — databases scale to zero after inactivity and resume in approximately 15 seconds on first connection.",
+        text: "Amazon Aurora Serverless v2 with a minimum capacity of 0 ACUs and auto-pause, resuming in about 15 seconds on first connection.",
         isCorrect: true,
         explanation: "Correct — Aurora Serverless v2 scale-to-zero (GA November 2024) sets minimum ACUs to 0. After the configured auto-pause threshold (5 minutes to 24 hours of no connections), the database enters a near-zero-cost paused state (only storage billed). When a connection arrives, the database resumes in approximately 15 seconds. At 15 seconds, this easily meets the 20-second first-query requirement. This is the optimal configuration for 500 sporadically-accessed tenant databases."
       },
@@ -1060,7 +1060,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Warm Standby is correct because it runs a scaled-down but immediately available stack in the DR region, providing ~1-minute RTO and sub-30-second RPO with near-synchronous replication at a cost of roughly 20–30% of full production DR cost.",
+        text: "Warm Standby is correct — a scaled-down but always-running DR stack gives ~1-minute RTO at roughly 20–30% of full production DR cost.",
         isCorrect: true,
         explanation: "Correct — Warm Standby keeps a reduced-capacity production stack running in the DR region, enabling near-immediate failover (Route 53 health-check flip within 30 seconds, DR region serves traffic immediately at reduced capacity). Near-synchronous database replication achieves sub-30-second RPO. Cost is significantly less than Active/Active because the DR region runs at 20–30% of production capacity. This is the minimum cost upgrade path from Pilot Light that meets the 5-minute RTO and 30-second RPO requirements."
       },
@@ -1100,7 +1100,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "AWS Elastic Disaster Recovery (AWS DRS) — continuous block-level replication, point-in-time recovery with a rolling 24-hour window, and automated non-disruptive drills.",
+        text: "AWS Elastic Disaster Recovery — continuous block-level replication with point-in-time recovery and automated non-disruptive drills.",
         isCorrect: true,
         explanation: "Correct — AWS Elastic Disaster Recovery (DRS, formerly CloudEndure DR) provides: (1) continuous block-level replication from any source (physical, VMware, Hyper-V, EC2, other clouds) to a low-cost AWS staging area, (2) sub-second RPO (block-level changes replicated continuously), (3) RTO of 5–20 minutes (automated launch to converted EC2 instances), (4) a rolling point-in-time recovery window (~24 hours) for recovering before ransomware infection, and (5) non-disruptive drills that launch recovery instances without impacting replication."
       },
@@ -1140,7 +1140,7 @@ export const domain2NewQuestions: Question[] = [
       },
       {
         id: "B",
-        text: "Route 53 Geoproximity routing — routes based on the geographic distance between the user and the resource, with a bias dial (–99 to +99) to expand or shrink each region's routing area.",
+        text: "Route 53 Geoproximity routing — routes by geographic distance, with a bias dial to expand or shrink each region's routing area.",
         isCorrect: true,
         explanation: "Correct — Geoproximity routing uses the geographic distance between the user's DNS resolver location and the resource. The bias parameter (–99 to +99) artificially expands (+) or shrinks (–) a region's geographic footprint: applying a +50 bias to eu-west-1 makes it attract traffic from a larger geographic area (including South America), shifting traffic from us-east-1. Geoproximity routing requires Route 53 Traffic Flow. This is distinct from Geolocation (which routes by legal jurisdiction) and Latency (which routes by measured network performance)."
       },

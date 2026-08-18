@@ -21,7 +21,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "AWS Compute Optimizer — requires opting in at the organization level in the AWS Cost Explorer console; no additional charge.",
+        text: "AWS Compute Optimizer — requires an organization-level opt-in in Cost Explorer; no additional charge.",
         isCorrect: true,
         explanation: "Correct — AWS Compute Optimizer is FREE and provides ML-based right-sizing recommendations for EC2, EC2 Auto Scaling groups, EBS volumes, Lambda functions, ECS tasks on Fargate, and RDS/Aurora. To receive recommendations across all member accounts, the payer account must opt in at the organization level via the AWS Cost Explorer / Compute Optimizer console. The opt-in enables Compute Optimizer to ingest 14 days of CloudWatch utilization data across accounts. No Support plan upgrade is required."
       },
@@ -101,7 +101,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "AWS Budgets with a Cost budget set to $10,000, an 80% alert threshold with email notification, and a Budget Action at 100% that applies an IAM policy to deny EC2 StartInstances or uses an AWS Systems Manager automation to stop instances.",
+        text: "AWS Budgets with a $10,000 cost budget, an 80% alert, and a Budget Action at 100% that denies EC2 StartInstances.",
         isCorrect: true,
         explanation: "Correct — AWS Budgets is purpose-built for this exact scenario. The first two free budgets per account are $0; thereafter $0.02/budget/day. A Cost Budget tracks actual or forecasted spend. An alert at 80% sends email via SNS. Budget Actions at 100% can: (1) apply an SCP to restrict spending, (2) apply a targeted IAM policy, or (3) trigger an AWS Systems Manager (SSM) action to stop EC2 instances — all without custom Lambda code. Action-enabled budgets cost $0.10/day."
       },
@@ -181,7 +181,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Enable EC2 Hibernation at launch, hibernate the instances at 6 PM, and resume them in the morning. The EBS root volume must be encrypted and large enough to hold the RAM contents.",
+        text: "Enable EC2 Hibernation, hibernate the instances at 6 PM, and resume them in the morning from the encrypted root volume.",
         isCorrect: true,
         explanation: "Correct — EC2 Hibernation saves the entire contents of RAM to the encrypted EBS root volume, then powers off the instance. Instance-hour billing stops while hibernated — only EBS storage and any Elastic IP costs continue. On resume, the RAM contents are restored in seconds. Prerequisites: hibernation must be enabled at launch (cannot be added later), the EBS root volume must be encrypted, the root volume must have enough free space for the RAM dump, and the instance RAM must be ≤150 GB. This eliminates the 20-minute warm-up and stops compute billing overnight."
       },
@@ -215,13 +215,13 @@ export const domain4NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "512 MB / 2,000 ms is cheaper — less memory always costs less in Lambda pricing.",
+        text: "512 MB / 2,000 ms is cheaper — less memory always costs less under Lambda pricing.",
         isCorrect: false,
         explanation: "Wrong — Lambda pricing is based on GB-seconds (memory × duration), not memory alone. At 512 MB for 2,000 ms: 0.5 GB × 2.0 s = 1.0 GB-s. At 1,024 MB for 600 ms: 1.0 GB × 0.6 s = 0.6 GB-s. The 1,024 MB configuration is 40% cheaper per invocation even though it uses more memory, because the dramatic execution time reduction more than offsets the higher memory cost."
       },
       {
         id: "B",
-        text: "1,024 MB / 600 ms is cheaper — because Lambda bills on GB-seconds, and when the duration decrease outweighs the memory increase, total GB-seconds (and cost) falls.",
+        text: "1,024 MB / 600 ms is cheaper — Lambda bills GB-seconds, and the shorter duration outweighs the extra memory.",
         isCorrect: true,
         explanation: "Correct — Lambda billing formula: cost = (memory GB) × (duration s) × $0.0000166667 (x86). At 512 MB / 2,000 ms: 0.5 × 2.0 = 1.0 GB-s = $0.0000166667. At 1,024 MB / 600 ms: 1.0 × 0.6 = 0.6 GB-s = $0.0000100000. The 1,024 MB config is 40% cheaper per invocation. Allocating more memory to a CPU-bound Lambda function speeds execution proportionally because Lambda vCPU allocation scales linearly with memory. This is the core principle of Lambda power tuning."
       },
@@ -233,7 +233,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "D",
-        text: "The choice depends on the request rate — at high request rates, 512 MB is always cheaper.",
+        text: "The choice depends on the request rate — at high request rates, 512 MB is always the cheaper option.",
         isCorrect: false,
         explanation: "Wrong — Request rate affects total cost but not the per-invocation cost comparison. If the 1,024 MB configuration uses 0.6 GB-s vs 1.0 GB-s at 512 MB, the 1,024 MB config is cheaper per invocation at any request rate. The savings scale linearly: at 1 million invocations, 1,024 MB saves $6.67 vs 512 MB."
       }
@@ -261,7 +261,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Lambda SnapStart for Java is FREE, creates a snapshot of the initialized execution environment after the Init phase, and restores it on cold starts — reducing latency to sub-second without Provisioned Concurrency charges.",
+        text: "Lambda SnapStart for Java is free — it snapshots the initialized environment and restores it on cold starts.",
         isCorrect: true,
         explanation: "Correct — Lambda SnapStart for Java is free. AWS takes a snapshot of the initialized Lambda execution environment after the Init phase completes and caches it. Subsequent cold starts restore from the snapshot instead of re-initializing, reducing cold start latency dramatically (often from seconds to milliseconds). This can eliminate the need for Provisioned Concurrency in many cases. The $300/month Provisioned Concurrency cost would be eliminated. Note: SnapStart is incompatible with Provisioned Concurrency, EFS mounts, ephemeral storage >512 MB, and container image functions."
       },
@@ -301,7 +301,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Enable AWS S3 Storage Lens at the organization level — the free tier provides 28+ metrics and activity recommendations across all accounts in a single dashboard.",
+        text: "Enable S3 Storage Lens at the organization level — the free tier gives 28+ metrics across all accounts in one dashboard.",
         isCorrect: true,
         explanation: "Correct — Amazon S3 Storage Lens is purpose-built for this use case. When enabled at the organization level in the management account, it aggregates storage metrics across all member accounts and regions. The free tier provides 28+ metrics (object count, active buckets, average object size, requests, etc.) with 14-day history and cost-saving recommendations including: buckets without lifecycle policies, unversioned buckets, data in Standard that could be tiered, and non-current version accumulation. The Advanced tier adds 62+ metrics and costs $0.20 per million objects monitored."
       },
@@ -335,13 +335,13 @@ export const domain4NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Enable S3 Transfer Acceleration on the bucket — AWS absorbs the transfer cost.",
+        text: "Enable S3 Transfer Acceleration on the bucket — AWS absorbs the data transfer cost.",
         isCorrect: false,
         explanation: "Wrong — S3 Transfer Acceleration speeds up uploads from distant clients by routing through CloudFront edge locations. It adds an additional $0.04–$0.08/GB premium ON TOP of standard transfer pricing. It does not eliminate the bucket owner's egress costs — it increases them."
       },
       {
         id: "B",
-        text: "Enable S3 Requester Pays on the bucket — authenticated AWS requesters pay for data transfer and request costs instead of the bucket owner.",
+        text: "Enable S3 Requester Pays — authenticated requesters pay the data transfer and request costs instead of the owner.",
         isCorrect: true,
         explanation: "Correct — S3 Requester Pays is a bucket-level setting that shifts data transfer and request costs from the bucket owner to the requester. When enabled, requesters must include x-amz-request-payer: requester in their requests and must be authenticated AWS users (anonymous access is blocked when Requester Pays is enabled). The bucket owner still pays for storage. This eliminates the $45,000/month egress bill while keeping the dataset accessible to legitimate research organizations with AWS accounts."
       },
@@ -375,25 +375,25 @@ export const domain4NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Continue using S3 LIST API but parallelize across 10 threads to reduce runtime.",
+        text: "Continue using the S3 LIST API but parallelize across 10 threads to reduce the runtime.",
         isCorrect: false,
         explanation: "Wrong — Parallelizing LIST API calls reduces runtime but does NOT reduce request costs. 8 billion objects still require approximately 8 million LIST requests (1,000 objects per page), totaling $16,000 regardless of how many threads are used. The cost is per request, not per time."
       },
       {
         id: "B",
-        text: "Enable Amazon S3 Inventory on the bucket, which generates a flat-file listing (CSV/ORC/Parquet) of all objects with metadata including encryption status, replication status, and storage class — at $0.0025 per million objects listed.",
+        text: "Enable Amazon S3 Inventory to generate a flat-file listing of all objects and their encryption status.",
         isCorrect: true,
         explanation: "Correct — S3 Inventory generates a scheduled (daily or weekly) flat-file listing of all objects in a bucket with configurable metadata fields: encryption status (SSE-S3/SSE-KMS/unencrypted), replication status, storage class, object size, last modified date, ETag, and more. Pricing is $0.0025 per million objects. For 8 billion objects: 8,000 × $0.0025 = $20 — compared to $16,000 for LIST API. The inventory file is delivered to a destination S3 bucket and can be queried with Amazon Athena. Savings: 99.9% cost reduction."
       },
       {
         id: "C",
-        text: "Use Amazon Macie to scan all S3 buckets for encryption compliance.",
+        text: "Use Amazon Macie to scan all of the S3 buckets for encryption compliance.",
         isCorrect: false,
         explanation: "Wrong — Amazon Macie is a data security service that discovers sensitive data (PII, credentials) using ML. It is not designed for bulk object metadata auditing (encryption status, storage class, replication status). Macie charges per GB scanned and is far more expensive than S3 Inventory for this use case."
       },
       {
         id: "D",
-        text: "Enable S3 Server Access Logging and write a script to parse log files for object-level encryption metadata.",
+        text: "Enable S3 Server Access Logging and write a script to parse the log files for object encryption metadata.",
         isCorrect: false,
         explanation: "Wrong — S3 Server Access Logs record HTTP requests made to the bucket, not current object metadata state. They cannot tell you whether objects uploaded before logging was enabled are encrypted. S3 Inventory provides a complete point-in-time snapshot of all object metadata."
       }
@@ -415,25 +415,25 @@ export const domain4NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Elastic Throughput would cost MORE — it charges per GB read/written, which at 5 GB/s for 2 hours would cost $0.03/GB × 5 GB/s × 7,200 seconds = over $1 million per transcode window.",
+        text: "Elastic Throughput would cost MORE — at 5 GB/s for 2 hours the per-GB charges would exceed $1 million per transcode window.",
         isCorrect: false,
         explanation: "Wrong — The math is incorrect. EFS Elastic Throughput charges $0.03/GB for reads and $0.06/GB for writes. At 5 GB/s for 2 hours: $0.06 × (5 GB/s × 7,200 s) = $0.06 × 36,000 GB = $2,160 per window per day. Monthly (assuming daily transcoding): ~$64,800. This IS more expensive than Provisioned at $30,000/month. However, the question is about the EXPECTED impact — the correct answer acknowledges this scenario. If transcoding happens less than ~12 days/month, Elastic is cheaper. The architect should model actual usage."
       },
       {
         id: "B",
-        text: "Elastic Throughput charges only when throughput is actually consumed — for a 2-hour burst in a 24-hour day, it would eliminate the ~$24,000/month paid for idle provisioned throughput during the 22 off-hours.",
+        text: "Elastic Throughput charges only for throughput actually consumed, avoiding the ~$24,000/month idle provisioned cost.",
         isCorrect: true,
         explanation: "Correct — EFS Provisioned Throughput bills $6/MB/s-month (approximately) for the provisioned capacity 24/7, regardless of utilization. For 22 idle hours per day, approximately 91.7% of the provisioned throughput cost is wasted. EFS Elastic Throughput charges only when data is read ($0.03/GB) or written ($0.06/GB). For 2 hours of 5 GB/s writes daily: $0.06 × (5 GB/s × 7,200 s) × 30 days ≈ $64,800/month — however, in practice bursts are rarely continuous at maximum rate. The key principle: Elastic Throughput eliminates wasted idle provisioned cost and is optimal when throughput demand is truly spiky relative to 24/7 provisioned cost."
       },
       {
         id: "C",
-        text: "Provisioned Throughput is always cheaper for workloads exceeding 1 MB/s average throughput.",
+        text: "Provisioned Throughput is always cheaper for workloads exceeding 1 MB/s of average throughput.",
         isCorrect: false,
         explanation: "Wrong — The cost crossover between Elastic and Provisioned Throughput depends on actual GB consumed vs the provisioned rate, not simply whether throughput exceeds 1 MB/s. The correct comparison: (provisioned_rate_MB/s × $6/MB/s-month) vs (total_GB_read × $0.03 + total_GB_written × $0.06) per month."
       },
       {
         id: "D",
-        text: "Switching to Elastic Throughput has no cost impact because EFS Elastic Throughput mode is free.",
+        text: "Switching to Elastic Throughput has no cost impact because EFS Elastic Throughput mode is free of charge.",
         isCorrect: false,
         explanation: "Wrong — EFS Elastic Throughput is NOT free. It charges per GB of data read ($0.03/GB) and written ($0.06/GB). It is the correct choice for spiky workloads because you avoid paying for provisioned capacity during idle periods, but you do pay for actual I/O consumed."
       }
@@ -461,7 +461,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Cross-AZ traffic is charged at $0.01/GB in each direction. For 10 TB of EC2 (us-east-1a) to RDS (us-east-1b) traffic, the monthly charge is $100 (outbound from EC2's AZ). The return traffic adds another $100, totaling $200/month.",
+        text: "Cross-AZ traffic costs $0.01/GB in each direction, so 10 TB between EC2 and RDS is about $200/month in total.",
         isCorrect: true,
         explanation: "Correct — AWS charges $0.01/GB in EACH direction for cross-AZ data transfer. For 10 TB (10,000 GB) one-way: $0.01 × 10,000 = $100. Round-trip doubles this to $200/month. This is a real cost driver in multi-AZ architectures. Best practice: place EC2 instances in the same AZ as their primary RDS instance (or read replica) to avoid cross-AZ charges. Use ALB with availability zone affinity (zonal shift) where possible."
       },
@@ -501,7 +501,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Data transfer from S3 to CloudFront (origin fetches) is FREE. However, CloudFront charges for data transfer out to end users ($0.085/GB for the first 10 TB from NA/EU edges), so total cost depends on traffic volume.",
+        text: "S3-to-CloudFront origin fetches are free, but CloudFront charges for transfer out to users ($0.085/GB for the first 10 TB).",
         isCorrect: true,
         explanation: "Correct — AWS explicitly waives the data transfer fee for S3 objects served as a CloudFront origin. This is a major cost benefit versus serving directly from S3 (which would charge $0.09/GB for internet egress). CloudFront charges for the final hop to end users at $0.085/GB (NA/EU, first 10 TB/month), but also includes a free tier: 1 TB egress + 10 million HTTPS requests/month. S3 GET requests are still charged on the origin side ($0.0004/1,000). The savings vs direct S3: CloudFront is $0.085/GB vs S3 direct $0.09/GB, PLUS CloudFront caches content (reducing origin requests and effective per-byte cost)."
       },
@@ -541,7 +541,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Enabling Multi-AZ approximately doubles the instance cost — the standby runs the same instance type as the primary and is billed at the full On-Demand rate, even though it is not accessible for reads or writes.",
+        text: "Enabling Multi-AZ roughly doubles the instance cost — the standby runs the same instance type at the full On-Demand rate.",
         isCorrect: true,
         explanation: "Correct — RDS Multi-AZ (Standard, with one non-readable standby) provisions a second identical instance in a different AZ. This standby is billed at the same hourly rate as the primary. For db.m6g.2xlarge at $0.48/hr: Multi-AZ = $0.96/hr ($691/month), doubling the compute cost. Additionally, Multi-AZ doubles storage costs (the standby has its own storage replica). Total bill increase: approximately 100% for instance + 100% for storage. The standby cannot serve reads or writes — it only activates on failover."
       },
@@ -581,7 +581,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Set minimum ACUs to 0 — this enables true scale-to-zero (auto-pause on no connections, ~15-second resume). Known limitation: Aurora Serverless v2 with min 0 ACUs cannot be used as an Aurora Global Database secondary cluster.",
+        text: "Set minimum ACUs to 0 for true scale-to-zero with ~15-second resume; note it cannot be an Aurora Global Database secondary.",
         isCorrect: true,
         explanation: "Correct — Aurora Serverless v2 scale-to-zero requires minimum ACUs = 0 (GA'd November 2024). With min 0 ACUs, the cluster auto-pauses after a period of no connections and resumes in approximately 15 seconds on first connection. Known constraints that BLOCK scale-to-zero: (1) RDS Proxy attached, (2) Aurora Global Database secondary cluster, (3) zero-ETL integration to Redshift active, (4) tier 0 or tier 1 readers configured. For a standalone dev/test environment, setting min 0 ACUs eliminates compute charges during idle periods."
       },
@@ -621,7 +621,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "No — I/O charges represent only 13.3% of the total bill ($60/$450). The breakeven threshold for I/O-Optimized is when I/O charges exceed 25% of the total Aurora bill. Below 25%, I/O-Optimized costs MORE due to higher storage (2.25×) and instance (~30%) rates.",
+        text: "No — I/O charges are only 13.3% of the bill ($60/$450), below the 25% breakeven threshold, so I/O-Optimized costs more.",
         isCorrect: true,
         explanation: "Correct — AWS's documented recommendation: switch to Aurora I/O-Optimized when I/O charges exceed 25% of the total Aurora bill. In this case: $60/$450 = 13.3%, well below the 25% threshold. Switching would increase: storage from $90 to ~$202 (2.25×) and instance from $300 to ~$390 (30% more). New total: ~$592, versus $450 on standard pricing — a 31.5% INCREASE. I/O-Optimized is only beneficial for high-I/O OLTP workloads where I/O charges dominate."
       },
@@ -701,7 +701,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "The senior engineer is correct — each write to the base table is replicated to all 3 GSIs; total WCU consumption is 500 base + 500 × 3 GSIs = 2,000 WCUs. You must provision WCUs on both the table and each GSI independently.",
+        text: "The senior engineer is correct — each base write replicates to all 3 GSIs, so 500 base writes consume 2,000 WCUs total.",
         isCorrect: true,
         explanation: "Correct — DynamoDB write amplification: every write to the base table that modifies an attribute projected into a GSI also writes to that GSI. For 3 GSIs, 1 write = up to 4 WCU operations (1 base + 3 GSIs). Provisioned capacity must be set on both the base table (500 WCU) and each GSI (up to 500 WCU each = 1,500 WCU on GSIs). Total cost: 2,000 WCUs/s provisioned. For on-demand, WRUs are charged per actual write unit consumed across all indexes. This is a major cost driver for write-heavy tables with multiple GSIs."
       },
@@ -741,19 +741,19 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "ElastiCache Serverless for Valkey — scales automatically from 0 to the required cache size and ECPU rate, billed per GB-hour stored and per million ECPUs consumed.",
+        text: "ElastiCache Serverless for Valkey — scales automatically and bills per GB-hour and per million ECPUs.",
         isCorrect: true,
         explanation: "Correct — ElastiCache Serverless scales automatically without requiring the selection of node types or cluster sizes. For Valkey (as of 2024, 33% cheaper than Redis OSS Serverless): $0.084/GB-hr (minimum 100 MB, vs Redis $0.125/GB-hr) and $0.0023/million ECPUs. For a startup with unknown traffic, Serverless eliminates capacity planning and scales from minimal to high load automatically. At low usage, costs are minimal. Operational overhead is near-zero — no node sizing, no cluster management."
       },
       {
         id: "C",
-        text: "ElastiCache for Redis OSS with Auto Scaling enabled to adjust cluster size dynamically.",
+        text: "ElastiCache for Redis OSS with Auto Scaling enabled to adjust the cluster size dynamically.",
         isCorrect: false,
         explanation: "Wrong — ElastiCache node-based clusters (Redis/Valkey) do not support auto-scaling the same way as ElastiCache Serverless. Resharding (adding/removing shards) is a manual or scripted process that causes brief elevated latency. For truly dynamic scaling without operational overhead, Serverless is the correct choice."
       },
       {
         id: "D",
-        text: "Deploy a self-managed Redis cluster on EC2 Spot Instances to minimize costs.",
+        text: "Deploy a self-managed Redis cluster on EC2 Spot Instances to minimize the running cost.",
         isCorrect: false,
         explanation: "Wrong — A self-managed Redis cluster on Spot Instances introduces high operational overhead (cluster management, replication, failover) and carries interruption risk inappropriate for a cache serving production traffic. Spot Instances may be reclaimed with 2-minute warning, causing cache data loss. This violates the 'minimize operational overhead' requirement."
       }
@@ -775,13 +775,13 @@ export const domain4NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Enable CloudFront Origin Shield to reduce origin requests.",
+        text: "Enable CloudFront Origin Shield to reduce the number of origin requests.",
         isCorrect: false,
         explanation: "Wrong — CloudFront Origin Shield ($0.0075/10K requests) reduces the number of cache misses that reach the origin, lowering origin load and costs. However, it does not restrict which edge regions serve end users. Origin Shield addresses origin costs, not CDN delivery costs from expensive global PoPs."
       },
       {
         id: "B",
-        text: "Switch CloudFront distribution to Price Class 100 (North America and Europe only) — this limits delivery to the lowest-cost edge locations and excludes expensive PoPs in South America, Africa, and Asia Pacific.",
+        text: "Switch the CloudFront distribution to Price Class 100 to exclude the costliest edge locations.",
         isCorrect: true,
         explanation: "Correct — CloudFront Price Classes control which edge locations serve your distribution: Price Class 100 (North America + Europe only, lowest cost), Price Class 200 (adds Asia Pacific, Middle East, Africa), Price Class All (all PoPs, highest cost). When a user in an excluded region requests content, CloudFront serves them from the nearest included PoP (with higher latency but no premium pricing). Since the company's users are primarily in US/Europe, Price Class 100 captures the target audience at the lowest CDN delivery price."
       },
@@ -815,13 +815,13 @@ export const domain4NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "All Trusted Advisor cost optimization checks are available on the Developer Support plan.",
+        text: "All of the Trusted Advisor cost optimization checks are available on the Developer Support plan.",
         isCorrect: false,
         explanation: "Wrong — The Developer Support plan provides only the 7 core Trusted Advisor checks: S3 bucket permissions (public access), security groups with unrestricted access, MFA on root account, EBS public snapshots, RDS public snapshots, IAM use, and service limits. The cost optimization checks (idle RDS, underutilized EC2, unassociated EIPs, low-utilization EBS) require Business or Enterprise Support."
       },
       {
         id: "B",
-        text: "The cost optimization checks (idle RDS, underutilized EC2, unassociated EIPs, low-utilization EBS) require Business or Enterprise Support. On Developer Support, these checks are visible but show 'Upgrade required' rather than actual findings.",
+        text: "These checks require Business or Enterprise Support — on Developer they show 'Upgrade required' instead of findings.",
         isCorrect: true,
         explanation: "Correct — AWS Trusted Advisor's full Cost Optimization category is gated behind Business or Enterprise Support. On Developer and Basic Support, the cost optimization check tiles appear in the console but display 'Your plan does not support this check' or require an upgrade. The team must upgrade to at least Business Support ($100/month minimum) to access these checks. Business Support provides access to all Trusted Advisor checks including: idle load balancers, low-utilization EC2 (CPU <10%), underused EBS volumes (<1 IOPS/day), unassociated EIPs, idle RDS, and S3 bucket versioning recommendations."
       },
@@ -855,13 +855,13 @@ export const domain4NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "AWS Trusted Advisor — provides architectural recommendations across all six pillars.",
+        text: "AWS Trusted Advisor — provides architectural recommendations across all six of the pillars.",
         isCorrect: false,
         explanation: "Wrong — AWS Trusted Advisor provides automated checks in specific categories (Cost Optimization, Security, Fault Tolerance, Performance, Service Limits, Operational Excellence) but does not conduct a formal architectural review aligned to the AWS Well-Architected Framework pillars. Trusted Advisor focuses on specific resource-level checks, not holistic workload architecture reviews."
       },
       {
         id: "B",
-        text: "AWS Well-Architected Tool — a free, self-service tool that conducts structured architectural reviews based on the six Well-Architected Framework pillars and generates a prioritized list of HRIs and improvement plans.",
+        text: "AWS Well-Architected Tool — a free self-service review across the six pillars with a prioritized HRI list.",
         isCorrect: true,
         explanation: "Correct — The AWS Well-Architected Tool is completely FREE. It guides teams through a structured set of questions for each of the six pillars: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, and Sustainability. At the end of a review, it generates a report identifying High Risk Items (HRIs) with links to best practice guidance, improvement plans, and milestones for tracking progress. It can be used for individual workloads and accessed via the AWS Management Console or API."
       },
@@ -901,7 +901,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "AWS Application Discovery Service (ADS) for pre-migration discovery and dependency mapping, and AWS Application Migration Service (AWS MGN) for the lift-and-shift migration.",
+        text: "AWS Application Discovery Service for dependency mapping and AWS Application Migration Service for the lift-and-shift.",
         isCorrect: true,
         explanation: "Correct — AWS Application Discovery Service (ADS) is FREE and discovers on-premises server data: CPU utilization, memory, disk, network I/O, and process-level data for dependency mapping. The data feeds directly into AWS Migration Hub for tracking and into AWS pricing tools for right-sizing estimates. AWS Application Migration Service (AWS MGN) is the free lift-and-shift migration service that continuously replicates source servers to AWS and enables non-disruptive cutover. MGN is free for the first 90 days of replication per server — you only pay for the EC2 and EBS resources consumed during replication and testing."
       },
@@ -941,7 +941,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "VPC Peering is cheaper up to approximately 10 VPCs for cost; above 10 VPCs, Transit Gateway is often justified on cost due to the quadratic growth in peering connections needed and routing table management overhead — though the cost advantage is primarily operational, not billing.",
+        text: "VPC Peering is cheaper up to about 10 VPCs; above that Transit Gateway usually wins on operational cost, not raw billing.",
         isCorrect: true,
         explanation: "Correct — VPC Peering: $0/connection/hr; same-region intra-AZ via private IP is free; cross-AZ $0.01/GB each way. For 15 VPCs: 15×14/2 = 105 peering connections (no extra AWS charge for the connections themselves, but routing tables must manage each). Transit Gateway: 15 attachments × $0.05/hr × 720 hrs = $540/month + data processing at $0.02/GB. The AWS billing threshold is roughly: TGW data processing savings from simplified routing vs TGW attachment costs. For most architectures with >10 VPCs or hybrid (VPN/DX) connectivity, TGW's operational simplicity and the ability to use a single hub for VPN/DX connections justify the cost. The exam answer: 10+ VPCs or any hybrid connectivity → Transit Gateway."
       },
@@ -1015,19 +1015,19 @@ export const domain4NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Alias records are 50% cheaper per query than CNAME records in Route 53.",
+        text: "Alias records are priced 50% lower per query than CNAME records in Route 53.",
         isCorrect: false,
         explanation: "Wrong — CNAME records are charged at standard Route 53 query rates ($0.40/M queries). Alias records pointing to supported AWS resources (CloudFront, ELB, S3 website endpoints, API Gateway, etc.) are charged $0 per query — they are completely FREE, not just 50% cheaper. The savings are 100% on the DNS query cost for those records."
       },
       {
         id: "B",
-        text: "Route 53 queries for Alias records pointing to AWS resources (CloudFront, ELB, S3 website endpoint, API Gateway, etc.) are FREE — $0 per query versus $0.40 per million queries for CNAME records.",
+        text: "Route 53 Alias queries to AWS resources are free — $0 per query versus $0.40 per million for CNAME records.",
         isCorrect: true,
         explanation: "Correct — Route 53 Alias records that point to supported AWS resources (CloudFront distributions, ELBs, S3 website endpoints, Elastic Beanstalk environments, API Gateway, VPC endpoints, Global Accelerator, etc.) are billed at $0 per query. Standard CNAME records cost $0.40/M queries (first 1 billion), then $0.20/M. For a high-traffic website with millions of DNS lookups per month, this is a meaningful cost saving. Additionally, Alias records can be used for the zone apex (root domain) where CNAME records are not permitted by DNS standards."
       },
       {
         id: "C",
-        text: "Alias records eliminate the Route 53 hosted zone charge of $0.50/zone/month.",
+        text: "Alias records eliminate the Route 53 hosted zone charge of $0.50 per zone per month.",
         isCorrect: false,
         explanation: "Wrong — Route 53 hosted zone charges ($0.50/zone/month for the first 25 zones) are fixed regardless of whether you use Alias or CNAME records. Alias records only affect the per-query billing, not the zone fee."
       },
@@ -1061,7 +1061,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "No — EBS Snapshot Archive has a 90-day minimum storage duration, but the team's 60-day retention policy means they would be billed for an extra 30 days they don't use. At $0.0125/GB × 90 days vs $0.05/GB × 60 days, the per-day cost is lower in Archive ($0.000417/GB-day vs $0.00167/GB-day), so Archive is still cheaper even with the minimum — but the team should verify the math before committing to ensure compliance policy allows the effective 90-day storage.",
+        text: "No — Snapshot Archive has a 90-day minimum, so a 60-day retention policy is still billed for the full 90 days.",
         isCorrect: true,
         explanation: "Correct — The 90-day minimum is the key trap. Standard: $0.05/GB-month × 2 months = $0.10/GB for 60-day retention. Archive: $0.0125/GB-month × 3 months (minimum) = $0.0375/GB for 90-day minimum. Archive is still 62.5% cheaper than Standard even with the 30-day penalty. However, the compliance policy must accept that effective retention becomes 90 days (not 60 days) under Archive, because AWS bills the minimum. If compliance requires deletion at exactly 60 days AND the extra 30 days of billed storage violates data governance policy, Archive is not appropriate. If only cost matters, Archive wins even with the minimum penalty."
       },
@@ -1101,7 +1101,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Apply user-defined tags (e.g., CostCenter, BusinessUnit) to all AWS resources, then activate those tags in the AWS Billing and Cost Management console (Billing → Cost Allocation Tags). Tags become visible in Cost Explorer and CUR within approximately 24 hours of activation.",
+        text: "Apply user-defined tags to resources, then activate them in Billing → Cost Allocation Tags; they appear within about 24 hours.",
         isCorrect: true,
         explanation: "Correct — The two required steps are: (1) Tag resources with user-defined tags (e.g., CostCenter=Finance, BusinessUnit=HR); (2) Activate the tag keys in the AWS Billing console under Cost Allocation Tags. Activation is per-tag-key, not per-tag-value. After ~24 hours, the tags appear as filterable dimensions in Cost Explorer and as columns in CUR. For chargeback: filter Cost Explorer by the tag key/value to generate per-business-unit reports. For Organizations: activate tags in the payer account to aggregate across member accounts."
       },
@@ -1141,7 +1141,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "RDS Extended Support charges began for MySQL 5.7 (end of standard support February 29, 2024 for RDS). Extended Support adds $0.10/vCPU-hr (years 1–2), charging ALL instances including the Multi-AZ standby. Remediation: upgrade to MySQL 8.0 (free major version upgrade) to exit Extended Support.",
+        text: "RDS Extended Support for MySQL 5.7 began billing $0.10/vCPU-hr on all instances. Remediation: upgrade to MySQL 8.0.",
         isCorrect: true,
         explanation: "Correct — MySQL 5.7 reached end of RDS standard support and entered RDS Extended Support. Charges: $0.10/vCPU-hr (years 1–2), $0.20/vCPU-hr (year 3+). Critical trap: charges apply to ALL instances including Multi-AZ standbys. For db.m6i.4xlarge Multi-AZ (16 vCPUs primary + 16 vCPUs standby = 32 vCPUs): $0.10 × 32 × 720 = $2,304/month additional charge. Remediation: perform an in-place major version upgrade to MySQL 8.0 (free). Extended Support is charged from the end-of-standard-support date regardless of whether the customer opted in."
       },
@@ -1181,7 +1181,7 @@ export const domain4NewQuestions2: Question[] = [
       },
       {
         id: "B",
-        text: "Direct Connect is more cost-effective at 8 TB/month — estimated DX cost: port $219/month + ~$0.02/GB × 8,000 GB = $160/month = $379/month total, saving $377.50/month (50% reduction) versus VPN's $756.50/month.",
+        text: "Direct Connect is more cost-effective — about $379/month total versus VPN's $756.50, saving roughly $377/month.",
         isCorrect: true,
         explanation: "Correct — Direct Connect 1 Gbps: port-hour $0.30/hr × 730 = $219/month; data transfer out ~$0.02/GB × 8,000 GB = $160/month; total ≈ $379/month. VPN: $36.50 + $720 = $756.50/month. Savings: $377.50/month (49.8% reduction). The break-even between VPN and 1 Gbps DX occurs at approximately 2.6 TB/month of sustained egress. At 8 TB/month, well above break-even, Direct Connect is clearly more cost-effective. Additional DX benefits: consistent network performance (not best-effort like internet), lower latency, and SLA-backed connectivity."
       },
