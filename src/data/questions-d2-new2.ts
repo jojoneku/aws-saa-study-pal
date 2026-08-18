@@ -135,25 +135,25 @@ export const domain2NewQuestions2: Question[] = [
     options: [
       {
         id: "A",
-        text: "Option A — Amazon MQ with an ActiveMQ broker natively supports JMS, AMQP 1.0, MQTT, STOMP, and OpenWire, so existing code needs no changes.",
+        text: "The Amazon MQ proposal is correct — ActiveMQ natively supports JMS, AMQP 1.0, MQTT, and STOMP, so existing code is unchanged.",
         isCorrect: true,
         explanation: "Correct — Amazon MQ is a managed Apache ActiveMQ (and RabbitMQ) broker. It natively supports the protocols the ERP system uses: JMS, AMQP 1.0, MQTT, STOMP, OpenWire, and WSS. Applications connect to Amazon MQ using the same client libraries and connection strings (updated hostname only), requiring zero code changes. This is the textbook 'lift-and-shift messaging migration' use case for Amazon MQ."
       },
       {
         id: "B",
-        text: "Option B — Amazon SQS + SNS is the preferred architecture because it is fully managed, more scalable, and less expensive than Amazon MQ.",
+        text: "The SQS + SNS proposal is preferred because it is fully managed, more scalable, and less expensive to run than Amazon MQ.",
         isCorrect: false,
-        explanation: "Wrong — SQS and SNS use AWS-proprietary APIs (AWS SDK, not JMS or AMQP). Migrating from JMS/AMQP to SQS requires rewriting all message-producing and message-consuming code to use AWS SDK calls — a significant engineering effort. Option B would require 'major code changes,' which the question prohibits. Amazon MQ is the correct choice when the application uses standard messaging protocols (JMS, AMQP, MQTT, STOMP) and code changes must be minimized."
+        explanation: "Wrong — SQS and SNS use AWS-proprietary APIs (AWS SDK, not JMS or AMQP). Migrating from JMS/AMQP to SQS requires rewriting all message-producing and message-consuming code to use AWS SDK calls — a significant engineering effort. The SQS + SNS approach would require 'major code changes,' which the question prohibits. Amazon MQ is the correct choice when the application uses standard messaging protocols (JMS, AMQP, MQTT, STOMP) and code changes must be minimized."
       },
       {
         id: "C",
-        text: "Option B is better because Amazon MQ does not support AMQP 1.0, which the ERP system requires for its queues.",
+        text: "The SQS + SNS proposal is better because Amazon MQ does not support AMQP 1.0, which the ERP system requires for its queues.",
         isCorrect: false,
         explanation: "Wrong — Amazon MQ with Apache ActiveMQ DOES support AMQP 1.0 natively. Amazon MQ with RabbitMQ supports AMQP 0-9-1. AMQP 1.0 is specifically listed in Amazon MQ's ActiveMQ supported protocol list. This option contains a false technical claim."
       },
       {
         id: "D",
-        text: "Both options require equal code changes because AWS services always require the AWS SDK regardless of the protocol layer.",
+        text: "Both proposals require equal code changes because AWS services always require the AWS SDK regardless of the protocol layer.",
         isCorrect: false,
         explanation: "Wrong — Amazon MQ is specifically designed to NOT require AWS SDK changes. Applications connect using standard protocol clients (ActiveMQ JMS client, AMQP 1.0 client, MQTT client) to the Amazon MQ broker endpoint. No AWS SDK is required. SQS/SNS DO require the AWS SDK, making this claim false."
       }

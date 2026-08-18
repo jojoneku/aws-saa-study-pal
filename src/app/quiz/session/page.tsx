@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { OptionButton } from "@/components/OptionButton"
 import type { Question, Domain } from "@/lib/types"
-import { shuffleQuestionOptions } from "@/lib/quiz"
+import { shuffled, shuffleQuestionOptions } from "@/lib/shuffle"
 import { cn } from "@/lib/utils"
 import {
   ShieldCheck,
@@ -552,14 +552,9 @@ function QuizSessionContent() {
   // ── State ─────────────────────────────────────────────────────────────────
   // Options are shuffled per question too — the authored bank puts the correct
   // answer in slot B most of the time, which is a giveaway on its own.
-  const [questions] = useState<Question[]>(() => {
-    const pool = [...basePool]
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[pool[i], pool[j]] = [pool[j], pool[i]]
-    }
-    return pool.slice(0, questionCount).map(shuffleQuestionOptions)
-  })
+  const [questions] = useState<Question[]>(() =>
+    shuffled(basePool).slice(0, questionCount).map(shuffleQuestionOptions)
+  )
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
   const [revealed, setRevealed] = useState(false)
